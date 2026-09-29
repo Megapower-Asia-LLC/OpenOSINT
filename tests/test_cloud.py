@@ -37,6 +37,8 @@ def reset_memory_store():
     db._MEMORY_USERS.clear()
     db._MEMORY_USERS_BY_IDENTITY.clear()
     db._next_user_id = 1
+    db._MEMORY_WAITLIST.clear()
+    db._next_waitlist_id = 1
     keys._MEMORY_KEYS.clear()
     # Reset cached Fernet so tests always get a fresh ephemeral key
     keys._fernet = None
@@ -687,3 +689,106 @@ def test_retention_constant_matches_documented_policy():
     from cloud.config import USAGE_METADATA_RETENTION_DAYS
 
     assert USAGE_METADATA_RETENTION_DAYS == 365
+
+
+# ── waitlist ────────────────────────────────────────────────────────────────
+
+
+async def test_waitlist_valid_signup_returns_200_and_is_stored(client):
+    resp = await client.post(
+        "/v1/waitlist",
+        json={
+            "email": "Analyst@Example.com",
+            "role": "soc_analyst",
+            "use_case": "Enriching alerts with IP reputation",
+            "plan_interest": "pro",
+            "consent": True,
+            "source": "utm_source=twitter",
+        },
+    )
+    assert resp.status_code == 200
+    assert resp.json()["status"] == "ok"
+    # Stored lowercased
+    assert "analyst@example.com" in db._MEMORY_WAITLIST
+    stored = db._MEMORY_WAITLIST["analyst@example.com"]
+    assert stored.role == "soc_analyst"
+    assert stored.plan_interest == "pro"
+
+
+async def test_waitlist_duplicate_email_returns_same_success_message(client):
+    body = {"email": "dup@example.com", "consent": True}
+    first = await client.post("/v1/waitlist", json=body)
+    second = await client.post("/v1/waitlist", json=body)
+
+    assert first.status_code == 200
+    assert second.status_code == 200
+    assert first.json() == second.json()
+    # Still only one row — the second call didn't create a duplicate
+    assert len(db._MEMORY_WAITLIST) == 1
+
+
+async def test_waitlist_missing_consent_returns_400(client):
+    resp = await client.post(
+        "/v1/waitlist", json={"email": "noconsent@example.com", "consent": False}
+    )
+    assert resp.status_code == 400
+    assert "noconsent@example.com" not in db._MEMORY_WAITLIST
+
+
+async def test_waitlist_invalid_email_returns_422(client):
+    resp = await client.post(
+        "/v1/waitlist", json={"email": "not-an-email", "consent": True}
+    )
+    assert resp.status_code == 422
+    assert len(db._MEMORY_WAITLIST) == 0
+
+
+async def test_waitlist_honeypot_filled_returns_200_and_stores_nothing(client):
+    resp = await client.post(
+        "/v1/waitlist",
+        json={
+            "email": "bot@example.com",
+            "consent": True,
+            "website": "http://spam.example",
+        },
+    )
+    assert resp.status_code == 200
+    assert resp.json()["status"] == "ok"
+    assert len(db._MEMORY_WAITLIST) == 0
+
+
+async def test_waitlist_stats_requires_setup_token(client):
+    resp = await client.get("/v1/waitlist/stats")
+    assert resp.status_code == 403
+
+
+async def test_waitlist_stats_rejects_wrong_token(client):
+    with patch.dict(os.environ, {"OPENOSINT_SETUP_TOKEN": "correct-token"}):
+        resp = await client.get(
+            "/v1/waitlist/stats", headers={"X-Setup-Token": "wrong-token"}
+        )
+    assert resp.status_code == 403
+
+
+async def test_waitlist_stats_returns_aggregate_counts_with_valid_token(client):
+    await client.post(
+        "/v1/waitlist",
+        json={"email": "a@example.com", "role": "developer", "plan_interest": "pro", "consent": True},
+    )
+    await client.post(
+        "/v1/waitlist",
+        json={"email": "b@example.com", "role": "developer", "plan_interest": "team", "consent": True},
+    )
+
+    with patch.dict(os.environ, {"OPENOSINT_SETUP_TOKEN": "correct-token"}):
+        resp = await client.get(
+            "/v1/waitlist/stats", headers={"X-Setup-Token": "correct-token"}
+        )
+
+    assert resp.status_code == 200
+    body = resp.json()
+    assert body["total"] == 2
+    assert body["by_role"] == {"developer": 2}
+    assert body["by_plan_interest"] == {"pro": 1, "team": 1}
+    # No email addresses are ever returned by this endpoint
+    assert "a@example.com" not in resp.text

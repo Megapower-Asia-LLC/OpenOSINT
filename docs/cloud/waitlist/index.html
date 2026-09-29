@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OpenOSINT Cloud Waitlist — Hosted MCP + REST API, Coming Soon</title>
+<meta name="description" content="Join the waitlist for OpenOSINT Cloud's self-serve tier: a hosted MCP endpoint and REST API for IP and domain infrastructure intelligence. No payment required to join — planned pricing only.">
+<meta name="keywords" content="OpenOSINT Cloud waitlist, hosted MCP server, IP intelligence API waitlist, infrastructure intelligence API, OSINT API early access">
+<link rel="canonical" href="https://openosint.tech/cloud/waitlist/">
+<meta property="og:title" content="OpenOSINT Cloud Waitlist — Coming Soon">
+<meta property="og:description" content="Hosted OpenOSINT, zero API-key juggling. Join the waitlist for a self-serve MCP + REST API tier. Infrastructure intelligence only — no people search, no breach data.">
+<meta property="og:url" content="https://openosint.tech/cloud/waitlist/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="OpenOSINT">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="OpenOSINT Cloud Waitlist — Coming Soon">
+<meta name="twitter:description" content="Join the waitlist for a self-serve, hosted OpenOSINT MCP + REST API tier.">
+<link rel="icon" type="image/svg+xml" href="../../logo.svg">
+<link rel="stylesheet" href="../../style.css">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebPage",
+  "name": "OpenOSINT Cloud Waitlist",
+  "description": "Waitlist for a planned self-serve tier of OpenOSINT Cloud — a hosted MCP + REST API for IP and domain infrastructure intelligence.",
+  "url": "https://openosint.tech/cloud/waitlist/",
+  "isPartOf": { "@type": "WebSite", "url": "https://openosint.tech" }
+}
+</script>
+<style>
+.oo-included-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px; margin: 16px 0; }
+.oo-included-grid > div { border: 1px solid #1f2a44; background: #0b1220; border-radius: 8px; padding: 14px 16px; }
+.oo-included-grid h4 { font-family: monospace; font-size: 0.85rem; color: #e6edf3; margin: 0 0 6px; letter-spacing: 0.02em; }
+.oo-included-grid p { color: #9fb0c3; font-size: 0.85rem; margin: 0; text-align: left; }
+.wl-form { max-width: 560px; }
+.wl-field { margin: 0 0 16px; }
+.wl-field label { display: block; font-family: monospace; font-size: 0.85rem; margin-bottom: 4px; color: inherit; }
+.wl-field input[type="email"],
+.wl-field input[type="text"],
+.wl-field select,
+.wl-field textarea {
+  width: 100%;
+  padding: 8px 10px;
+  font-family: Georgia, "Times New Roman", Times, serif;
+  font-size: 15px;
+  border: 1px solid #888;
+  border-radius: 4px;
+  background: #fff;
+  color: #000;
+}
+.wl-field textarea { resize: vertical; min-height: 70px; }
+.wl-field input:focus,
+.wl-field select:focus,
+.wl-field textarea:focus,
+.wl-consent input:focus {
+  outline: 2px solid #3fb950;
+  outline-offset: 1px;
+}
+.wl-radio-row { display: flex; gap: 18px; flex-wrap: wrap; font-family: monospace; font-size: 0.85rem; }
+.wl-radio-row label { display: flex; align-items: center; gap: 6px; }
+.wl-consent { display: flex; align-items: flex-start; gap: 8px; font-size: 0.85rem; margin: 4px 0 18px; }
+.wl-consent label { flex: 1; }
+.wl-honeypot { position: absolute; left: -9999px; width: 1px; height: 1px; overflow: hidden; }
+.wl-submit {
+  display: inline-block;
+  background: #3fb950;
+  color: #000;
+  font-family: monospace;
+  font-size: 14px;
+  font-weight: bold;
+  padding: 10px 24px;
+  border: 2px solid #3fb950;
+  border-radius: 3px;
+  cursor: pointer;
+}
+.wl-submit:hover:not(:disabled) { background: #2ea043; border-color: #2ea043; }
+.wl-submit:disabled { opacity: 0.6; cursor: not-allowed; }
+.wl-status { min-height: 22px; margin-top: 10px; font-family: monospace; font-size: 0.85rem; }
+.wl-status[data-state="ok"] { color: #2ea043; }
+.wl-status[data-state="err"] { color: #d1242f; }
+.wl-stars { vertical-align: middle; }
+
+@media (prefers-color-scheme: dark) {
+  .wl-field input[type="email"],
+  .wl-field input[type="text"],
+  .wl-field select,
+  .wl-field textarea { background: #141414; color: #d8d8d8; border-color: #444; }
+}
+
+@media (max-width: 420px) {
+  .oo-included-grid { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+
+<div id="nav">
+<a href="/" style="color:#3fb950;font-weight:bold;">HOME</a>
+<a href="/blog/" style="color:#58a6ff;">BLOG</a>
+<a href="/tools/" style="color:#58a6ff;">TOOLS</a>
+<a href="/cloud/" style="color:#58a6ff;">CLOUD API</a>
+<a href="/cloud/waitlist/" style="color:#ffffff;">WAITLIST</a>
+<a href="/learn/" style="color:#58a6ff;">LEARN</a>
+<span class="nav-sep">|</span><a href="/free-prompts/?ref=nav" class="nav-cta">FREE PROMPTS</a>
+<a href="/commercial/" style="color:#f0a732;font-weight:bold;">FOR TEAMS</a>
+<a href="https://github.com/OpenOSINT/OpenOSINT" target="_blank" rel="noopener">GITHUB</a>
+<span class="nav-sep">|</span><a href="/sponsors.html" class="nav-cta">&#10084; Sponsor</a>
+</div>
+
+<div id="content">
+
+<div id="masthead">
+<table width="100%" cellpadding="0" cellspacing="0" border="0">
+<tr>
+<td class="mhead-l">OPENOSINT CLOUD</td>
+<td class="mhead-c">Waitlist</td>
+<td class="mhead-r">COMING SOON</td>
+</tr>
+</table>
+</div>
+
+<hr>
+
+<h2 id="hero">HOSTED OPENOSINT, ZERO API-KEY JUGGLING</h2>
+<div class="indent">
+<p>The open-source OpenOSINT framework stays free and MIT-licensed &mdash; that isn't changing. OpenOSINT Cloud is a separate, planned self-serve tier: a hosted MCP endpoint and REST API with data sources included, so you don't wire up five providers and five API keys yourself.</p>
+<p>This page is a waitlist only. There is no payment, no pre-order, and no checkout &mdash; we're validating demand before building billing.</p>
+<p><a href="https://github.com/OpenOSINT/OpenOSINT/stargazers"><img class="wl-stars" src="https://img.shields.io/github/stars/OpenOSINT/OpenOSINT?style=flat-square" alt="OpenOSINT GitHub stars"></a></p>
+<a href="#waitlist-form" class="cta-btn">Join the waitlist &rarr;</a>
+</div>
+
+<h2 id="included">WHAT'S INCLUDED (PLANNED)</h2>
+<div class="indent">
+<div class="oo-included-grid">
+<div><h4>Hosted MCP endpoint</h4><p>Connect Claude, Cursor, or any MCP client directly &mdash; no local server to run.</p></div>
+<div><h4>REST API</h4><p>Same tool set over plain HTTP, for scripts and backend services.</p></div>
+<div><h4>Included sources</h4><p>IP2Location, DNS, RDAP, Certificate Transparency, GDELT &mdash; no separate signups.</p></div>
+<div><h4>Bring your own key</h4><p>Add your own AbuseIPDB, VirusTotal Premium, or Censys key for premium sources.</p></div>
+<div><h4>Entity graph</h4><p>Link findings across a single investigation automatically.</p></div>
+<div><h4>PDF reports</h4><p>Export an investigation as a structured report.</p></div>
+</div>
+<p>Planned sources (pending licensing): Shodan, IPinfo Lite.</p>
+</div>
+
+<h2 id="pricing">PLANNED PRICING</h2>
+<div class="indent">
+<p><b>Planned &mdash; not yet available.</b> Nothing below can be purchased today; there are no buy buttons on this page. Credit amounts are placeholders until real usage data comes in.</p>
+<div class="oo-cta-compare">
+  <div>
+    <h4>Free</h4>
+    <div class="price">$0<span style="font-size:0.6em;">/mo</span></div>
+    <p>Limited monthly credits, hosted MCP endpoint, keyless sources.</p>
+    <p><b>Credits:</b> TBD/mo</p>
+  </div>
+  <div class="featured">
+    <h4>Pro</h4>
+    <div class="price">$19<span style="font-size:0.6em;">/mo</span></div>
+    <p>More credits, all included sources, bring-your-own-key for the rest.</p>
+    <p><b>Credits:</b> TBD/mo</p>
+  </div>
+  <div>
+    <h4>Team</h4>
+    <div class="price">$79<span style="font-size:0.6em;">/mo</span></div>
+    <p>Higher credits, shared usage across a team, entity graph and PDF reports.</p>
+    <p><b>Credits:</b> TBD/mo</p>
+  </div>
+</div>
+<p>Waitlist members get early access and a founding-member price when this launches.</p>
+</div>
+
+<h2 id="waitlist-form">JOIN THE WAITLIST</h2>
+<div class="indent">
+<form class="wl-form" id="wl-form" novalidate>
+
+  <div class="wl-field">
+    <label for="wl-email">Email <span aria-hidden="true">*</span></label>
+    <input type="email" id="wl-email" name="email" autocomplete="email" required>
+  </div>
+
+  <div class="wl-field">
+    <label for="wl-role">Role</label>
+    <select id="wl-role" name="role">
+      <option value="">Prefer not to say</option>
+      <option value="soc_analyst">SOC analyst</option>
+      <option value="threat_intel">Threat intel</option>
+      <option value="pentester_bug_bounty">Pentester / bug bounty</option>
+      <option value="journalist_researcher">Journalist / researcher</option>
+      <option value="msp_it">MSP / IT</option>
+      <option value="developer">Developer</option>
+      <option value="other">Other</option>
+    </select>
+  </div>
+
+  <div class="wl-field">
+    <span style="display:block;font-family:monospace;font-size:0.85rem;margin-bottom:6px;">Which plan interests you?</span>
+    <div class="wl-radio-row" role="radiogroup" aria-label="Plan interest">
+      <label><input type="radio" name="plan_interest" value="pro"> Pro</label>
+      <label><input type="radio" name="plan_interest" value="team"> Team</label>
+      <label><input type="radio" name="plan_interest" value="" checked> Not sure</label>
+    </div>
+  </div>
+
+  <div class="wl-field">
+    <label for="wl-use-case">What would you use it for? <span style="font-weight:normal;">(optional)</span></label>
+    <textarea id="wl-use-case" name="use_case" maxlength="500"></textarea>
+  </div>
+
+  <div class="wl-honeypot" aria-hidden="true">
+    <label for="wl-gotcha">Company website</label>
+    <input type="text" id="wl-gotcha" name="_gotcha" tabindex="-1" autocomplete="off">
+  </div>
+
+  <div class="wl-consent">
+    <input type="checkbox" id="wl-consent" name="consent" required style="margin-top:3px;">
+    <label for="wl-consent">I agree to receive emails about OpenOSINT Cloud launch. Unsubscribe anytime. See the <a href="/privacy/">Privacy Policy</a>.</label>
+  </div>
+
+  <button type="submit" class="wl-submit" id="wl-submit">Join the waitlist</button>
+  <p class="wl-status" id="wl-status" role="status" aria-live="polite"></p>
+</form>
+</div>
+
+<h2 id="faq">FAQ</h2>
+<div class="indent">
+
+<p><b>Is the open-source version going away?</b><br>
+No. OpenOSINT stays free and MIT-licensed. Cloud is an additional hosted option, not a replacement.</p>
+
+<p><b>What data sources are included?</b><br>
+See <a href="#included">What's Included</a> above. All final sources and quotas are confirmed at launch, not on this page.</p>
+
+<p><b>Do you offer people search or breach lookups?</b><br>
+No. OpenOSINT Cloud is scoped to infrastructure intelligence only &mdash; IP geolocation, ASN/ISP, proxy/VPN/Tor detection, IP reputation, DNS, subdomains, domain/RDAP data, and news/geo signal. See the <a href="/acceptable-use/">Acceptable Use Policy</a>.</p>
+
+<p><b>When does it launch?</b><br>
+When the waitlist shows enough demand. Joining helps us decide.</p>
+
+<p><b>Can I self-host instead?</b><br>
+Yes &mdash; the framework is MIT-licensed. See the <a href="/">main OpenOSINT docs</a> for the CLI, web UI, and MCP server you can run yourself today.</p>
+
+</div>
+
+<h2 id="sources">DATA SOURCE ATTRIBUTION</h2>
+<div class="indent">
+<p style="font-size:0.85rem;color:#9fb0c3;">IP geolocation and ASN data via <a href="https://ipinfo.io" target="_blank" rel="noopener">ipinfo.io</a>. Proxy/VPN/Tor and threat-score data sponsored by <a href="https://www.ip2location.io/" target="_blank" rel="noopener">IP2Location.io</a>. Additional host and service signal via <a href="https://www.shodan.io" target="_blank" rel="noopener">Shodan</a> where included in a given plan. Each provider's data is used under its own terms.</p>
+</div>
+
+<h2 id="legal">LEGAL</h2>
+<div class="indent">
+<p>
+<a href="/terms/">Terms of Service</a> &nbsp;&middot;&nbsp;
+<a href="/privacy/">Privacy Policy</a> &nbsp;&middot;&nbsp;
+<a href="/acceptable-use/">Acceptable Use Policy</a> &nbsp;&middot;&nbsp;
+<a href="/subprocessors/">Sub-processors</a>
+</p>
+<p>Questions: <a href="mailto:commercial@openosint.tech">commercial@openosint.tech</a></p>
+</div>
+
+<hr>
+
+<div id="footer">
+<table width="100%" cellpadding="0" cellspacing="0" border="0">
+<tr>
+<td class="mhead-l">OPENOSINT CLOUD</td>
+<td class="mhead-c">openosint.tech/cloud/waitlist/</td>
+<td class="mhead-r">WAITLIST</td>
+</tr>
+</table>
+</div>
+
+</div><!-- #content -->
+
+<script>
+(function () {
+  // Formspree form endpoint — paste your form ID here, e.g.
+  // "https://formspree.io/f/abcdwxyz". The only place this page needs it.
+  var FORMSPREE_ENDPOINT = "https://formspree.io/f/mkjgkvyj";
+
+  var form = document.getElementById("wl-form");
+  var submitBtn = document.getElementById("wl-submit");
+  var statusEl = document.getElementById("wl-status");
+
+  // Pass utm_source / ref from the URL into the source field, no tracking script involved.
+  var params = new URLSearchParams(window.location.search);
+  var source = params.get("utm_source") || params.get("ref") || "";
+
+  function setStatus(message, state) {
+    statusEl.textContent = message;
+    statusEl.setAttribute("data-state", state || "");
+  }
+
+  function extractErrorMessage(data) {
+    if (data && Array.isArray(data.errors) && data.errors.length) {
+      return data.errors
+        .map(function (e) { return e.message || e.field; })
+        .filter(Boolean)
+        .join(" ");
+    }
+    if (data && typeof data.error === "string") {
+      return data.error;
+    }
+    return "Something went wrong. Try again.";
+  }
+
+  form.addEventListener("submit", function (e) {
+    e.preventDefault();
+    var email = document.getElementById("wl-email").value.trim();
+    var consent = document.getElementById("wl-consent").checked;
+    if (!email) {
+      setStatus("Enter your email address.", "err");
+      return;
+    }
+    if (!consent) {
+      setStatus("Please check the consent box to join.", "err");
+      return;
+    }
+
+    var planEl = form.querySelector('input[name="plan_interest"]:checked');
+    var payload = {
+      email: email,
+      role: document.getElementById("wl-role").value || null,
+      use_case: document.getElementById("wl-use-case").value.trim() || null,
+      plan_interest: (planEl && planEl.value) || null,
+      consent: consent,
+      source: source || null,
+      _gotcha: document.getElementById("wl-gotcha").value,
+    };
+
+    submitBtn.disabled = true;
+    setStatus("Joining…", "");
+
+    fetch(FORMSPREE_ENDPOINT, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "Accept": "application/json" },
+      body: JSON.stringify(payload),
+    })
+      .then(function (resp) {
+        return resp.json().then(function (data) {
+          return { ok: resp.ok, data: data };
+        });
+      })
+      .then(function (result) {
+        if (result.ok) {
+          setStatus("You're on the list. We'll email you when OpenOSINT Cloud opens up.", "ok");
+          form.reset();
+        } else {
+          setStatus(extractErrorMessage(result.data), "err");
+        }
+      })
+      .catch(function () {
+        setStatus("Network error. Try again in a moment.", "err");
+      })
+      .finally(function () {
+        submitBtn.disabled = false;
+      });
+  });
+})();
+</script>
+
+</body>
+</html>

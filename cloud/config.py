@@ -71,3 +71,10 @@ PLAN_CREDITS: dict[str, int] = {
     "starter": 1_000, # $19/mo
     "pro":     5_000, # $49/mo
 }
+
+# ── Waitlist ──────────────────────────────────────────────────────────────────
+# Burst smoothing for the public, unauthenticated POST /v1/waitlist route —
+# same InProcessSlidingWindowLimiter as the platform-pool limiter above, just
+# keyed by client IP instead of api_key since there's no credential yet.
+WAITLIST_RATE_WINDOW_SECS: float = float(os.environ.get("WAITLIST_RATE_WINDOW_SECS", "60"))
+WAITLIST_RATE_MAX_CALLS: int = int(os.environ.get("WAITLIST_RATE_MAX_CALLS", "5"))

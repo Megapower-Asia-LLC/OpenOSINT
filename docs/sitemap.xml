@@ -70,6 +70,14 @@
     <priority>0.9</priority>
   </url>
 
+  <!-- Cloud waitlist (planned self-serve tier) -->
+  <url>
+    <loc>https://openosint.tech/cloud/waitlist/</loc>
+    <lastmod>2026-09-29</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+
   <!-- Learn OSINT resource page -->
   <url>
     <loc>https://openosint.tech/learn/</loc>
