@@ -17,6 +17,7 @@
 <meta name="twitter:description" content="Join the waitlist for a self-serve, hosted OpenOSINT MCP + REST API tier.">
 <link rel="icon" type="image/svg+xml" href="../../logo.svg">
 <link rel="stylesheet" href="../../style.css">
+<script src="../../assets/waitlist.js" defer></script>
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -32,60 +33,7 @@
 .oo-included-grid > div { border: 1px solid #1f2a44; background: #0b1220; border-radius: 8px; padding: 14px 16px; }
 .oo-included-grid h4 { font-family: monospace; font-size: 0.85rem; color: #e6edf3; margin: 0 0 6px; letter-spacing: 0.02em; }
 .oo-included-grid p { color: #9fb0c3; font-size: 0.85rem; margin: 0; text-align: left; }
-.wl-form { max-width: 560px; }
-.wl-field { margin: 0 0 16px; }
-.wl-field label { display: block; font-family: monospace; font-size: 0.85rem; margin-bottom: 4px; color: inherit; }
-.wl-field input[type="email"],
-.wl-field input[type="text"],
-.wl-field select,
-.wl-field textarea {
-  width: 100%;
-  padding: 8px 10px;
-  font-family: Georgia, "Times New Roman", Times, serif;
-  font-size: 15px;
-  border: 1px solid #888;
-  border-radius: 4px;
-  background: #fff;
-  color: #000;
-}
-.wl-field textarea { resize: vertical; min-height: 70px; }
-.wl-field input:focus,
-.wl-field select:focus,
-.wl-field textarea:focus,
-.wl-consent input:focus {
-  outline: 2px solid #3fb950;
-  outline-offset: 1px;
-}
-.wl-radio-row { display: flex; gap: 18px; flex-wrap: wrap; font-family: monospace; font-size: 0.85rem; }
-.wl-radio-row label { display: flex; align-items: center; gap: 6px; }
-.wl-consent { display: flex; align-items: flex-start; gap: 8px; font-size: 0.85rem; margin: 4px 0 18px; }
-.wl-consent label { flex: 1; }
-.wl-honeypot { position: absolute; left: -9999px; width: 1px; height: 1px; overflow: hidden; }
-.wl-submit {
-  display: inline-block;
-  background: #3fb950;
-  color: #000;
-  font-family: monospace;
-  font-size: 14px;
-  font-weight: bold;
-  padding: 10px 24px;
-  border: 2px solid #3fb950;
-  border-radius: 3px;
-  cursor: pointer;
-}
-.wl-submit:hover:not(:disabled) { background: #2ea043; border-color: #2ea043; }
-.wl-submit:disabled { opacity: 0.6; cursor: not-allowed; }
-.wl-status { min-height: 22px; margin-top: 10px; font-family: monospace; font-size: 0.85rem; }
-.wl-status[data-state="ok"] { color: #2ea043; }
-.wl-status[data-state="err"] { color: #d1242f; }
 .wl-stars { vertical-align: middle; }
-
-@media (prefers-color-scheme: dark) {
-  .wl-field input[type="email"],
-  .wl-field input[type="text"],
-  .wl-field select,
-  .wl-field textarea { background: #141414; color: #d8d8d8; border-color: #444; }
-}
 
 @media (max-width: 420px) {
   .oo-included-grid { grid-template-columns: 1fr; }
@@ -170,16 +118,16 @@
 
 <h2 id="waitlist-form">JOIN THE WAITLIST</h2>
 <div class="indent">
-<form class="wl-form" id="wl-form" novalidate>
+<form class="wl-form" id="wl-form" data-waitlist-form data-form-location="waitlist_page" novalidate>
 
   <div class="wl-field">
     <label for="wl-email">Email <span aria-hidden="true">*</span></label>
-    <input type="email" id="wl-email" name="email" autocomplete="email" required>
+    <input type="email" id="wl-email" name="email" data-wl-email autocomplete="email" required>
   </div>
 
   <div class="wl-field">
     <label for="wl-role">Role</label>
-    <select id="wl-role" name="role">
+    <select id="wl-role" name="role" data-wl-role>
       <option value="">Prefer not to say</option>
       <option value="soc_analyst">SOC analyst</option>
       <option value="threat_intel">Threat intel</option>
@@ -202,21 +150,21 @@
 
   <div class="wl-field">
     <label for="wl-use-case">What would you use it for? <span style="font-weight:normal;">(optional)</span></label>
-    <textarea id="wl-use-case" name="use_case" maxlength="500"></textarea>
+    <textarea id="wl-use-case" name="use_case" data-wl-use-case maxlength="500"></textarea>
   </div>
 
   <div class="wl-honeypot" aria-hidden="true">
     <label for="wl-gotcha">Company website</label>
-    <input type="text" id="wl-gotcha" name="_gotcha" tabindex="-1" autocomplete="off">
+    <input type="text" id="wl-gotcha" name="_gotcha" data-wl-gotcha tabindex="-1" autocomplete="off">
   </div>
 
   <div class="wl-consent">
-    <input type="checkbox" id="wl-consent" name="consent" required style="margin-top:3px;">
+    <input type="checkbox" id="wl-consent" name="consent" data-wl-consent required style="margin-top:3px;">
     <label for="wl-consent">I agree to receive emails about OpenOSINT Cloud launch. Unsubscribe anytime. See the <a href="/privacy/">Privacy Policy</a>.</label>
   </div>
 
-  <button type="submit" class="wl-submit" id="wl-submit">Join the waitlist</button>
-  <p class="wl-status" id="wl-status" role="status" aria-live="polite"></p>
+  <button type="submit" class="wl-submit" id="wl-submit" data-wl-submit>Join the waitlist</button>
+  <p class="wl-status" id="wl-status" data-wl-status role="status" aria-live="polite"></p>
 </form>
 </div>
 
@@ -269,93 +217,6 @@ Yes &mdash; the framework is MIT-licensed. See the <a href="/">main OpenOSINT do
 </div>
 
 </div><!-- #content -->
-
-<script>
-(function () {
-  // Formspree form endpoint — paste your form ID here, e.g.
-  // "https://formspree.io/f/abcdwxyz". The only place this page needs it.
-  var FORMSPREE_ENDPOINT = "https://formspree.io/f/mkjgkvyj";
-
-  var form = document.getElementById("wl-form");
-  var submitBtn = document.getElementById("wl-submit");
-  var statusEl = document.getElementById("wl-status");
-
-  // Pass utm_source / ref from the URL into the source field, no tracking script involved.
-  var params = new URLSearchParams(window.location.search);
-  var source = params.get("utm_source") || params.get("ref") || "";
-
-  function setStatus(message, state) {
-    statusEl.textContent = message;
-    statusEl.setAttribute("data-state", state || "");
-  }
-
-  function extractErrorMessage(data) {
-    if (data && Array.isArray(data.errors) && data.errors.length) {
-      return data.errors
-        .map(function (e) { return e.message || e.field; })
-        .filter(Boolean)
-        .join(" ");
-    }
-    if (data && typeof data.error === "string") {
-      return data.error;
-    }
-    return "Something went wrong. Try again.";
-  }
-
-  form.addEventListener("submit", function (e) {
-    e.preventDefault();
-    var email = document.getElementById("wl-email").value.trim();
-    var consent = document.getElementById("wl-consent").checked;
-    if (!email) {
-      setStatus("Enter your email address.", "err");
-      return;
-    }
-    if (!consent) {
-      setStatus("Please check the consent box to join.", "err");
-      return;
-    }
-
-    var planEl = form.querySelector('input[name="plan_interest"]:checked');
-    var payload = {
-      email: email,
-      role: document.getElementById("wl-role").value || null,
-      use_case: document.getElementById("wl-use-case").value.trim() || null,
-      plan_interest: (planEl && planEl.value) || null,
-      consent: consent,
-      source: source || null,
-      _gotcha: document.getElementById("wl-gotcha").value,
-    };
-
-    submitBtn.disabled = true;
-    setStatus("Joining…", "");
-
-    fetch(FORMSPREE_ENDPOINT, {
-      method: "POST",
-      headers: { "Content-Type": "application/json", "Accept": "application/json" },
-      body: JSON.stringify(payload),
-    })
-      .then(function (resp) {
-        return resp.json().then(function (data) {
-          return { ok: resp.ok, data: data };
-        });
-      })
-      .then(function (result) {
-        if (result.ok) {
-          setStatus("You're on the list. We'll email you when OpenOSINT Cloud opens up.", "ok");
-          form.reset();
-        } else {
-          setStatus(extractErrorMessage(result.data), "err");
-        }
-      })
-      .catch(function () {
-        setStatus("Network error. Try again in a moment.", "err");
-      })
-      .finally(function () {
-        submitBtn.disabled = false;
-      });
-  });
-})();
-</script>
 
 </body>
 </html>

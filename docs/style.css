@@ -301,6 +301,58 @@ a:visited {
 }
 
 /* ------------------------------------------------------------------ */
+/* Waitlist form — shared by the homepage and /cloud/waitlist/         */
+/* Submit logic lives in assets/waitlist.js, driven by data-wl-* hooks */
+/* ------------------------------------------------------------------ */
+
+.wl-form { max-width: 560px; }
+.wl-field { margin: 0 0 16px; }
+.wl-field label { display: block; font-family: monospace; font-size: 0.85rem; margin-bottom: 4px; color: inherit; }
+.wl-field input[type="email"],
+.wl-field input[type="text"],
+.wl-field select,
+.wl-field textarea {
+  width: 100%;
+  padding: 8px 10px;
+  font-family: Georgia, "Times New Roman", Times, serif;
+  font-size: 15px;
+  border: 1px solid #888;
+  border-radius: 4px;
+  background: #fff;
+  color: #000;
+}
+.wl-field textarea { resize: vertical; min-height: 70px; }
+.wl-field input:focus,
+.wl-field select:focus,
+.wl-field textarea:focus,
+.wl-consent input:focus {
+  outline: 2px solid #3fb950;
+  outline-offset: 1px;
+}
+.wl-radio-row { display: flex; gap: 18px; flex-wrap: wrap; font-family: monospace; font-size: 0.85rem; }
+.wl-radio-row label { display: flex; align-items: center; gap: 6px; }
+.wl-consent { display: flex; align-items: flex-start; gap: 8px; font-size: 0.85rem; margin: 4px 0 18px; }
+.wl-consent label { flex: 1; }
+.wl-honeypot { position: absolute; left: -9999px; width: 1px; height: 1px; overflow: hidden; }
+.wl-submit {
+  display: inline-block;
+  background: #3fb950;
+  color: #000;
+  font-family: monospace;
+  font-size: 14px;
+  font-weight: bold;
+  padding: 10px 24px;
+  border: 2px solid #3fb950;
+  border-radius: 3px;
+  cursor: pointer;
+}
+.wl-submit:hover:not(:disabled) { background: #2ea043; border-color: #2ea043; }
+.wl-submit:disabled { opacity: 0.6; cursor: not-allowed; }
+.wl-status { min-height: 22px; margin-top: 10px; font-family: monospace; font-size: 0.85rem; }
+.wl-status[data-state="ok"] { color: #2ea043; }
+.wl-status[data-state="err"] { color: #d1242f; }
+
+/* ------------------------------------------------------------------ */
 /* Dark mode — terminal users                                           */
 /* ------------------------------------------------------------------ */
 
@@ -317,6 +369,10 @@ a:visited {
   a             { color: #6699ff; }
   a:visited     { color: #cc99ff; }
   #nav a        { color: #d8d8d8; }
+  .wl-field input[type="email"],
+  .wl-field input[type="text"],
+  .wl-field select,
+  .wl-field textarea { background: #141414; color: #d8d8d8; border-color: #444; }
 }
 
 /* ------------------------------------------------------------------ */
