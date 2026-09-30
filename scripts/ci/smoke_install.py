@@ -16,11 +16,13 @@ from __future__ import annotations
 import argparse
 import json
 import os
+import queue
 import signal
 import socket
 import subprocess
 import sys
 import tempfile
+import threading
 import time
 import urllib.request
 from pathlib import Path
@@ -143,23 +145,41 @@ def check_mcp(runner: list[str], env: dict, work: Path, expected_version: str) -
         {"jsonrpc": "2.0", "method": "notifications/initialized"},
         {"jsonrpc": "2.0", "id": 2, "method": "tools/list"},
     ]
-    proc = subprocess.run(
-        [*runner, "openosint-mcp"],
-        input="\n".join(json.dumps(r) for r in requests) + "\n",
-        env=env,
-        cwd=work,
-        capture_output=True,
-        text=True,
-        timeout=START_TIMEOUT_SECS,
-    )
-    replies = {}
-    for line in proc.stdout.splitlines():
-        try:
-            msg = json.loads(line)
-        except json.JSONDecodeError:
-            continue
-        replies[msg.get("id")] = msg
-    assert 1 in replies and 2 in replies, f"MCP server did not answer:\n{proc.stdout}\n{proc.stderr}"
+    log = work / "mcp.log"
+    kwargs = {"start_new_session": True} if os.name != "nt" else {}
+    with log.open("w") as err:
+        proc = subprocess.Popen(
+            [*runner, "openosint-mcp"],
+            stdin=subprocess.PIPE,
+            stdout=subprocess.PIPE,
+            stderr=err,
+            env=env,
+            cwd=work,
+            text=True,
+            **kwargs,
+        )
+    lines: queue.Queue[str] = queue.Queue()
+    threading.Thread(
+        target=lambda: [lines.put(line) for line in proc.stdout], daemon=True
+    ).start()
+    replies: dict = {}
+    try:
+        # Keep stdin open until both replies arrive: closing it early makes the
+        # server exit before a slow first tools/list (graph import) is answered.
+        proc.stdin.write("\n".join(json.dumps(r) for r in requests) + "\n")
+        proc.stdin.flush()
+        deadline = time.monotonic() + START_TIMEOUT_SECS
+        while not {1, 2} <= replies.keys() and time.monotonic() < deadline:
+            try:
+                msg = json.loads(lines.get(timeout=1))
+            except queue.Empty:
+                continue
+            except json.JSONDecodeError:
+                continue
+            replies[msg.get("id")] = msg
+    finally:
+        stop(proc)
+    assert {1, 2} <= replies.keys(), f"MCP server did not answer:\n{log.read_text()}"
     version = replies[1]["result"]["serverInfo"]["version"]
     assert version == expected_version, f"MCP serverInfo.version {version} != {expected_version}"
     tools = replies[2]["result"]["tools"]
