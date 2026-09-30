@@ -436,6 +436,13 @@ openosint web
 
 Browser-based AI chat with streaming tool output, inline result cards, light/dark theme toggle. Supports local inference via Ollama or any OpenAI-compatible endpoint — no Anthropic API key required.
 
+**Which hosts and sites may talk to the server.** On a loopback bind the server only answers requests whose `Host` is `127.0.0.1`, `localhost` or `::1`. Every `/api/*` request from a browser must come from the UI's own origin; cross-site requests are refused (scripts and `curl`, which send no `Origin`, are unaffected).
+
+| Variable | Use it when |
+|---|---|
+| `OPENOSINT_ALLOWED_HOSTS` | You reach the UI by another name (LAN name, Docker hostname, reverse proxy), e.g. `OPENOSINT_ALLOWED_HOSTS=osint.lan,localhost`. Comma-separated; `host` or `host:port`. On a non-loopback bind (`--allow-remote`, Docker) the `Host` check only runs when this is set, so set it there. |
+| `OPENOSINT_ALLOWED_ORIGINS` | A separate front end on another origin calls the API, e.g. `OPENOSINT_ALLOWED_ORIGINS=http://localhost:3000`. Comma-separated. |
+
 <div align="center">
   <a href="https://raw.githubusercontent.com/OpenOSINT/OpenOSINT/main/docs/assets/demo-web-graph.mp4">
     <img src="https://raw.githubusercontent.com/OpenOSINT/OpenOSINT/main/docs/assets/demo-web-graph.gif"
@@ -818,7 +825,7 @@ OpenOSINT is open source under the [MIT License](./LICENSE) — free for any use
 
 *For authorized security research only. See [DISCLAIMER.md](DISCLAIMER.md).*
 
-*OpenOSINT v2.29.0 — September 2026*
+*OpenOSINT v2.29.1 — September 2026*
 
 ## Star History
 
