@@ -47,7 +47,7 @@ async def client():
     import openosint.web_server as ws
 
     app = ws.create_app(host="127.0.0.1")
-    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as c:
+    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://127.0.0.1") as c:
         yield c
 
 
@@ -281,22 +281,19 @@ class TestRejectionMessageUniformity:
         assert resp_off.status_code == resp_metadata.status_code == 403
         assert resp_off.json() == resp_metadata.json()
 
-    async def test_flag_off_vs_origin_guard_rejection_identical(self, client, monkeypatch):
+    async def test_cross_site_rejection_identical_with_flag_on_or_off(self, client, monkeypatch):
+        """A cross-origin prober must not learn whether the flag is on."""
+        payload = {"openai_base_url": "http://127.0.0.1:9999/v1"}
+        headers = {"Sec-Fetch-Site": "cross-site"}
+
         monkeypatch.delenv("OPENOSINT_ALLOW_CLIENT_BACKEND", raising=False)
-        resp_off = await client.post(
-            "/api/openai/test",
-            json={"openai_base_url": "http://attacker.example/v1", "openai_api_key": ""},
-        )
+        resp_off = await client.post("/api/openai/test", json=payload, headers=headers)
 
         monkeypatch.setenv("OPENOSINT_ALLOW_CLIENT_BACKEND", "1")
-        resp_cross_site = await client.post(
-            "/api/openai/test",
-            json={"openai_base_url": "http://127.0.0.1:9999/v1"},
-            headers={"Sec-Fetch-Site": "cross-site"},
-        )
+        resp_on = await client.post("/api/openai/test", json=payload, headers=headers)
 
-        assert resp_off.status_code == resp_cross_site.status_code == 403
-        assert resp_off.json() == resp_cross_site.json()
+        assert resp_off.status_code == resp_on.status_code == 403
+        assert resp_off.json() == resp_on.json()
 
     async def test_allowlist_mismatch_matches_flag_off_message(self, client, monkeypatch):
         monkeypatch.delenv("OPENOSINT_ALLOW_CLIENT_BACKEND", raising=False)
@@ -374,7 +371,7 @@ class TestBrowserOriginGuard:
                 resp = await client.post(
                     "/api/openai/test",
                     json={"openai_base_url": "http://127.0.0.1:9999/v1"},
-                    headers={"Origin": "http://test"},
+                    headers={"Origin": "http://127.0.0.1"},
                 )
         assert resp.status_code == 200
 
@@ -405,23 +402,18 @@ class TestBrowserOriginGuard:
                 )
         assert resp.status_code == 200
 
-    async def test_guard_inactive_when_flag_off(self, client, monkeypatch):
-        """A cross-site Origin header must not block the ordinary env-only
-        chat path when client-supplied backends are disabled — the guard
-        only exists to protect the flag it's gating."""
+    async def test_guard_is_active_even_when_flag_off(self, client, monkeypatch):
+        """The browser-origin guard no longer depends on client-supplied
+        backends being enabled: a cross-site request is refused either way."""
         monkeypatch.delenv("OPENOSINT_ALLOW_CLIENT_BACKEND", raising=False)
         monkeypatch.setenv("ANTHROPIC_API_KEY", "sk-real-key")
 
-        async def fake_stream(messages):
-            yield {"type": "done"}
-
-        with patch("openosint.web_server._stream_claude", side_effect=fake_stream):
-            resp = await client.post(
-                "/api/chat",
-                json={"message": "hi"},
-                headers={"Sec-Fetch-Site": "cross-site"},
-            )
-        assert resp.status_code == 200
+        resp = await client.post(
+            "/api/chat",
+            json={"message": "hi"},
+            headers={"Sec-Fetch-Site": "cross-site"},
+        )
+        assert resp.status_code == 403
 
 
 # ---------------------------------------------------------------------------

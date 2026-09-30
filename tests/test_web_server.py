@@ -472,7 +472,7 @@ async def http_client():
     ws._RATE_STORE.clear()
     ws._TILE_RATE_STORE.clear()
     app = ws.create_app(host="127.0.0.1")
-    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as c:
+    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://127.0.0.1") as c:
         yield c
     ws._RATE_STORE.clear()
     ws._TILE_RATE_STORE.clear()
@@ -935,7 +935,7 @@ class TestDemoMode:
         from openosint.web_server import _RATE_STORE
         _RATE_STORE.clear()
         app = ws.create_app(host="0.0.0.0")
-        async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as c:
+        async with AsyncClient(transport=ASGITransport(app=app), base_url="http://127.0.0.1") as c:
             yield c
         _RATE_STORE.clear()
 
@@ -1164,7 +1164,7 @@ class TestProxyExposureInvariant:
         monkeypatch.delenv("OPENOSINT_DEMO_MODE", raising=False)
         ws._RATE_STORE.clear()
         app = ws.create_app(host="127.0.0.1")
-        async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as c:
+        async with AsyncClient(transport=ASGITransport(app=app), base_url="http://127.0.0.1") as c:
             yield c
         ws._RATE_STORE.clear()
 
@@ -1258,7 +1258,7 @@ class TestCreateAppFactoryRoutes:
 
         _RATE_STORE.clear()
         app = create_app()
-        async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as c:
+        async with AsyncClient(transport=ASGITransport(app=app), base_url="http://127.0.0.1") as c:
             yield c
         _RATE_STORE.clear()
 
@@ -1278,7 +1278,7 @@ class TestCreateAppFactoryRoutes:
 
         _RATE_STORE.clear()
         app = ws.create_app(host="0.0.0.0")
-        async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as c:
+        async with AsyncClient(transport=ASGITransport(app=app), base_url="http://127.0.0.1") as c:
             resp = await c.get("/api/health")
         assert resp.status_code == 200
         assert resp.json()["demo_mode"] is True
@@ -1311,7 +1311,7 @@ class TestSetupEndpointGuards:
         monkeypatch.setattr(ws, "_ROOT", tmp_path)
         app = ws.create_app()
         transport = ASGITransport(app=app, client=("203.0.113.5", 12345))
-        async with AsyncClient(transport=transport, base_url="http://test") as c:
+        async with AsyncClient(transport=transport, base_url="http://127.0.0.1") as c:
             resp = await c.post("/api/setup", json={"OPENAI_BASE_URL": "http://attacker.example/v1"})
 
         assert resp.status_code == 403
@@ -1326,7 +1326,7 @@ class TestSetupEndpointGuards:
         monkeypatch.delenv("OPENOSINT_SETUP_TOKEN", raising=False)
         app = ws.create_app()
         transport = ASGITransport(app=app, client=("203.0.113.5", 12345))
-        async with AsyncClient(transport=transport, base_url="http://test") as c:
+        async with AsyncClient(transport=transport, base_url="http://127.0.0.1") as c:
             resp = await c.post(
                 "/api/setup",
                 json={"SHODAN_API_KEY": "x"},
@@ -1343,7 +1343,7 @@ class TestSetupEndpointGuards:
         monkeypatch.setenv("OPENOSINT_SETUP_TOKEN", "correct-token")
         app = ws.create_app()
         transport = ASGITransport(app=app, client=("203.0.113.5", 12345))
-        async with AsyncClient(transport=transport, base_url="http://test") as c:
+        async with AsyncClient(transport=transport, base_url="http://127.0.0.1") as c:
             resp = await c.post(
                 "/api/setup",
                 json={"SHODAN_API_KEY": "x"},
@@ -1360,7 +1360,7 @@ class TestSetupEndpointGuards:
         monkeypatch.setenv("OPENOSINT_SETUP_TOKEN", "correct-token")
         app = ws.create_app()
         transport = ASGITransport(app=app, client=("203.0.113.5", 12345))
-        async with AsyncClient(transport=transport, base_url="http://test") as c:
+        async with AsyncClient(transport=transport, base_url="http://127.0.0.1") as c:
             resp = await c.post(
                 "/api/setup",
                 json={"SHODAN_API_KEY": "x"},

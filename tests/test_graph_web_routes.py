@@ -97,7 +97,7 @@ async def client():
     from openosint.web_server import create_app
 
     app = create_app()
-    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as c:
+    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://127.0.0.1") as c:
         yield c
 
 
@@ -458,7 +458,7 @@ class TestReviewDecide:
         _seed(web_db)
         monkeypatch.setenv("OPENOSINT_GRAPH_DB", str(web_db))
         app = create_app()
-        async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as c:
+        async with AsyncClient(transport=ASGITransport(app=app), base_url="http://127.0.0.1") as c:
             resp = await c.post(
                 "/api/graph/review/decide",
                 json={"entity_id": "person-1", "canonical_id": "person-2", "decision": "accept"},

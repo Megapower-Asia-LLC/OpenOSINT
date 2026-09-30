@@ -72,6 +72,7 @@ from openosint.tools.search_virustotal import run_virustotal_osint
 from openosint.tools.search_whois import run_whois_osint
 from openosint import __version__ as _VERSION
 from openosint.regexes import EMAIL_FIND_RE
+from openosint.request_guard import RequestGuardMiddleware
 _ROOT = Path(__file__).parent.parent
 
 # Web assets: prefer the package-relative path (pip install) with project-root fallback (dev/editable)
@@ -1589,7 +1590,7 @@ async def _demo_chat_stream(message: str) -> AsyncIterator[dict]:
 # ---------------------------------------------------------------------------
 
 
-def create_app(host: str | None = None) -> FastAPI:
+def create_app(host: str | None = None, port: int | None = None) -> FastAPI:
     """Build the FastAPI app. `host` is the address this process will be
     bound to, if known — it decides the DEMO_MODE network-exposure invariant
     (see the module note near DEMO_MODE's definition). Leave it unset only
@@ -1612,6 +1613,7 @@ def create_app(host: str | None = None) -> FastAPI:
         allow_methods=["*"],
         allow_headers=["*"],
     )
+    app.add_middleware(RequestGuardMiddleware, loopback_bind=_is_loopback_host(host), port=port)
 
     # ------------------------------------------------------------------
     # GET /api/health
@@ -2072,6 +2074,12 @@ def create_app(host: str | None = None) -> FastAPI:
                 status_code=403,
             )
 
+        if request.headers.get("content-type", "").split(";")[0].strip().lower() != "application/json":
+            return JSONResponse(
+                {"status": "error", "message": "Content-Type must be application/json."},
+                status_code=415,
+            )
+
         body: dict = await request.json()
         env_path = _ROOT / ".env"
         existing: dict[str, str] = {}
@@ -2352,7 +2360,7 @@ async def serve_async(host: str = "127.0.0.1", port: int = 8080, allow_remote: b
     """Run uvicorn within an already-running asyncio event loop."""
     _require_safe_bind(host, allow_remote)
     load_env_or_exit()
-    app = create_app(host=host)
+    app = create_app(host=host, port=port)
     _print_banner(host, port)
     config = uvicorn.Config(app, host=host, port=port, log_level="warning", loop="none")
     server = uvicorn.Server(config)
@@ -2363,7 +2371,7 @@ def run_server(host: str = "127.0.0.1", port: int = 8080, allow_remote: bool = F
     """Standalone blocking entry point."""
     _require_safe_bind(host, allow_remote)
     load_env_or_exit()
-    app = create_app(host=host)
+    app = create_app(host=host, port=port)
     _print_banner(host, port)
     uvicorn.run(app, host=host, port=port, log_level="warning")
 
