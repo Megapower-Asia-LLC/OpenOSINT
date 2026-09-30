@@ -1,7 +1,9 @@
 """`openosint web` startup: bind first, then announce; busy port fails clearly."""
 
 import asyncio
+import io
 import socket
+import sys
 
 import pytest
 
@@ -63,3 +65,15 @@ def test_banner_omits_no_key_notice_when_key_present(monkeypatch, capsys):
     web_server._print_banner("127.0.0.1", 8080)
 
     assert "No AI provider configured" not in capsys.readouterr().out
+
+
+def test_banner_survives_a_stdout_that_cannot_encode_the_arrow(monkeypatch):
+    """Windows with stdout redirected defaults to cp1252, which has no '→'."""
+    buffer = io.BytesIO()
+    stream = io.TextIOWrapper(buffer, encoding="cp1252", write_through=True)
+    monkeypatch.setattr(sys, "stdout", stream)
+    monkeypatch.setenv("ANTHROPIC_API_KEY", "sk-ant-test")
+
+    web_server._print_banner("127.0.0.1", 8080)
+
+    assert b"http://127.0.0.1:8080/" in buffer.getvalue()

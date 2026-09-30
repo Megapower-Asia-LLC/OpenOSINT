@@ -26,6 +26,7 @@ import re
 import secrets
 import shutil
 import socket
+import sys
 import time
 from collections import OrderedDict
 from collections import deque as _deque
@@ -2428,4 +2429,9 @@ def _print_banner(host: str, port: int) -> None:
             "chat will refuse proxied requests. See the README before doing so."
         )
     lines.append("[*] Press Ctrl+C to stop.")
+    try:
+        # A redirected stdout on Windows is cp1252, which cannot encode "→".
+        sys.stdout.reconfigure(errors="replace")
+    except (AttributeError, ValueError):
+        pass  # not a TextIOWrapper (e.g. a test capture object)
     print("\n".join(lines), flush=True)
