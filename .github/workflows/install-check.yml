@@ -45,7 +45,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: astral-sh/setup-uv@v5
-      - run: uv build --wheel
+      - run: uv build
+      - name: No bytecode in wheel or sdist
+        run: python scripts/ci/check_dist_clean.py dist
       - uses: actions/upload-artifact@v4
         with:
           name: wheel
