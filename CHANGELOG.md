@@ -9,6 +9,18 @@ OpenOSINT adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Added
+- One-command web UI install: `uvx openosint web` (after installing [uv](https://docs.astral.sh/uv/)). The README Installation section now leads with it; `pip install openosint && openosint web` remains the documented fallback.
+- `OPENOSINT_HOME` environment variable to relocate the data directory (`graph.db`, session history). Defaults to `~/.openosint`, so existing installs are unchanged; `OPENOSINT_GRAPH_DB` still takes precedence for `graph.db`.
+- `openosint web` banner now prints the data directory and, when no AI provider is configured, a one-line notice. No network probe is made to print it.
+- CI workflow `install-check`: tests and lint on Python 3.10 and 3.12, a clean `uvx` install (no keys, isolated HOME) with web and MCP health checks on Ubuntu, macOS and Windows, the graph extra on Ubuntu, and `docker compose up` on a fresh checkout with no `.env`.
+
+### Changed
+- `openosint web` binds its port before printing the URL or opening the browser. If the port is busy it exits with `Port N is already in use. Pick another one with: openosint web --port N+1` instead of printing a URL and then a raw uvicorn error.
+- Docker: `.env` is now optional in `docker-compose.yml` (a fresh clone previously failed or created a directory named `.env`). The image installs the `graph` extra instead of `web` (which only added `playwright`), stores `graph.db` and history in an `openosint-data` volume via `OPENOSINT_HOME=/data`, and keeps UI-saved keys in that volume. A new `.dockerignore` keeps a local `.env` and `.venv` out of the image.
+- The MCP server's `serverInfo.version` now reports the OpenOSINT version (it reported the `mcp` library's version).
+- Package description says 20 tools, matching the tool catalog.
+
 ## [2.29.1] — 2026-10-01
 
 ### Security
