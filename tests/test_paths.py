@@ -2,7 +2,8 @@
 
 from pathlib import Path
 
-from openosint.graph.store.db_path import default_db_path
+import pytest
+
 from openosint.paths import home_dir
 
 
@@ -27,6 +28,9 @@ def test_home_dir_ignores_blank_openosint_home(monkeypatch, tmp_path):
 
 
 def test_graph_db_lives_under_openosint_home(monkeypatch, tmp_path):
+    pytest.importorskip("followthemoney", reason="requires the 'graph' extra")
+    from openosint.graph.store.db_path import default_db_path
+
     monkeypatch.delenv("OPENOSINT_GRAPH_DB", raising=False)
     monkeypatch.setenv("OPENOSINT_HOME", str(tmp_path / "data"))
 
@@ -35,6 +39,9 @@ def test_graph_db_lives_under_openosint_home(monkeypatch, tmp_path):
 
 
 def test_graph_db_override_wins_over_openosint_home(monkeypatch, tmp_path):
+    pytest.importorskip("followthemoney", reason="requires the 'graph' extra")
+    from openosint.graph.store.db_path import default_db_path
+
     explicit = tmp_path / "elsewhere" / "g.db"
     monkeypatch.setenv("OPENOSINT_GRAPH_DB", str(explicit))
     monkeypatch.setenv("OPENOSINT_HOME", str(tmp_path / "data"))
