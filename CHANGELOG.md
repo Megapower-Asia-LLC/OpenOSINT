@@ -9,10 +9,10 @@ OpenOSINT adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
-## [2.29.1] — 2026-09-30
+## [2.29.1] — 2026-10-01
 
 ### Security
-- Fixed: the local web server could be driven by any website open in the same browser while `openosint web` was running (advisory: [GHSA-XXXX](https://github.com/OpenOSINT/OpenOSINT/security/advisories/GHSA-XXXX)). The server now validates the `Host` header and refuses cross-site browser requests to every `/api/*` endpoint except `/api/health`, and `/api/setup` requires `Content-Type: application/json`. All users of the web UI should upgrade. The MCP server, CLI and REPL are not affected.
+- Fixed: the local web server could be driven by any website open in the same browser while `openosint web` was running (advisory: [GHSA-2wrv-jxxj-r2xc](https://github.com/OpenOSINT/OpenOSINT/security/advisories/GHSA-2wrv-jxxj-r2xc)). The server now validates the `Host` header and refuses cross-site browser requests to every `/api/*` endpoint except `/api/health`, and `/api/setup` requires `Content-Type: application/json`. All users of the web UI should upgrade. The MCP server, CLI and REPL are not affected.
 - New settings: `OPENOSINT_ALLOWED_HOSTS` (extra hostnames the server answers to; also the way to turn on `Host` checking on `--allow-remote` and Docker binds) and `OPENOSINT_ALLOWED_ORIGINS` (extra browser origins allowed to call the API). See the README Web UI section.
 - Behavior change: reaching the UI through a name other than `localhost` or `127.0.0.1` on a loopback bind now needs `OPENOSINT_ALLOWED_HOSTS`. A browser-based front end on another origin needs `OPENOSINT_ALLOWED_ORIGINS`.
 
