@@ -16,6 +16,7 @@ Routes:
 from __future__ import annotations
 
 import asyncio
+import errno
 import hashlib
 import ipaddress
 import json
@@ -29,7 +30,7 @@ import time
 from collections import OrderedDict
 from collections import deque as _deque
 from pathlib import Path
-from typing import AsyncIterator
+from typing import AsyncIterator, Callable
 from urllib.parse import urlparse as _urlparse
 
 import requests as _requests
@@ -71,6 +72,7 @@ from openosint.tools.search_username import run_username_osint
 from openosint.tools.search_virustotal import run_virustotal_osint
 from openosint.tools.search_whois import run_whois_osint
 from openosint import __version__ as _VERSION
+from openosint.paths import home_dir
 from openosint.regexes import EMAIL_FIND_RE
 from openosint.request_guard import RequestGuardMiddleware
 _ROOT = Path(__file__).parent.parent
@@ -2356,35 +2358,74 @@ def _require_safe_bind(host: str, allow_remote: bool) -> None:
     )
 
 
-async def serve_async(host: str = "127.0.0.1", port: int = 8080, allow_remote: bool = False) -> None:
-    """Run uvicorn within an already-running asyncio event loop."""
+def _bind_socket(host: str, port: int) -> socket.socket:
+    """Bind the listening socket up front so a busy port fails before anything is announced."""
+    family = socket.AF_INET6 if ":" in host else socket.AF_INET
+    sock = socket.socket(family, socket.SOCK_STREAM)
+    if os.name != "nt":  # on Windows SO_REUSEADDR would allow a second bind to the same port
+        sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+    try:
+        sock.bind((host, port))
+    except OSError as exc:
+        sock.close()
+        if exc.errno == errno.EADDRINUSE:
+            raise SystemExit(
+                f"Port {port} is already in use. "
+                f"Pick another one with: openosint web --port {port + 1}"
+            ) from None
+        raise SystemExit(f"Cannot listen on {host}:{port}: {exc.strerror or exc}") from None
+    sock.set_inheritable(True)
+    return sock
+
+
+async def serve_async(
+    host: str = "127.0.0.1",
+    port: int = 8080,
+    allow_remote: bool = False,
+    on_started: Callable[[], None] | None = None,
+) -> None:
+    """Run uvicorn within an already-running asyncio event loop.
+
+    `on_started` runs once the port is bound and the URL has been printed.
+    """
     _require_safe_bind(host, allow_remote)
     load_env_or_exit()
     app = create_app(host=host, port=port)
+    sock = _bind_socket(host, port)
     _print_banner(host, port)
+    if on_started is not None:
+        on_started()
     config = uvicorn.Config(app, host=host, port=port, log_level="warning", loop="none")
     server = uvicorn.Server(config)
-    await server.serve()
+    await server.serve(sockets=[sock])
 
 
 def run_server(host: str = "127.0.0.1", port: int = 8080, allow_remote: bool = False) -> None:
     """Standalone blocking entry point."""
-    _require_safe_bind(host, allow_remote)
-    load_env_or_exit()
-    app = create_app(host=host, port=port)
-    _print_banner(host, port)
-    uvicorn.run(app, host=host, port=port, log_level="warning")
+    asyncio.run(serve_async(host=host, port=port, allow_remote=allow_remote))
 
 
 def _print_banner(host: str, port: int) -> None:
     display = "localhost" if host in ("0.0.0.0", "") else host
-    print(f"[*] OpenOSINT {_VERSION} web server")
-    print(f"[*] App  → http://{display}:{port}/")
-    print(f"[*] Docs → http://{display}:{port}/docs/")
+    lines = [
+        f"[*] OpenOSINT {_VERSION} web server",
+        f"[*] App  → http://{display}:{port}/",
+        f"[*] Docs → http://{display}:{port}/docs/",
+        f"[*] Data → {home_dir()}",
+    ]
+    if not (
+        os.environ.get("ANTHROPIC_API_KEY", "").strip()
+        or os.environ.get("OPENAI_BASE_URL", "").strip()
+    ):
+        lines.append(
+            "[*] No AI provider configured (a local Ollama is auto-detected). "
+            "Set ANTHROPIC_API_KEY to enable chat; keyless tools work without it."
+        )
     if _is_loopback_host(host) and not OPENOSINT_TRUSTED_PROXY:
-        print(
+        lines.append(
             "[*] Bound to loopback. If you put a reverse proxy in front of this, "
             "set OPENOSINT_TRUSTED_PROXY=true — otherwise credentialed tools and "
             "chat will refuse proxied requests. See the README before doing so."
         )
-    print("[*] Press Ctrl+C to stop.")
+    lines.append("[*] Press Ctrl+C to stop.")
+    print("\n".join(lines), flush=True)
