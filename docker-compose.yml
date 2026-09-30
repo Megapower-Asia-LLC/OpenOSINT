@@ -3,7 +3,13 @@ services:
     build: .
     ports:
       - "8080:8080"
-    env_file: .env
+    # .env is optional: the web UI starts with no keys configured.
+    env_file:
+      - path: .env
+        required: false
     volumes:
       - ./reports:/app/reports
-      - ./.env:/app/.env
+      - openosint-data:/data
+
+volumes:
+  openosint-data:
