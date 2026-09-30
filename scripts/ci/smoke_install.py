@@ -30,6 +30,7 @@ from pathlib import Path
 START_TIMEOUT_SECS = 300  # first run downloads and installs every dependency
 FAIL_FAST_TIMEOUT_SECS = 120
 MIN_TOOLS = 20
+MCP_SECOND_INIT_MAX_SECS = 10
 SECRET_MARKERS = (
     "KEY", "TOKEN", "SECRET", "PASSWORD", "OPENOSINT", "ANTHROPIC", "OPENAI",
     "OLLAMA", "SHODAN", "CENSYS", "VIRUSTOTAL", "IPINFO", "HIBP", "BRIGHTDATA",
@@ -42,14 +43,19 @@ def _uv_dir(*args: str) -> str:
 
 def clean_env(home: Path) -> dict[str, str]:
     """Current env minus anything key-like, with all home/config dirs isolated."""
-    env = {
-        k: v for k, v in os.environ.items() if not any(m in k.upper() for m in SECRET_MARKERS)
-    }
+    env = {k: v for k, v in os.environ.items() if not any(m in k.upper() for m in SECRET_MARKERS)}
     # Keep uv's own cache/python store so the run stays fast; everything the
     # app itself might read or write is redirected below.
     env["UV_CACHE_DIR"] = _uv_dir("cache", "dir")
     env["UV_PYTHON_INSTALL_DIR"] = _uv_dir("python", "dir")
-    for var in ("HOME", "USERPROFILE", "APPDATA", "LOCALAPPDATA", "XDG_CONFIG_HOME", "XDG_DATA_HOME"):
+    for var in (
+        "HOME",
+        "USERPROFILE",
+        "APPDATA",
+        "LOCALAPPDATA",
+        "XDG_CONFIG_HOME",
+        "XDG_DATA_HOME",
+    ):
         env[var] = str(home)
     env["PYTHONUNBUFFERED"] = "1"
     return env
@@ -92,7 +98,9 @@ def wait_for_health(url: str, proc: subprocess.Popen, log: Path) -> None:
     deadline = time.monotonic() + START_TIMEOUT_SECS
     while time.monotonic() < deadline:
         if proc.poll() is not None:
-            raise SystemExit(f"web server exited early (code {proc.returncode}):\n{log.read_text()}")
+            raise SystemExit(
+                f"web server exited early (code {proc.returncode}):\n{log.read_text()}"
+            )
         try:
             status, body = fetch(f"{url}/api/health")
             if status == 200 and json.loads(body).get("status") == "ok":
@@ -145,8 +153,35 @@ def check_mcp(runner: list[str], env: dict, work: Path, expected_version: str) -
         {"jsonrpc": "2.0", "method": "notifications/initialized"},
         {"jsonrpc": "2.0", "id": 2, "method": "tools/list"},
     ]
-    log = work / "mcp.log"
+    replies, seconds = mcp_session(runner, env, work, requests, {1, 2}, "mcp.log")
+    version = replies[1]["result"]["serverInfo"]["version"]
+    assert version == expected_version, f"MCP serverInfo.version {version} != {expected_version}"
+    tools = replies[2]["result"]["tools"]
+    assert len(tools) >= MIN_TOOLS, f"only {len(tools)} MCP tools listed"
+    print(
+        f"ok  MCP server {version} lists {len(tools)} tools (first launch, initialize {seconds[1]:.1f}s)"
+    )
+
+    # Second launch: the environment now exists, so this is what a user sees every time
+    # after the first. The threshold is generous for shared CI runners; it exists to catch
+    # a regression such as a network call or a heavy import added to startup.
+    _, warm = mcp_session(runner, env, work, requests[:1], {1}, "mcp-second.log")
+    assert warm[1] < MCP_SECOND_INIT_MAX_SECS, (
+        f"MCP initialize took {warm[1]:.1f}s on the second launch "
+        f"(limit {MCP_SECOND_INIT_MAX_SECS}s)"
+    )
+    print(
+        f"ok  MCP initialize on second launch: {warm[1]:.1f}s (limit {MCP_SECOND_INIT_MAX_SECS}s)"
+    )
+
+
+def mcp_session(
+    runner: list[str], env: dict, work: Path, requests: list[dict], wanted: set[int], log_name: str
+) -> tuple[dict, dict]:
+    """Launch openosint-mcp, send `requests`, return ({id: reply}, {id: seconds since launch})."""
+    log = work / log_name
     kwargs = {"start_new_session": True} if os.name != "nt" else {}
+    started = time.monotonic()
     with log.open("w") as err:
         proc = subprocess.Popen(
             [*runner, "openosint-mcp"],
@@ -159,32 +194,26 @@ def check_mcp(runner: list[str], env: dict, work: Path, expected_version: str) -
             **kwargs,
         )
     lines: queue.Queue[str] = queue.Queue()
-    threading.Thread(
-        target=lambda: [lines.put(line) for line in proc.stdout], daemon=True
-    ).start()
+    threading.Thread(target=lambda: [lines.put(line) for line in proc.stdout], daemon=True).start()
     replies: dict = {}
+    seconds: dict = {}
     try:
-        # Keep stdin open until both replies arrive: closing it early makes the
+        # Keep stdin open until every wanted reply arrives: closing it early makes the
         # server exit before a slow first tools/list (graph import) is answered.
         proc.stdin.write("\n".join(json.dumps(r) for r in requests) + "\n")
         proc.stdin.flush()
-        deadline = time.monotonic() + START_TIMEOUT_SECS
-        while not {1, 2} <= replies.keys() and time.monotonic() < deadline:
+        deadline = started + START_TIMEOUT_SECS
+        while not wanted <= replies.keys() and time.monotonic() < deadline:
             try:
                 msg = json.loads(lines.get(timeout=1))
-            except queue.Empty:
-                continue
-            except json.JSONDecodeError:
+            except (queue.Empty, json.JSONDecodeError):
                 continue
             replies[msg.get("id")] = msg
+            seconds[msg.get("id")] = time.monotonic() - started
     finally:
         stop(proc)
-    assert {1, 2} <= replies.keys(), f"MCP server did not answer:\n{log.read_text()}"
-    version = replies[1]["result"]["serverInfo"]["version"]
-    assert version == expected_version, f"MCP serverInfo.version {version} != {expected_version}"
-    tools = replies[2]["result"]["tools"]
-    assert len(tools) >= MIN_TOOLS, f"only {len(tools)} MCP tools listed"
-    print(f"ok  MCP server {version} lists {len(tools)} tools")
+    assert wanted <= replies.keys(), f"MCP server did not answer:\n{log.read_text()}"
+    return replies, seconds
 
 
 def main() -> None:

@@ -35,7 +35,7 @@ jobs:
       - run: >-
           ruff format --check
           openosint/paths.py tests/test_paths.py tests/test_web_startup.py
-          tests/test_mcp_version.py
+          tests/test_mcp_version.py scripts/ci/smoke_install.py scripts/ci/check_dist_clean.py
       # Graph tests self-skip here (importorskip: no followthemoney without the extra).
       - run: pytest tests -q
 
