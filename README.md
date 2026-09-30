@@ -748,6 +748,8 @@ docker compose run --rm openosint email target@example.com --json
 
 `.env` is optional: with no keys the web UI still starts at <http://localhost:8080>. To add keys, set `ANTHROPIC_API_KEY` (and optionally `HIBP_API_KEY`, `IPINFO_TOKEN`) in a `.env` next to `docker-compose.yml`, or export them before running `docker compose`. Reports are persisted to `./reports/`; the graph database and session history live in the `openosint-data` volume (`/data` in the container, via `OPENOSINT_HOME`). The image includes the graph view.
 
+The port is published on `127.0.0.1` only. To reach it from other machines on purpose, run `OPENOSINT_BIND=0.0.0.0 docker compose up`. **Security note:** the UI's setup endpoint accepts and stores API keys, so only do this on a network and behind a firewall or reverse proxy you trust.
+
 **DigitalOcean App Platform:** see [`.do/app.yaml`](.do/app.yaml) for App Platform configuration.
 
 ## Integrations

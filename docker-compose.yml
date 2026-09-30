@@ -2,7 +2,9 @@ services:
   openosint:
     build: .
     ports:
-      - "8080:8080"
+      # Loopback only by default. To expose on the LAN deliberately:
+      #   OPENOSINT_BIND=0.0.0.0 docker compose up
+      - "${OPENOSINT_BIND:-127.0.0.1}:8080:8080"
     # .env is optional: the web UI starts with no keys configured.
     env_file:
       - path: .env
