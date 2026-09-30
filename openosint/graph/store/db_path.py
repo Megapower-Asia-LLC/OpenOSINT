@@ -13,14 +13,17 @@ from __future__ import annotations
 import os
 from pathlib import Path
 
+from openosint.paths import home_dir
+
 
 def default_db_path() -> Path:
-    """The graph store path: $OPENOSINT_GRAPH_DB, else ~/.openosint/graph.db.
+    """The graph store path: $OPENOSINT_GRAPH_DB, else $OPENOSINT_HOME/graph.db
+    (default ~/.openosint/graph.db).
 
     Creates the parent directory so a first-run caller can open the store
     immediately.
     """
     override = os.environ.get("OPENOSINT_GRAPH_DB")
-    path = Path(override) if override else Path.home() / ".openosint" / "graph.db"
+    path = Path(override) if override else home_dir() / "graph.db"
     path.parent.mkdir(parents=True, exist_ok=True)
     return path
