@@ -126,6 +126,8 @@ def check_web(runner: list[str], env: dict, work: Path) -> None:
         assert f"{url}/" in (work / "web.log").read_text(), "banner did not print the real URL"
         print(f"ok  web UI up at {url}/")
         check_rejections(url)
+        status, body = fetch(f"{url}/api/sponsors")
+        assert status == 200 and json.loads(body)["sponsors"], "wheel did not ship sponsors.json"
 
         second = spawn(cmd, env, work, work / "busy.log")
         try:

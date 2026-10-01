@@ -31,7 +31,7 @@ from pathlib import Path
 
 _REPO_ROOT = Path(__file__).parent.parent
 _README = _REPO_ROOT / "README.md"
-_SPONSORS_FILE = _REPO_ROOT / "sponsors.json"
+_SPONSORS_FILE = _REPO_ROOT / "openosint" / "sponsors.json"
 
 START_MARKER = "<!-- SPONSORS:START -->"
 END_MARKER = "<!-- SPONSORS:END -->"
@@ -228,7 +228,7 @@ def main() -> None:
         "--sponsors",
         type=Path,
         default=_SPONSORS_FILE,
-        help="Path to sponsors.json (default: repo root sponsors.json).",
+        help="Path to sponsors.json (default: openosint/sponsors.json).",
     )
     parser.add_argument(
         "--docs-html",

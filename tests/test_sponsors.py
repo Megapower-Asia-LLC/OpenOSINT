@@ -343,8 +343,8 @@ def test_renderer_omits_integration_doc_link_when_absent(tmp_path):
 
 def test_real_sponsors_json_is_valid():
     """Ensure the committed sponsors.json always passes validation."""
-    real_path = Path(__file__).parent.parent / "sponsors.json"
-    assert real_path.exists(), "sponsors.json not found at repo root"
+    real_path = Path(__file__).parent.parent / "openosint" / "sponsors.json"
+    assert real_path.exists(), "openosint/sponsors.json not found"
     sponsors = load_sponsors(real_path)
     assert isinstance(sponsors, list)
     for s in sponsors:
@@ -355,7 +355,7 @@ def test_real_sponsors_json_is_valid():
 
 
 # ---------------------------------------------------------------------------
-# /api/sponsors from an install without sponsors.json (pip/wheel)
+# /api/sponsors: packaged data, and the missing-file fallback
 # ---------------------------------------------------------------------------
 
 
@@ -379,3 +379,33 @@ def test_api_sponsors_still_fails_loudly_on_a_corrupt_file(monkeypatch, tmp_path
     bad.write_text("{not json", encoding="utf-8")
     monkeypatch.setattr("openosint.sponsors._SPONSORS_FILE", bad)
     assert _sponsors_client().get("/api/sponsors").status_code == 500
+
+
+def test_api_sponsors_serves_the_packaged_data():
+    resp = _sponsors_client().get("/api/sponsors")
+    assert resp.status_code == 200
+    assert len(resp.json()["sponsors"]) == len(load_sponsors())
+    assert resp.json()["sponsors"], "packaged sponsors.json is empty"
+
+
+def test_one_sponsors_file_for_package_and_renderer():
+    """The renderer (README/docs) and the packaged runtime read the same file."""
+    import importlib.util
+
+    import openosint.sponsors as runtime
+
+    spec = importlib.util.spec_from_file_location(
+        "render_sponsors", Path(__file__).parent.parent / "scripts" / "render_sponsors.py"
+    )
+    renderer = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(renderer)
+    assert renderer._SPONSORS_FILE.resolve() == runtime._SPONSORS_FILE.resolve()
+    assert not (Path(__file__).parent.parent / "sponsors.json").exists(), "stray root copy"
+
+
+def test_sponsors_json_is_declared_as_package_data():
+    import tomllib
+
+    root = Path(__file__).parent.parent
+    cfg = tomllib.loads((root / "pyproject.toml").read_text(encoding="utf-8"))
+    assert "sponsors.json" in cfg["tool"]["setuptools"]["package-data"]["openosint"]

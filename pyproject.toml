@@ -120,7 +120,7 @@ include = ["openosint*"]
 exclude = ["assets*", "docs*", "scripts*", "tests*"]
 
 [tool.setuptools.package-data]
-openosint = ["web/*.html", "web/**/*"]
+openosint = ["web/*.html", "web/**/*", "sponsors.json"]
 "openosint.playbooks" = ["recipes/*.yaml"]
 "openosint.graph" = ["data/*.json"]
 

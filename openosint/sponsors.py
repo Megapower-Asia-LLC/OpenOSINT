@@ -1,7 +1,7 @@
 """
 Sponsors data loader and validator.
 
-Single source of truth: sponsors.json at the project root.
+Single source of truth: openosint/sponsors.json (packaged with the wheel).
 Tiers: featured | integration | supporter
 """
 
@@ -11,7 +11,7 @@ import json
 from pathlib import Path
 from typing import TypedDict
 
-_SPONSORS_FILE = Path(__file__).parent.parent / "sponsors.json"
+_SPONSORS_FILE = Path(__file__).parent / "sponsors.json"
 
 VALID_TIERS = {"featured", "integration", "supporter"}
 REQUIRED_FIELDS = {"name", "tagline", "url", "logo", "tier"}
@@ -33,7 +33,7 @@ class SponsorsValidationError(ValueError):
 
 
 class SponsorsFileMissing(SponsorsValidationError):
-    """sponsors.json is not on disk, e.g. a pip/wheel install (it lives at the repo root)."""
+    """sponsors.json is not on disk (a broken install; it ships inside the package)."""
 
 
 def _validate(entry: dict, index: int) -> None:

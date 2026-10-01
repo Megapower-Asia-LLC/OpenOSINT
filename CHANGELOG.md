@@ -26,7 +26,7 @@ OpenOSINT adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Docker: `/app/.env` is a symlink to `/data/.env` that is no longer pre-created empty, so a fresh container logs no `Loaded .env` line until a key is saved.
 
 ### Fixed
-- `/api/sponsors` returned 500 on pip/wheel installs, which do not ship the repo-root `sponsors.json`; it now returns an empty list (a corrupt file still errors).
+- `/api/sponsors` returned 500 on pip/wheel installs because `sponsors.json` was not packaged. The file now lives at `openosint/sponsors.json` (still the single source of truth, also read by `scripts/render_sponsors.py`) and ships in the wheel; a missing file falls back to an empty list.
 - `.mcp/server.json` described 16 tools; it now says 20, and the docs-consistency test checks it.
 
 ### Removed
