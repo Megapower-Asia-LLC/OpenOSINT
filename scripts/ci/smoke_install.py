@@ -5,8 +5,9 @@ every key/config variable stripped and HOME/USERPROFILE/APPDATA pointed at an
 empty temp directory, from an empty working directory. It then checks that:
 
   1. the web UI answers (/api/health and /) and prints its real URL,
-  2. a second instance on the same port fails with a message naming --port,
-  3. `openosint-mcp` starts, reports the wheel's version and lists the tools.
+  2. a foreign Host header and a cross-site POST to /api/setup are rejected (403),
+  3. a second instance on the same port fails with a message naming --port,
+  4. `openosint-mcp` starts, reports the wheel's version and lists the tools.
 
 Usage: python scripts/ci/smoke_install.py dist/openosint-X.Y.Z-py3-none-any.whl [--extra graph]
 """
@@ -26,6 +27,8 @@ import threading
 import time
 import urllib.request
 from pathlib import Path
+
+from check_guard import check_rejections
 
 START_TIMEOUT_SECS = 300  # first run downloads and installs every dependency
 FAIL_FAST_TIMEOUT_SECS = 120
@@ -122,6 +125,7 @@ def check_web(runner: list[str], env: dict, work: Path) -> None:
         assert status == 200 and "OpenOSINT" in body, "GET / did not serve the web UI"
         assert f"{url}/" in (work / "web.log").read_text(), "banner did not print the real URL"
         print(f"ok  web UI up at {url}/")
+        check_rejections(url)
 
         second = spawn(cmd, env, work, work / "busy.log")
         try:
