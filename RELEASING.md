@@ -15,4 +15,4 @@
 
 ## One-time demo setup
 
-The demo app (`openosint-demo`) needs `OPENOSINT_ALLOWED_HOSTS` set, because its `--allow-remote` bind only checks the `Host` header when it is set: `heroku config:set OPENOSINT_ALLOWED_HOSTS=demo.openosint.tech -a openosint-demo` (already done; re-run if the app is recreated or the domain changes).
+The demo app (`openosint-demo`) needs `OPENOSINT_ALLOWED_HOSTS` set, because its `--allow-remote` bind only checks the `Host` header when it is set: `heroku config:set OPENOSINT_ALLOWED_HOSTS=demo.openosint.tech,openosint-demo-8f67039da343.herokuapp.com -a openosint-demo` (already done; re-run if the app is recreated or the domain changes).
