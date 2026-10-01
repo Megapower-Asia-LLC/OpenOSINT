@@ -25,6 +25,13 @@ OpenOSINT adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Docker: `docker-compose.yml` sets `OPENOSINT_PUBLISHED_BIND` (derived from `OPENOSINT_BIND`) so a port published on loopback only is no longer treated as network-exposed, and defaults `OPENOSINT_ALLOWED_HOSTS=localhost,127.0.0.1` so the `Host` check is active. Only an exact `127.0.0.1`, `localhost` or `::1` lifts the restriction; unset, empty or anything else keeps it. The banner says when it is lifted. Never set it by hand when the port is reachable from other interfaces.
 - Docker: `/app/.env` is a symlink to `/data/.env` that is no longer pre-created empty, so a fresh container logs no `Loaded .env` line until a key is saved.
 
+### Fixed
+- `/api/sponsors` returned 500 on pip/wheel installs, which do not ship the repo-root `sponsors.json`; it now returns an empty list (a corrupt file still errors).
+- `.mcp/server.json` described 16 tools; it now says 20, and the docs-consistency test checks it.
+
+### Removed
+- `.do/app.yaml` (DigitalOcean App Platform spec, unused).
+
 ## [2.29.1] — 2026-10-01
 
 ### Security
