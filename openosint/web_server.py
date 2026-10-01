@@ -126,10 +126,26 @@ def _env_forces_demo_mode() -> bool:
     return os.getenv("OPENOSINT_DEMO_MODE", "").strip().lower() in ("1", "true", "yes", "on")
 
 
+def _restriction_lifted_by_declaration(host: str | None) -> bool:
+    """True when a non-loopback bind is declared to be published on loopback only.
+
+    Inside a container the process must bind 0.0.0.0, but `docker compose` can
+    publish the port on 127.0.0.1 alone. OPENOSINT_PUBLISHED_BIND is that
+    declaration, set only by docker-compose.yml (derived from OPENOSINT_BIND),
+    never in the Dockerfile. Exact match after trimming; anything else, empty
+    or unset included, keeps the restriction. An undetermined bind (None)
+    never qualifies. It is only ever consulted for a non-loopback bind.
+    """
+    if host is None or _is_loopback_host(host):
+        return False
+    return os.environ.get("OPENOSINT_PUBLISHED_BIND", "").strip() in _SAFE_BIND_HOSTS
+
+
 def _compute_demo_mode(host: str | None) -> bool:
     """The network-exposure invariant described above, as a pure function of
-    the bind address (plus the tighten-only env override)."""
-    return (not _is_loopback_host(host)) or _env_forces_demo_mode()
+    the bind address (plus the declaration above and the tighten-only env override)."""
+    exposed = not _is_loopback_host(host) and not _restriction_lifted_by_declaration(host)
+    return exposed or _env_forces_demo_mode()
 
 
 # Set for real by create_app(host=...) before routes are built; None here
@@ -2421,6 +2437,13 @@ def _print_banner(host: str, port: int) -> None:
         lines.append(
             "[*] No AI provider configured (a local Ollama is auto-detected). "
             "Set ANTHROPIC_API_KEY to enable chat; keyless tools work without it."
+        )
+    if _restriction_lifted_by_declaration(host):
+        lines.append(
+            "[*] OPENOSINT_PUBLISHED_BIND="
+            f"{os.environ['OPENOSINT_PUBLISHED_BIND'].strip()}: the port is declared "
+            "published on loopback only, so the non-loopback restriction lifted. "
+            "Never set this if the port is reachable from other interfaces."
         )
     if _is_loopback_host(host) and not OPENOSINT_TRUSTED_PROXY:
         lines.append(
