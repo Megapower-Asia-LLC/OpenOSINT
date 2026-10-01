@@ -30,5 +30,7 @@ EXPOSE 8080
 # safe here because the container network boundary is what's actually
 # exposed; publish the port only to trusted networks.
 # /app/.env is a symlink into the data volume so keys saved from the UI
-# survive container re-creation without a bind-mounted file.
-CMD ["sh", "-c", "touch /data/.env && ln -sf /data/.env /app/.env && exec openosint web --host 0.0.0.0 --port 8080 --no-browser --allow-remote"]
+# survive container re-creation without a bind-mounted file. It dangles until
+# a key is saved (which then creates /data/.env); no empty file is touched, so
+# the "Loaded .env" line only appears once there really is one.
+CMD ["sh", "-c", "ln -sf /data/.env /app/.env && exec openosint web --host 0.0.0.0 --port 8080 --no-browser --allow-remote"]
