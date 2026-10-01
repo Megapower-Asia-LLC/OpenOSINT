@@ -91,6 +91,15 @@ jobs:
           uvx --from "openosint[graph] @ file://$PWD/$(ls dist/*.whl)"
           python -c "import followthemoney; print('followthemoney', followthemoney.__version__)"
 
+  lock:
+    name: uv.lock is up to date
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+      # The Heroku demo deploys with `uv sync --locked`: a stale lock breaks it.
+      - run: uv lock --check
+
   docker:
     name: docker compose up (fresh checkout, no .env)
     runs-on: ubuntu-latest
@@ -98,17 +107,31 @@ jobs:
       - uses: actions/checkout@v4
       - name: Confirm there is no .env
         run: test ! -e .env
-      - run: docker compose up --build -d
       - name: Wait for /api/health
         run: |
+          cat > "$RUNNER_TEMP/wait.sh" <<'SH'
           for i in $(seq 1 60); do
             curl -fsS http://localhost:8080/api/health && exit 0
             sleep 2
           done
           docker compose logs
           exit 1
-      - run: curl -fsS http://localhost:8080/ | grep -q OpenOSINT
-      - name: Graph libraries import in the image
-        run: docker compose exec -T openosint python -c "import followthemoney, icu"
+          SH
+      - name: Default compose is unrestricted with the Host check on
+        run: |
+          docker compose up --build -d
+          bash "$RUNNER_TEMP/wait.sh"
+          curl -fsS http://localhost:8080/ | grep -q OpenOSINT
+          python3 scripts/ci/check_guard.py http://localhost:8080 --restricted false --fresh
+          if docker compose logs | grep -q "Loaded .env"; then
+            echo "unexpected 'Loaded .env' line on a fresh install"; docker compose logs; exit 1
+          fi
+          docker compose exec -T openosint python -c "import followthemoney, icu"
+          docker compose down -v
+      - name: OPENOSINT_BIND=0.0.0.0 stays restricted
+        run: |
+          OPENOSINT_BIND=0.0.0.0 docker compose up -d
+          bash "$RUNNER_TEMP/wait.sh"
+          python3 scripts/ci/check_guard.py http://localhost:8080 --restricted true
       - if: always()
         run: docker compose down -v
