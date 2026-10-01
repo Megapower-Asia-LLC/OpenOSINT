@@ -352,3 +352,30 @@ def test_real_sponsors_json_is_valid():
         for field in REQUIRED_FIELDS:
             assert field in s
             assert s[field].strip()
+
+
+# ---------------------------------------------------------------------------
+# /api/sponsors from an install without sponsors.json (pip/wheel)
+# ---------------------------------------------------------------------------
+
+
+def _sponsors_client():
+    from starlette.testclient import TestClient
+
+    import openosint.web_server as ws
+
+    return TestClient(ws.create_app(host="127.0.0.1"), base_url="http://127.0.0.1")
+
+
+def test_api_sponsors_degrades_to_empty_list_when_file_is_not_packaged(monkeypatch, tmp_path):
+    monkeypatch.setattr("openosint.sponsors._SPONSORS_FILE", tmp_path / "missing.json")
+    resp = _sponsors_client().get("/api/sponsors")
+    assert resp.status_code == 200
+    assert resp.json() == {"status": "ok", "sponsors": []}
+
+
+def test_api_sponsors_still_fails_loudly_on_a_corrupt_file(monkeypatch, tmp_path):
+    bad = tmp_path / "sponsors.json"
+    bad.write_text("{not json", encoding="utf-8")
+    monkeypatch.setattr("openosint.sponsors._SPONSORS_FILE", bad)
+    assert _sponsors_client().get("/api/sponsors").status_code == 500

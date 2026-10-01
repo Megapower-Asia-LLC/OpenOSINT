@@ -1696,10 +1696,13 @@ def create_app(host: str | None = None, port: int | None = None) -> FastAPI:
 
     @app.get("/api/sponsors")
     async def list_sponsors():
-        from openosint.sponsors import SponsorsValidationError, load_sponsors
+        from openosint.sponsors import SponsorsFileMissing, SponsorsValidationError, load_sponsors
 
         try:
             sponsors = load_sponsors()
+        except SponsorsFileMissing:
+            # pip/wheel installs do not ship the repo-root sponsors.json.
+            sponsors = []
         except SponsorsValidationError as exc:
             return JSONResponse({"status": "error", "message": str(exc)}, status_code=500)
         return {"status": "ok", "sponsors": sponsors}

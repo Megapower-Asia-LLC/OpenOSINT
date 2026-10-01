@@ -32,6 +32,10 @@ class SponsorsValidationError(ValueError):
     pass
 
 
+class SponsorsFileMissing(SponsorsValidationError):
+    """sponsors.json is not on disk, e.g. a pip/wheel install (it lives at the repo root)."""
+
+
 def _validate(entry: dict, index: int) -> None:
     missing = REQUIRED_FIELDS - entry.keys()
     if missing:
@@ -58,7 +62,7 @@ def load_sponsors(path: Path | None = None) -> list[Sponsor]:
     try:
         raw = json.loads(sponsors_path.read_text(encoding="utf-8"))
     except FileNotFoundError:
-        raise SponsorsValidationError(f"sponsors.json not found at {sponsors_path}")
+        raise SponsorsFileMissing(f"sponsors.json not found at {sponsors_path}")
     except json.JSONDecodeError as exc:
         raise SponsorsValidationError(f"sponsors.json is not valid JSON: {exc}")
 
