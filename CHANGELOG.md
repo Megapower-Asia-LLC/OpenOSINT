@@ -9,6 +9,14 @@ OpenOSINT adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [2.30.0] — 2026-10-01
+
+One-command install (`uvx openosint web`), Docker fixes, and CI that now runs on Ubuntu, macOS and Windows.
+
+> **Behavior changes**
+> - Docker now publishes the web UI on `127.0.0.1:8080` by default instead of all host interfaces. To expose it deliberately, run `OPENOSINT_BIND=0.0.0.0 docker compose up` (see the README Docker section for the security note).
+> - `openosint web` exits with a clear message when the port is busy instead of printing a URL and then a raw uvicorn error.
+
 ### Added
 - One-command web UI install: `uvx openosint web` (after installing [uv](https://docs.astral.sh/uv/)). The README Installation section now leads with it; `pip install openosint && openosint web` remains the documented fallback.
 - `OPENOSINT_HOME` environment variable to relocate the data directory (`graph.db`, session history). Defaults to `~/.openosint`, so existing installs are unchanged; `OPENOSINT_GRAPH_DB` still takes precedence for `graph.db`.
