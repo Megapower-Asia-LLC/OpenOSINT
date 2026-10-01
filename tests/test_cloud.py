@@ -460,7 +460,7 @@ async def test_platform_pool_upstream_error_charges_zero_credits(client):
 
 # ── (j) allow-list shape and removed-tool 400s ───────────────────────────────
 
-from cloud.tools import ALLOW_LIST as _ALLOW_LIST
+from cloud.tools import ALLOW_LIST as _ALLOW_LIST  # noqa: E402
 
 _EXPECTED_TOOLS = {
     "search_ip", "search_ip2location", "search_abuseipdb", "search_dns", "search_domain",

@@ -429,8 +429,8 @@ of this README.
 ### Web UI
 
 ```bash
-pip install "openosint[web]"
-openosint web
+uvx openosint web
+# or: pip install openosint && openosint web
 # Opens http://localhost:8080 automatically
 ```
 
@@ -584,9 +584,50 @@ $ claude
 
 ## Installation
 
+### Quickstart — web UI in one command
+
+Install [uv](https://docs.astral.sh/uv/) once. It runs OpenOSINT in its own isolated environment, so there is no Python setup:
+
 ```bash
-# From PyPI (recommended)
+# macOS / Linux
+curl -LsSf https://astral.sh/uv/install.sh | sh
+```
+
+```powershell
+# Windows (PowerShell)
+powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | iex"
+```
+
+Then start OpenOSINT (open a new terminal first if `uvx` is not found):
+
+```bash
+uvx openosint web
+```
+
+You should see:
+
+```text
+[*] OpenOSINT x.y.z web server
+[*] App  → http://127.0.0.1:8080/
+[*] Data → /home/you/.openosint
+```
+
+Your browser opens automatically; if it doesn't, open <http://127.0.0.1:8080/>. No `.env` file and no API keys are needed to start — keyless tools work immediately, and AI chat needs a provider key (`ANTHROPIC_API_KEY`) or a local Ollama.
+
+| Want to… | Do this |
+|---|---|
+| Use another port | `uvx openosint web --port 8081` (if 8080 is busy, OpenOSINT exits and tells you this) |
+| Keep the browser closed | `uvx openosint web --no-browser` |
+| Find your data | Graph database and session history live in `~/.openosint/` (`%USERPROFILE%\.openosint` on Windows). Move it with `OPENOSINT_HOME=/path`; `OPENOSINT_GRAPH_DB` still overrides just `graph.db`. |
+| Find reports | CLI and REPL reports are written to `./reports/` in the directory you ran `openosint` from. The web UI writes none. |
+| Use the entity graph view | Needs the `graph` extra, which builds [PyICU](https://pypi.org/project/PyICU/) and so needs libicu and a C++ compiler first (Python 3.11+). Ubuntu: `sudo apt install libicu-dev pkg-config g++`. macOS: `brew install icu4c pkg-config` and `export PKG_CONFIG_PATH="$(brew --prefix icu4c)/lib/pkgconfig"`. Then `uvx --from "openosint[graph]" openosint web`. On Windows, or to skip the build, use [Docker](#docker), which includes it. |
+
+### Alternatives
+
+```bash
+# pip (Python 3.10+)
 pip install openosint
+openosint web
 
 # Updating
 pip install --upgrade openosint
@@ -705,9 +746,11 @@ docker compose up --build
 docker compose run --rm openosint email target@example.com --json
 ```
 
-Set `ANTHROPIC_API_KEY` (and optionally `HIBP_API_KEY`, `IPINFO_TOKEN`) in a `.env` file or export them before running `docker compose`. Reports are persisted to `./reports/` via a volume mount.
+`.env` is optional: with no keys the web UI still starts at <http://localhost:8080>. To provide keys today, list them under `environment:` in `docker-compose.yml` (or in a `.env` next to it), or put a `.env` in the data volume (`/data/.env`). Reports are persisted to `./reports/`; the graph database and session history live in the `openosint-data` volume (`/data` in the container, via `OPENOSINT_HOME`). The image includes the graph view.
 
-**DigitalOcean App Platform:** see [`.do/app.yaml`](.do/app.yaml) for App Platform configuration.
+The port is published on `127.0.0.1` only, and the `Host` check is on (`OPENOSINT_ALLOWED_HOSTS` defaults to `localhost,127.0.0.1` in the compose file; extend it if you reach the UI by another name). To reach it from other machines on purpose, run `OPENOSINT_BIND=0.0.0.0 docker compose up`: the instance then runs in restricted mode (it never spends keys held on the server). **Security note:** the UI's setup endpoint accepts and stores API keys, so only do this on a network and behind a firewall or reverse proxy you trust.
+
+> **Warning: `OPENOSINT_PUBLISHED_BIND`.** `docker-compose.yml` sets this to the same value as `OPENOSINT_BIND` to tell the server which address the port is published on; an exact loopback value (`127.0.0.1`, `localhost`, `::1`) lifts the restriction that a container's `0.0.0.0` bind otherwise gets. Never set it to a loopback value yourself, or edit the compose port mapping away from it, when the port is published on any other interface.
 
 ## Integrations
 
@@ -825,7 +868,7 @@ OpenOSINT is open source under the [MIT License](./LICENSE) — free for any use
 
 *For authorized security research only. See [DISCLAIMER.md](DISCLAIMER.md).*
 
-*OpenOSINT v2.29.1 — September 2026*
+*OpenOSINT v2.30.0 — October 2026*
 
 ## Star History
 

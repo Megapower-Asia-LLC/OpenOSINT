@@ -30,6 +30,7 @@ logger = logging.getLogger(__name__)
 # checkout) is checked before an upward cwd search — the opposite of the
 # CLI/web priority. A bad OPENOSINT_ENV_FILE path is logged here before
 # the process exits, not left to crash silently on an unhandled traceback.
+from openosint import __version__  # noqa: E402
 from openosint.env import load_env_or_exit  # noqa: E402
 
 load_env_or_exit(prefer_package_root=True)
@@ -701,9 +702,16 @@ async def _call_investigate_multi(arguments: dict[str, Any]) -> CallToolResult:
         )
 
 
+def _initialization_options():
+    """Server options reporting OpenOSINT's own version (not the mcp library's)."""
+    return app.create_initialization_options().model_copy(
+        update={"server_version": __version__}
+    )
+
+
 async def _serve() -> None:
     async with stdio_server() as (r, w):
-        await app.run(r, w, app.create_initialization_options())
+        await app.run(r, w, _initialization_options())
 
 
 def main() -> None:

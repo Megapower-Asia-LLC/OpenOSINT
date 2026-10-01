@@ -4,8 +4,8 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "openosint"
-version = "2.29.1"
-description = "AI-powered OSINT agent, MCP server, and CLI. Interactive REPL + 19 tools. Anthropic Claude or local Ollama. For authorized security research use only."
+version = "2.30.0"
+description = "AI-powered OSINT agent, MCP server, and CLI. Interactive REPL + 20 tools. Anthropic Claude or local Ollama. For authorized security research use only."
 readme = "README.md"
 requires-python = ">=3.10"
 license = "MIT"
@@ -120,9 +120,13 @@ include = ["openosint*"]
 exclude = ["assets*", "docs*", "scripts*", "tests*"]
 
 [tool.setuptools.package-data]
-openosint = ["web/*.html", "web/**/*"]
+openosint = ["web/*.html", "web/**/*", "sponsors.json"]
 "openosint.playbooks" = ["recipes/*.yaml"]
 "openosint.graph" = ["data/*.json"]
+
+[tool.setuptools.exclude-package-data]
+# "web/**/*" above would otherwise sweep in stray bytecode from local builds.
+"*" = ["__pycache__/*", "*.pyc", "*.pyo"]
 
 [tool.ruff]
 target-version = "py310"

@@ -82,7 +82,7 @@ Current sponsors: **[IP2Location.io](https://www.ip2location.io)** (IP Geolocati
 
 ## For maintainers: adding or updating a sponsor
 
-All sponsor data lives in [`sponsors.json`](sponsors.json) — a one-file change:
+All sponsor data lives in [`openosint/sponsors.json`](openosint/sponsors.json) — a one-file change:
 
 ```json
 {

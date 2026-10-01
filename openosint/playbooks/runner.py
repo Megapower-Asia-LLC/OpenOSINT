@@ -852,7 +852,6 @@ async def run_playbook(
     be created or the report file cannot be written — the caller is responsible
     for handling filesystem-level errors.
     """
-    from openosint.playbooks.loader import Recipe  # local import to avoid circular
 
     reports_path = reports_dir or Path("reports")
     try:

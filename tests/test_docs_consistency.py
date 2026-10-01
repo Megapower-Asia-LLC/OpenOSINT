@@ -6,6 +6,7 @@ pyproject.toml), never hand-typed here — that's the whole point.
 
 from __future__ import annotations
 
+import json
 import re
 from pathlib import Path
 
@@ -80,6 +81,17 @@ def test_docs_tools_page_row_count_matches_registered_tools():
     assert table_match, "docs/tools/index.html tool reference table not found"
     row_count = len(re.findall(r"<tr>", table_match.group(0))) - 1  # minus header row
     assert row_count == len(_mcp_server_tool_names())
+
+
+def test_mcp_registry_manifest_matches_tool_count_and_version():
+    manifest = json.loads((ROOT / ".mcp" / "server.json").read_text(encoding="utf-8"))
+    claim = _TOOL_COUNT_RE.search(manifest["description"])
+    assert claim, "no tool count in .mcp/server.json description"
+    assert int(claim.group(1)) == len(_mcp_server_tool_names())
+    pyproject = (ROOT / "pyproject.toml").read_text(encoding="utf-8")
+    version = re.search(r'^version\s*=\s*"([^"]+)"', pyproject, re.MULTILINE).group(1)
+    assert manifest["version"] == version
+    assert {p["version"] for p in manifest["packages"]} == {version}
 
 
 def test_every_tool_count_claim_matches_registered_tools():

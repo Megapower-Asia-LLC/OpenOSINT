@@ -958,12 +958,18 @@ async def _handle_web(
 
     from openosint.web_server import serve_async
 
-    if not no_browser:
+    def open_browser() -> None:
         display = "localhost" if host in ("0.0.0.0", "") else host
-        url = f"http://{display}:{port}"
-        threading.Timer(1.5, lambda: webbrowser.open(url)).start()
+        timer = threading.Timer(1.0, lambda: webbrowser.open(f"http://{display}:{port}"))
+        timer.daemon = True
+        timer.start()
 
-    await serve_async(host=host, port=port, allow_remote=allow_remote)
+    await serve_async(
+        host=host,
+        port=port,
+        allow_remote=allow_remote,
+        on_started=None if no_browser else open_browser,
+    )
 
 
 # ---------------------------------------------------------------------------

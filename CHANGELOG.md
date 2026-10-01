@@ -9,6 +9,37 @@ OpenOSINT adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [2.30.0] — 2026-10-01
+
+One-command install (`uvx openosint web`), Docker fixes, and CI that now runs on Ubuntu, macOS and Windows.
+
+> **Behavior changes**
+> - Docker now publishes the web UI on `127.0.0.1:8080` by default instead of all host interfaces. To expose it deliberately, run `OPENOSINT_BIND=0.0.0.0 docker compose up` (see the README Docker section for the security note).
+> - `openosint web` exits with a clear message when the port is busy instead of printing a URL and then a raw uvicorn error.
+
+### Added
+- One-command web UI install: `uvx openosint web` (after installing [uv](https://docs.astral.sh/uv/)). The README Installation section now leads with it; `pip install openosint && openosint web` remains the documented fallback.
+- `OPENOSINT_HOME` environment variable to relocate the data directory (`graph.db`, session history). Defaults to `~/.openosint`, so existing installs are unchanged; `OPENOSINT_GRAPH_DB` still takes precedence for `graph.db`.
+- `openosint web` banner now prints the data directory and, when no AI provider is configured, a one-line notice. No network probe is made to print it.
+- CI workflow `install-check`: tests and lint on Python 3.10 and 3.12, a clean `uvx` install (no keys, isolated HOME) with web and MCP health checks on Ubuntu, macOS and Windows, the graph extra on Ubuntu, and `docker compose up` on a fresh checkout with no `.env`.
+
+### Changed
+- `openosint web` binds its port before printing the URL or opening the browser. If the port is busy it exits with `Port N is already in use. Pick another one with: openosint web --port N+1` instead of printing a URL and then a raw uvicorn error.
+- Docker: `.env` is now optional in `docker-compose.yml` (a fresh clone previously failed or created a directory named `.env`). The image installs the `graph` extra instead of `web` (which only added `playwright`), stores `graph.db` and history in an `openosint-data` volume via `OPENOSINT_HOME=/data`, and keeps UI-saved keys in that volume. A new `.dockerignore` keeps a local `.env` and `.venv` out of the image.
+- **Behavior change:** `docker-compose.yml` now publishes the web UI on `127.0.0.1:8080` instead of all host interfaces. The setup endpoint accepts API keys, so LAN exposure should be deliberate: run `OPENOSINT_BIND=0.0.0.0 docker compose up` (see the README Docker section for the security note). Anyone reaching the container from another machine must set `OPENOSINT_BIND`.
+- The MCP server's `serverInfo.version` now reports the OpenOSINT version (it reported the `mcp` library's version).
+- 7 graph tests that exercise unimplemented `NotImplementedError` stubs are marked `xfail` (non-strict) so the suite is green.
+- Package description says 20 tools, matching the tool catalog.
+- Docker: `docker-compose.yml` sets `OPENOSINT_PUBLISHED_BIND` (derived from `OPENOSINT_BIND`) so a port published on loopback only is no longer treated as network-exposed, and defaults `OPENOSINT_ALLOWED_HOSTS=localhost,127.0.0.1` so the `Host` check is active. Only an exact `127.0.0.1`, `localhost` or `::1` lifts the restriction; unset, empty or anything else keeps it. The banner says when it is lifted. Never set it by hand when the port is reachable from other interfaces.
+- Docker: `/app/.env` is a symlink to `/data/.env` that is no longer pre-created empty, so a fresh container logs no `Loaded .env` line until a key is saved.
+
+### Fixed
+- `/api/sponsors` returned 500 on pip/wheel installs because `sponsors.json` was not packaged. The file now lives at `openosint/sponsors.json` (still the single source of truth, also read by `scripts/render_sponsors.py`) and ships in the wheel; a missing file falls back to an empty list.
+- `.mcp/server.json` described 16 tools; it now says 20, and the docs-consistency test checks it.
+
+### Removed
+- `.do/app.yaml` (DigitalOcean App Platform spec, unused).
+
 ## [2.29.1] — 2026-10-01
 
 ### Security
