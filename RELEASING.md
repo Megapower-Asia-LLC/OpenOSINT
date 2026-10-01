@@ -12,3 +12,7 @@
 6. **PyPI check**: `pip index versions openosint` lists X.Y.Z, then `uvx openosint@X.Y.Z web` starts from a clean directory.
 7. **Deploy the demo** (manual): `git push heroku-demo main:main`.
 8. **Health check**: `curl -fsS https://demo.openosint.tech/api/health` returns `"status":"ok"` and `"version":"X.Y.Z"`. If it fails, `heroku logs --tail -a openosint-demo`.
+
+## One-time demo setup
+
+The demo app (`openosint-demo`) needs `OPENOSINT_ALLOWED_HOSTS` set, because its `--allow-remote` bind only checks the `Host` header when it is set: `heroku config:set OPENOSINT_ALLOWED_HOSTS=demo.openosint.tech -a openosint-demo` (already done; re-run if the app is recreated or the domain changes).
