@@ -22,6 +22,8 @@ OpenOSINT adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - The MCP server's `serverInfo.version` now reports the OpenOSINT version (it reported the `mcp` library's version).
 - 7 graph tests that exercise unimplemented `NotImplementedError` stubs are marked `xfail` (non-strict) so the suite is green.
 - Package description says 20 tools, matching the tool catalog.
+- Docker: `docker-compose.yml` sets `OPENOSINT_PUBLISHED_BIND` (derived from `OPENOSINT_BIND`) so a port published on loopback only is no longer treated as network-exposed, and defaults `OPENOSINT_ALLOWED_HOSTS=localhost,127.0.0.1` so the `Host` check is active. Only an exact `127.0.0.1`, `localhost` or `::1` lifts the restriction; unset, empty or anything else keeps it. The banner says when it is lifted. Never set it by hand when the port is reachable from other interfaces.
+- Docker: `/app/.env` is a symlink to `/data/.env` that is no longer pre-created empty, so a fresh container logs no `Loaded .env` line until a key is saved.
 
 ## [2.29.1] — 2026-10-01
 

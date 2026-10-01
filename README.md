@@ -746,11 +746,11 @@ docker compose up --build
 docker compose run --rm openosint email target@example.com --json
 ```
 
-`.env` is optional: with no keys the web UI still starts at <http://localhost:8080>. To add keys, set `ANTHROPIC_API_KEY` (and optionally `HIBP_API_KEY`, `IPINFO_TOKEN`) in a `.env` next to `docker-compose.yml`, or export them before running `docker compose`. Reports are persisted to `./reports/`; the graph database and session history live in the `openosint-data` volume (`/data` in the container, via `OPENOSINT_HOME`). The image includes the graph view.
+`.env` is optional: with no keys the web UI still starts at <http://localhost:8080>. To provide keys today, list them under `environment:` in `docker-compose.yml` (or in a `.env` next to it), or put a `.env` in the data volume (`/data/.env`). Reports are persisted to `./reports/`; the graph database and session history live in the `openosint-data` volume (`/data` in the container, via `OPENOSINT_HOME`). The image includes the graph view.
 
-The port is published on `127.0.0.1` only. To reach it from other machines on purpose, run `OPENOSINT_BIND=0.0.0.0 docker compose up`. **Security note:** the UI's setup endpoint accepts and stores API keys, so only do this on a network and behind a firewall or reverse proxy you trust.
+The port is published on `127.0.0.1` only, and the `Host` check is on (`OPENOSINT_ALLOWED_HOSTS` defaults to `localhost,127.0.0.1` in the compose file; extend it if you reach the UI by another name). To reach it from other machines on purpose, run `OPENOSINT_BIND=0.0.0.0 docker compose up`: the instance then runs in restricted mode (it never spends keys held on the server). **Security note:** the UI's setup endpoint accepts and stores API keys, so only do this on a network and behind a firewall or reverse proxy you trust.
 
-**DigitalOcean App Platform:** see [`.do/app.yaml`](.do/app.yaml) for App Platform configuration.
+> **Warning: `OPENOSINT_PUBLISHED_BIND`.** `docker-compose.yml` sets this to the same value as `OPENOSINT_BIND` to tell the server which address the port is published on; an exact loopback value (`127.0.0.1`, `localhost`, `::1`) lifts the restriction that a container's `0.0.0.0` bind otherwise gets. Never set it to a loopback value yourself, or edit the compose port mapping away from it, when the port is published on any other interface.
 
 ## Integrations
 
