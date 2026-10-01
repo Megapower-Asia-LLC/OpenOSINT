@@ -73,16 +73,9 @@
 </tr>
 <tr>
   <td><b>Heroku (Salesforce)</b></td>
-  <td>OpenOSINT Cloud only</td>
-  <td>Hosts the Cloud API and its Postgres database: account records, credit balances, and encrypted BYOK credentials. Does not receive query/target content — the Cloud API returns tool results to the caller without persisting them (see <code>cloud/routes/enrich.py</code>).</td>
-  <td>USA</td>
-  <td>Standard Contractual Clauses (SCCs)</td>
-</tr>
-<tr>
-  <td><b>DigitalOcean</b></td>
-  <td>Public demo only</td>
-  <td>Hosts the demo web application. Receives every HTTP request to the demo, including visitor IP addresses and the input to every tool run there — including the keyless tools (WHOIS, DNS, domain enumeration, email/username enumeration, etc.), which remain fully interactive in demo mode. Was not previously disclosed on this page.</td>
-  <td>USA (and wherever the region is provisioned)</td>
+  <td>Public demo (demo.openosint.tech); OpenOSINT Cloud (currently offline)</td>
+  <td>Demo: hosts the demo web application. Receives every HTTP request to the demo, including visitor IP addresses and the input to every tool run there — including the keyless tools (WHOIS, DNS, domain enumeration, email/username enumeration, etc.), which remain fully interactive in demo mode. Cloud: hosts the Cloud API and its Postgres database: account records, credit balances, and encrypted BYOK credentials. Does not receive query/target content — the Cloud API returns tool results to the caller without persisting them (see <code>cloud/routes/enrich.py</code>).</td>
+  <td>United States</td>
   <td>Standard Contractual Clauses (SCCs)</td>
 </tr>
 <tr>
@@ -166,6 +159,7 @@
 <h2 id="changes">CHANGES</h2>
 <div class="indent">
 <p>This page was rewritten on 2026-08-30 after an internal accuracy review found it named a hosting provider (Heroku) the public demo does not run on, classified Shodan as a customer-supplied (BYOK) source when the code configures it as an operator-held key, and omitted Anthropic and DigitalOcean entirely. We will update this page when sub-processors are added or removed. Material changes will also be communicated via the <a href="/privacy/">Privacy Policy</a> update mechanism. Contact <a href="mailto:commercial@openosint.tech">commercial@openosint.tech</a> with questions.</p>
+<p>2026-10-01: the demo host was corrected from DigitalOcean to Heroku (Salesforce), which was already listed for OpenOSINT Cloud. The two uses are now one row.</p>
 </div>
 
 <hr>
