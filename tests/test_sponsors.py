@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import re
 import subprocess
 import sys
 import textwrap
@@ -404,8 +405,5 @@ def test_one_sponsors_file_for_package_and_renderer():
 
 
 def test_sponsors_json_is_declared_as_package_data():
-    import tomllib
-
-    root = Path(__file__).parent.parent
-    cfg = tomllib.loads((root / "pyproject.toml").read_text(encoding="utf-8"))
-    assert "sponsors.json" in cfg["tool"]["setuptools"]["package-data"]["openosint"]
+    text = (Path(__file__).parent.parent / "pyproject.toml").read_text(encoding="utf-8")
+    assert re.search(r'^openosint = \[.*"sponsors\.json".*\]', text, re.MULTILINE)
