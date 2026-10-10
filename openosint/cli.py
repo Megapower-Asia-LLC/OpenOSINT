@@ -374,6 +374,18 @@ def _build_parser() -> argparse.ArgumentParser:
         help="DNS query timeout (default: 10).",
     )
 
+    # exposure
+    exposure_cmd = subparsers.add_parser(
+        "exposure",
+        help="External exposure report graded A-F (no AI). Email and RDAP checks are DNS/registry only; "
+        "the TLS and HTTP-header checks contact the target directly (port 443).",
+    )
+    exposure_cmd.add_argument("domain", type=str, metavar="DOMAIN", help="Target domain (e.g. example.com).")
+    # default=SUPPRESS: a subparser default would overwrite the global --json given before the command
+    exposure_cmd.add_argument(
+        "--json", action="store_true", dest="json_output", default=argparse.SUPPRESS, help="Output structured JSON."
+    )
+
     # abuseipdb
     abuseipdb_cmd = subparsers.add_parser(
         "abuseipdb",
@@ -789,6 +801,22 @@ async def _handle_dns(
         _print_result(result)
 
 
+async def _handle_exposure(domain: str, json_output: bool = False) -> None:
+    from openosint.exposure import run_exposure
+    from openosint.exposure.render import render
+
+    print(f"[*] Exposure report: {domain}", file=sys.stderr)
+    try:
+        report = await run_exposure(domain)
+    except ValueError as exc:
+        print(f"[!] {exc}", file=sys.stderr)
+        sys.exit(2)
+    if json_output:
+        _emit_json(report.to_dict())
+    else:
+        print(render(report))
+
+
 async def _handle_ip2location(
     ip: str,
     timeout: int,
@@ -1132,6 +1160,8 @@ async def _async_main() -> None:
         await _handle_github(args.query, args.timeout, json_output=json_output)
     elif args.command == "dns":
         await _handle_dns(args.domain, args.timeout, json_output=json_output)
+    elif args.command == "exposure":
+        await _handle_exposure(args.domain, json_output=json_output)
     elif args.command == "abuseipdb":
         await _handle_abuseipdb(args.ip, args.timeout, json_output=json_output)
     elif args.command == "ip2location":

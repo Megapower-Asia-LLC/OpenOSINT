@@ -144,6 +144,12 @@ def _probe_dkim(resolver: dns.resolver.Resolver, domain: str) -> tuple[list[str]
     return found, False
 
 
+# Public aliases for other modules (openosint.exposure); same objects, no behaviour change.
+DKIM_SELECTORS = _DKIM_SELECTORS
+is_valid_dkim_record = _is_valid_dkim_record
+probe_dkim = _probe_dkim
+
+
 def _analyze_spf(txt_records: list[str]) -> tuple[str | None, list[str]]:
     """Return (spf_record_or_None, list_of_warnings)."""
     spf = next(

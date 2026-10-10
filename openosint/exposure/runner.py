@@ -1,0 +1,112 @@
+"""Runs the four checks concurrently (each blocking check in its own thread) and builds the report."""
+
+from __future__ import annotations
+
+import asyncio
+import re
+import socket
+import time
+from concurrent.futures import ThreadPoolExecutor
+from datetime import datetime, timezone
+
+import dns.exception
+import requests
+
+from openosint.exposure import email_check, headers_check, registration_check, tls_check
+from openosint.exposure.domains import registrable_domain
+from openosint.exposure.models import (
+    STATUS_ERROR,
+    STATUS_SKIPPED,
+    CheckError,
+    CheckResult,
+    CheckSkipped,
+    DomainNotRegistered,
+    ExposureReport,
+)
+from openosint.exposure.scoring import INCOMPLETE, assess
+from openosint.tool_policy import Noise
+from openosint.tools.exceptions import OSINTError
+
+MAX_REASON_CHARS = 80
+OVERALL_TIMEOUT = 50.0  # seconds; the command must finish well under 60s
+_DOMAIN_RE = re.compile(r"^(?=.{1,253}$)([a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z]{2,63}$")
+
+# name -> (check function, noise label used if the check fails before returning one)
+CHECKS = {
+    "email": (email_check.run, Noise.PASSIVE.value),
+    "registration": (registration_check.run, Noise.PASSIVE.value),
+    "tls": (tls_check.run, Noise.TOUCHES_TARGET.value),
+    "http_headers": (headers_check.run, Noise.TOUCHES_TARGET.value),
+}
+
+
+def normalize_domain(raw: str) -> str:
+    domain = re.sub(r"^[a-z][a-z0-9+.-]*://", "", raw.strip().lower()).split("/")[0].rstrip(".")
+    if not _DOMAIN_RE.match(domain):
+        raise ValueError(f"'{raw}' is not a valid domain name.")
+    return domain
+
+
+def short_reason(exc: Exception) -> str:
+    """One short human sentence for the terminal: no exception class names, no stack text."""
+    if isinstance(exc, (CheckError, CheckSkipped, OSINTError)):
+        text = " ".join(str(exc).split())
+    elif isinstance(exc, (TimeoutError, dns.exception.Timeout, requests.Timeout)):
+        text = "network timeout"
+    elif isinstance(exc, socket.gaierror):
+        text = "name does not resolve"
+    elif isinstance(exc, (OSError, requests.RequestException)):
+        text = "connection failed"
+    elif isinstance(exc, dns.exception.DNSException):
+        text = "DNS servers did not answer"
+    else:
+        text = "unexpected error (details in --json)"
+    return text if len(text) <= MAX_REASON_CHARS else text[: MAX_REASON_CHARS - 3] + "..."
+
+
+def _guarded(name: str, domain: str, registrable: str) -> CheckResult:
+    """Run one check; any failure becomes an error/skipped result, never an exception."""
+    fn, noise = CHECKS[name]
+    try:
+        return fn(domain, registrable)
+    except DomainNotRegistered:
+        raise
+    except CheckSkipped as exc:
+        return CheckResult(name, STATUS_SKIPPED, noise, reason=short_reason(exc), detail=str(exc))
+    except Exception as exc:  # noqa: BLE001 - a failing check must not crash the command
+        return CheckResult(name, STATUS_ERROR, noise, reason=short_reason(exc), detail=f"{type(exc).__name__}: {exc}")
+
+
+async def run_exposure(domain: str) -> ExposureReport:
+    domain = normalize_domain(domain)
+    registrable = registrable_domain(domain)
+    started = time.monotonic()
+    loop = asyncio.get_running_loop()
+    # ponytail: threads cannot be killed; per-call 5-10s timeouts bound stragglers. Add process isolation if that proves false.
+    pool = ThreadPoolExecutor(max_workers=len(CHECKS))
+    tasks = {name: loop.run_in_executor(pool, _guarded, name, domain, registrable) for name in CHECKS}
+    done, pending = await asyncio.wait(tasks.values(), timeout=OVERALL_TIMEOUT, return_when=asyncio.FIRST_EXCEPTION)
+    pool.shutdown(wait=False, cancel_futures=True)
+    for task in done:  # an unregistered domain aborts the whole report
+        if isinstance(task.exception(), DomainNotRegistered):
+            raise task.exception()
+
+    checks = tuple(
+        tasks[n].result() if tasks[n] in done
+        else CheckResult(n, STATUS_ERROR, CHECKS[n][1], reason=f"timed out after {OVERALL_TIMEOUT:.0f}s")
+        for n in CHECKS
+    )
+    score, grade, capped = assess(checks)
+    return ExposureReport(
+        domain=domain,
+        registrable_domain=registrable,
+        checked_at=datetime.now(timezone.utc).isoformat(timespec="seconds"),
+        duration_ms=round((time.monotonic() - started) * 1000),
+        checks=checks,
+        score=score,
+        grade=grade,
+        score_is_partial=grade == INCOMPLETE,
+        grade_capped_by_critical=capped,
+        excluded_checks=tuple(c.name for c in checks if c.status != "ok"),
+        findings=tuple(f for c in checks if c.status == "ok" for f in c.findings),
+    )

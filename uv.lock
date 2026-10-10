@@ -2540,6 +2540,7 @@ dependencies = [
     { name = "requests" },
     { name = "rich" },
     { name = "sse-starlette" },
+    { name = "tldextract" },
     { name = "uvicorn", extra = ["standard"] },
 ]
 
@@ -2644,6 +2645,7 @@ requires-dist = [
     { name = "sse-starlette", specifier = ">=1.8.0" },
     { name = "sse-starlette", marker = "extra == 'all'", specifier = ">=1.8.0" },
     { name = "sse-starlette", marker = "extra == 'web'", specifier = ">=1.8.0" },
+    { name = "tldextract", specifier = ">=5.1,<6" },
     { name = "uvicorn", extras = ["standard"], specifier = ">=0.29.0" },
     { name = "uvicorn", extras = ["standard"], marker = "extra == 'all'", specifier = ">=0.29.0" },
     { name = "uvicorn", extras = ["standard"], marker = "extra == 'web'", specifier = ">=0.29.0" },

@@ -28,6 +28,10 @@ from openosint.tools.exceptions import OSINTError, ToolExecutionError
 
 logger = logging.getLogger(__name__)
 
+
+class RDAPNotFound(OSINTError):
+    """RDAP answered 404: the domain is not registered. Still an OSINTError for existing callers."""
+
 _IANA_BOOTSTRAP_URL = "https://data.iana.org/rdap/dns.json"
 _BOOTSTRAP_CACHE_TTL_SECONDS = 3600
 _DEFAULT_TIMEOUT = 10
@@ -119,7 +123,7 @@ def fetch_rdap_data(domain: str, bootstrap: dict[str, list[str]], timeout_second
             continue
 
         if response.status_code == 404:
-            raise OSINTError(f"Domain '{domain}' is not registered (RDAP 404).")
+            raise RDAPNotFound(f"Domain '{domain}' is not registered (RDAP 404).")
         if response.status_code != 200:
             last_exc = ToolExecutionError(f"RDAP server returned HTTP {response.status_code} for '{domain}'.")
             continue
