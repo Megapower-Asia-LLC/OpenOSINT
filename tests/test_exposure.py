@@ -3,16 +3,11 @@
 from __future__ import annotations
 
 import asyncio
-import datetime as dt
 import json
 import socket
 import ssl
 
 import pytest
-from cryptography import x509
-from cryptography.hazmat.primitives import hashes, serialization
-from cryptography.hazmat.primitives.asymmetric import ec
-from cryptography.x509.oid import NameOID
 
 from openosint.exposure import (
     email_check,
@@ -20,100 +15,21 @@ from openosint.exposure import (
     registration_check,
     runner,
     scoring,
-    tls_check,
 )
 from openosint.exposure.models import CheckResult
 from openosint.exposure.render import render
 from openosint.exposure.scoring import SEVERITY_BY_ID, assess, finding
-
-NOW = dt.datetime.now(dt.timezone.utc)
-GOOD_SPF = "v=spf1 include:_spf.google.com -all"
-GOOD_DMARC = "v=DMARC1; p=reject; pct=100; rua=mailto:dmarc@example.com"
-GOOD_HEADERS = {
-    "Strict-Transport-Security": "max-age=31536000",
-    "Content-Security-Policy": "default-src 'self'; frame-ancestors 'none'",
-    "X-Content-Type-Options": "nosniff",
-    "Referrer-Policy": "no-referrer",
-}
-
-
-def make_cert(days_left: int = 200, hosts=("example.com", "www.example.com")) -> bytes:
-    key = ec.generate_private_key(ec.SECP256R1())
-    name = x509.Name([x509.NameAttribute(NameOID.COMMON_NAME, "Test CA")])
-    cert = (
-        x509.CertificateBuilder()
-        .subject_name(name)
-        .issuer_name(name)
-        .public_key(key.public_key())
-        .serial_number(1)
-        .not_valid_before(NOW - dt.timedelta(days=400))
-        .not_valid_after(NOW + dt.timedelta(days=days_left))
-        .add_extension(x509.SubjectAlternativeName([x509.DNSName(h) for h in hosts]), critical=False)
-        .sign(key, hashes.SHA256())
-    )
-    return cert.public_bytes(serialization.Encoding.DER)
-
-
-def verify_error(code: int) -> ssl.SSLCertVerificationError:
-    exc = ssl.SSLCertVerificationError(1, "verify failed")
-    exc.verify_code = code
-    return exc
-
-
-def rdap_body(days_to_expiry: int = 400, signed: bool = True) -> dict:
-    return {
-        "events": [
-            {"eventAction": "registration", "eventDate": (NOW - dt.timedelta(days=3650)).isoformat()},
-            {"eventAction": "expiration", "eventDate": (NOW + dt.timedelta(days=days_to_expiry)).isoformat()},
-        ],
-        "entities": [{"roles": ["registrar"], "vcardArray": ["vcard", [["fn", {}, "text", "Test Registrar"]]]}],
-        "secureDNS": {"delegationSigned": signed},
-    }
-
-
-@pytest.fixture
-def world(monkeypatch):
-    """A perfectly configured domain. Tests mutate `w` to break one thing at a time."""
-    w = {
-        "txt": {"example.com": [GOOD_SPF], "_dmarc.example.com": [GOOD_DMARC]},
-        "mx": ["10 mail.example.com."],
-        "dkim": (["google: v=DKIM1; p=abc"], False),
-        "bootstrap": {"com": ["https://rdap.example/"]},
-        "rdap": rdap_body(),
-        "tls": {"example.com": (make_cert(), "TLSv1.3"), "www.example.com": (make_cert(), "TLSv1.3")},
-        "headers": dict(GOOD_HEADERS),
-    }
-
-    monkeypatch.setattr(email_check, "_txt", lambda name: w["txt"].get(name, []))
-    monkeypatch.setattr(email_check, "_mx", lambda domain: w["mx"])
-    monkeypatch.setattr(email_check, "_probe_dkim", lambda domain: w["dkim"])
-    monkeypatch.setattr(registration_check, "_bootstrap", lambda: w["bootstrap"])
-    w["rdap_queried"] = []
-    w["tls_hosts"] = []
-    monkeypatch.setattr(registration_check, "_rdap", lambda domain, bootstrap: w["rdap_queried"].append(domain) or w["rdap"])
-
-    def connect(host, verify):
-        w["tls_hosts"].append(host)
-        entry = w["tls"][host]
-        if isinstance(entry, Exception):
-            if verify or not isinstance(entry, ssl.SSLError) or host not in w["tls_unverified"]:
-                raise entry
-            return w["tls_unverified"][host]
-        return entry
-
-    w["tls_unverified"] = {}
-    monkeypatch.setattr(tls_check, "_connect", connect)
-    monkeypatch.setattr(headers_check, "_get", lambda url: w["headers"])
-    return w
-
-
-def report(domain="example.com"):
-    return asyncio.run(runner.run_exposure(domain))
-
-
-def ids(rep) -> set[str]:
-    return {f.id for f in rep.findings}
-
+from tests.exposure_helpers import (  # noqa: F401
+    GOOD_DMARC,
+    GOOD_HEADERS,
+    GOOD_SPF,
+    NOW,
+    ids,
+    make_cert,
+    rdap_body,
+    report,
+    verify_error,
+)
 
 # --- scoring ---------------------------------------------------------------
 
@@ -427,6 +343,7 @@ def test_headers_skipped_when_tls_verification_fails(world, monkeypatch):
     monkeypatch.setattr(headers_check, "_get", bad_cert)
     h = next(c for c in report().checks if c.name == "http_headers")
     assert h.status == "skipped" and h.reason == "TLS verification failed (see TLS findings)"
+    assert h.reason_code == "tls_verification_failed"
 
 
 def test_headers_other_ssl_error_is_still_an_error(world, monkeypatch):

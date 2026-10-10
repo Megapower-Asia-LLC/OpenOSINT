@@ -79,10 +79,10 @@ def _check_host(host: str) -> list:
                            "Renew the certificate immediately and automate renewal."))
     elif 0 <= days < 14:
         out.append(finding("tls_cert_expires_lt_14d", CAT, f"Certificate for {host} expires in under 14 days",
-                           evidence, "Renew the certificate now and automate renewal."))
+                           evidence, "Renew the certificate now and automate renewal.", days))
     elif 0 <= days < 30:
         out.append(finding("tls_cert_expires_lt_30d", CAT, f"Certificate for {host} expires in under 30 days",
-                           evidence, "Renew the certificate soon and automate renewal."))
+                           evidence, "Renew the certificate soon and automate renewal.", days))
     if version in _OLD_VERSIONS:
         out.append(finding("tls_version_below_1_2", CAT, f"{host} negotiated {version}", evidence,
                            "Disable TLS versions below 1.2 on the server."))
@@ -90,17 +90,19 @@ def _check_host(host: str) -> list:
 
 
 def run(domain: str, registrable: str) -> CheckResult:
-    findings, notes = [], []
+    findings, notes, note_codes = [], [], []
     # www.<input> only for an apex input; a subdomain input checks just that host.
     for host in (domain, f"www.{domain}") if domain == registrable else (domain,):
         try:
             findings += _check_host(host)
         except socket.gaierror as exc:
             if host == domain:
-                raise CheckError(f"{host} does not resolve: {exc}") from exc
+                raise CheckError(f"{host} does not resolve: {exc}", "name_not_resolved") from exc
             notes.append(f"{host} skipped: no DNS record")
+            note_codes.append("www_not_in_dns")
         except OSError as exc:  # refused, timeout, reset: no usable HTTPS service
             findings.append(finding("tls_unreachable_443", CAT, f"No HTTPS service on {host}:443",
                                     f"{host}: {type(exc).__name__}: {exc}",
                                     "If the site should serve HTTPS, check the firewall and listener."))
-    return CheckResult("tls", STATUS_OK, Noise.TOUCHES_TARGET.value, findings=tuple(findings), notes=tuple(notes))
+    return CheckResult("tls", STATUS_OK, Noise.TOUCHES_TARGET.value, findings=tuple(findings), notes=tuple(notes),
+                       note_codes=tuple(note_codes))

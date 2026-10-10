@@ -38,7 +38,7 @@ def run(host: str, registrable: str) -> CheckResult:
     domain = registrable  # RDAP only knows registrable domains
     bootstrap = _bootstrap()
     if domain.rsplit(".", 1)[-1] not in bootstrap:  # e.g. .it: no RDAP service, not a failure
-        raise CheckSkipped("no RDAP service for TLD")
+        raise CheckSkipped("no RDAP service for TLD", "no_rdap_for_tld")
     try:
         raw = _rdap(domain, bootstrap)
     except RDAPNotFound as exc:
@@ -61,10 +61,10 @@ def run(host: str, registrable: str) -> CheckResult:
                                     "Renew the domain immediately; it may be released or hijacked."))
         elif days < 30:
             findings.append(finding("domain_expires_lt_30d", CAT, "Domain expires in under 30 days", evidence,
-                                    "Renew the domain now and enable auto-renewal."))
+                                    "Renew the domain now and enable auto-renewal.", days))
         elif days < 60:
             findings.append(finding("domain_expires_lt_60d", CAT, "Domain expires in under 60 days", evidence,
-                                    "Renew the domain and enable auto-renewal."))
+                                    "Renew the domain and enable auto-renewal.", days))
     secure = raw.get("secureDNS") or {}
     if not secure.get("delegationSigned"):
         findings.append(finding("dnssec_not_enabled", CAT, "DNSSEC is not enabled",

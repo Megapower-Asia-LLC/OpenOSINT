@@ -40,7 +40,7 @@ def run(domain: str, registrable: str) -> CheckResult:
         response_headers = _get(f"https://{domain}/")
     except requests.exceptions.SSLError as exc:
         if _is_cert_failure(exc):  # never retried unverified: the TLS check already reports it
-            raise CheckSkipped("TLS verification failed (see TLS findings)") from exc
+            raise CheckSkipped("TLS verification failed (see TLS findings)", "tls_verification_failed") from exc
         raise
     h = {k.lower(): v for k, v in response_headers.items()}
     csp = h.get("content-security-policy", "")

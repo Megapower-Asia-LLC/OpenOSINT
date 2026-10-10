@@ -385,6 +385,16 @@ def _build_parser() -> argparse.ArgumentParser:
     exposure_cmd.add_argument(
         "--json", action="store_true", dest="json_output", default=argparse.SUPPRESS, help="Output structured JSON."
     )
+    exposure_cmd.add_argument(
+        "--report",
+        type=str,
+        metavar="PATH.html",
+        default=None,
+        help="Also write a self-contained HTML report (prints cleanly to PDF from a browser).",
+    )
+    exposure_cmd.add_argument(
+        "--lang", choices=("en", "it"), default="en", help="Report language (default: en). Used with --report."
+    )
 
     # abuseipdb
     abuseipdb_cmd = subparsers.add_parser(
@@ -801,7 +811,9 @@ async def _handle_dns(
         _print_result(result)
 
 
-async def _handle_exposure(domain: str, json_output: bool = False) -> None:
+async def _handle_exposure(
+    domain: str, json_output: bool = False, report_path: str | None = None, lang: str = "en"
+) -> None:
     from openosint.exposure import run_exposure
     from openosint.exposure.render import render
 
@@ -815,6 +827,16 @@ async def _handle_exposure(domain: str, json_output: bool = False) -> None:
         _emit_json(report.to_dict())
     else:
         print(render(report))
+    if report_path:
+        from openosint.exposure.report import render_html
+
+        try:
+            with open(report_path, "w", encoding="utf-8") as fh:
+                fh.write(render_html(report, lang))
+        except OSError as exc:
+            print(f"[!] Could not write report to {report_path}: {exc.strerror or exc}", file=sys.stderr)
+            sys.exit(1)
+        print(f"[*] Report written: {report_path}", file=sys.stderr)
 
 
 async def _handle_ip2location(
@@ -1161,7 +1183,9 @@ async def _async_main() -> None:
     elif args.command == "dns":
         await _handle_dns(args.domain, args.timeout, json_output=json_output)
     elif args.command == "exposure":
-        await _handle_exposure(args.domain, json_output=json_output)
+        await _handle_exposure(
+            args.domain, json_output=json_output, report_path=args.report, lang=args.lang
+        )
     elif args.command == "abuseipdb":
         await _handle_abuseipdb(args.ip, args.timeout, json_output=json_output)
     elif args.command == "ip2location":

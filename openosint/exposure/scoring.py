@@ -72,9 +72,11 @@ SEVERITY_BY_ID = {
 _GRADE_RANK = {"A": 0, "B": 1, "C": 2, "D": 3, "F": 4}
 
 
-def finding(id: str, category: str, title: str, evidence: str, recommendation: str) -> Finding:
+def finding(
+    id: str, category: str, title: str, evidence: str, recommendation: str, days_left: int | None = None
+) -> Finding:
     """Build a Finding; severity always comes from SEVERITY_BY_ID."""
-    return Finding(id, category, SEVERITY_BY_ID[id], title, evidence, recommendation)
+    return Finding(id, category, SEVERITY_BY_ID[id], title, evidence, recommendation, days_left)
 
 
 def _grade_for(score: int) -> str:

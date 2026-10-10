@@ -41,7 +41,7 @@ def _mx(domain: str) -> list[str]:
     except dns.resolver.NoAnswer:
         return []
     except dns.resolver.NXDOMAIN as exc:
-        raise CheckError(f"{domain} does not exist (NXDOMAIN)") from exc
+        raise CheckError(f"{domain} does not exist (NXDOMAIN)", "name_not_resolved") from exc
 
 
 def _probe_dkim(domain: str) -> tuple[list[str], bool]:
@@ -74,7 +74,7 @@ def count_spf_lookups(spf: str, depth: int = 0) -> int:
 def _spf_findings(domain: str, has_mail: bool) -> list:
     records = _spf_records(domain)
     if not records:
-        return [finding("spf_missing", CAT, "No SPF record", "no v=spf1 TXT record at the apex",
+        return [finding("spf_missing", CAT, "No SPF record", f"no v=spf1 TXT record at {domain}",
                         "Publish an SPF record listing the servers allowed to send mail for the domain."
                         if has_mail else NO_MAIL_SPF_FIX)]
     spf, out = records[0], []

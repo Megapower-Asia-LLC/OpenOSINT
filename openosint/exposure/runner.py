@@ -64,6 +64,23 @@ def short_reason(exc: Exception) -> str:
     return text if len(text) <= MAX_REASON_CHARS else text[: MAX_REASON_CHARS - 3] + "..."
 
 
+def classify(exc: Exception) -> str:
+    """Stable reason code (models.REASON_CODES) for an exception."""
+    if isinstance(exc, (CheckError, CheckSkipped)):
+        return exc.code
+    if isinstance(exc, (TimeoutError, dns.exception.Timeout, requests.Timeout)):
+        return "timeout"
+    if isinstance(exc, OSINTError):
+        return "rdap_error"  # only the registration check calls into search_rdap
+    if isinstance(exc, socket.gaierror):
+        return "name_not_resolved"
+    if isinstance(exc, (OSError, requests.RequestException)):
+        return "unreachable"
+    if isinstance(exc, dns.exception.DNSException):
+        return "dns_error"
+    return "unexpected_error"
+
+
 def _guarded(name: str, domain: str, registrable: str) -> CheckResult:
     """Run one check; any failure becomes an error/skipped result, never an exception."""
     fn, noise = CHECKS[name]
@@ -72,9 +89,11 @@ def _guarded(name: str, domain: str, registrable: str) -> CheckResult:
     except DomainNotRegistered:
         raise
     except CheckSkipped as exc:
-        return CheckResult(name, STATUS_SKIPPED, noise, reason=short_reason(exc), detail=str(exc))
+        return CheckResult(name, STATUS_SKIPPED, noise, reason=short_reason(exc), detail=str(exc),
+                           reason_code=classify(exc))
     except Exception as exc:  # noqa: BLE001 - a failing check must not crash the command
-        return CheckResult(name, STATUS_ERROR, noise, reason=short_reason(exc), detail=f"{type(exc).__name__}: {exc}")
+        return CheckResult(name, STATUS_ERROR, noise, reason=short_reason(exc),
+                           detail=f"{type(exc).__name__}: {exc}", reason_code=classify(exc))
 
 
 async def run_exposure(domain: str) -> ExposureReport:
@@ -93,7 +112,7 @@ async def run_exposure(domain: str) -> ExposureReport:
 
     checks = tuple(
         tasks[n].result() if tasks[n] in done
-        else CheckResult(n, STATUS_ERROR, CHECKS[n][1], reason=f"timed out after {OVERALL_TIMEOUT:.0f}s")
+        else CheckResult(n, STATUS_ERROR, CHECKS[n][1], reason=f"timed out after {OVERALL_TIMEOUT:.0f}s", reason_code="timeout")
         for n in CHECKS
     )
     score, grade, capped = assess(checks)
