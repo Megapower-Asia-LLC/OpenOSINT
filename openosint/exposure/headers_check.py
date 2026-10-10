@@ -7,8 +7,8 @@ import ssl
 import requests
 
 from openosint import __version__
-from openosint.exposure.models import STATUS_OK, CheckResult, CheckSkipped
-from openosint.exposure.scoring import finding
+from openosint.exposure.models import STATUS_OK, CheckResult, CheckSkipped, Passed, data
+from openosint.exposure.scoring import ev, finding
 from openosint.proxy import get_requests_proxies
 from openosint.tool_policy import Noise
 
@@ -16,6 +16,16 @@ CAT = "http_headers"
 TIMEOUT = 10
 MAX_REDIRECTS = 3
 USER_AGENT = f"OpenOSINT-exposure/{__version__} (+https://github.com/OpenOSINT/OpenOSINT)"
+
+
+# finding id -> header shown in the "present" list when that finding did not fire
+PRESENT_NAMES = (
+    ("hsts_missing", "Strict-Transport-Security"),
+    ("csp_missing", "Content-Security-Policy"),
+    ("x_content_type_options_missing", "X-Content-Type-Options"),
+    ("frame_protection_missing", "X-Frame-Options / frame-ancestors"),
+    ("referrer_policy_missing", "Referrer-Policy"),
+)
 
 
 def _is_cert_failure(exc: BaseException) -> bool:
@@ -60,5 +70,8 @@ def run(domain: str, registrable: str) -> CheckResult:
     if "referrer-policy" not in h:
         missing.append(("referrer_policy_missing", "Referrer-Policy header missing",
                         "Send Referrer-Policy: strict-origin-when-cross-origin or stricter."))
-    findings = tuple(finding(i, CAT, t, "header not present in response", r) for i, t, r in missing)
-    return CheckResult("http_headers", STATUS_OK, Noise.TOUCHES_TARGET.value, findings=findings)
+    findings = tuple(finding(i, CAT, t, "header not present in response", r, ev=ev("header_absent")) for i, t, r in missing)
+    absent = {i for i, _, _ in missing}
+    present = tuple(name for fid, name in PRESENT_NAMES if fid not in absent)
+    passed = (Passed("headers_present", data(headers=", ".join(present))),) if present else ()
+    return CheckResult("http_headers", STATUS_OK, Noise.TOUCHES_TARGET.value, findings=findings, passed=passed)

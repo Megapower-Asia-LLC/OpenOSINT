@@ -10,7 +10,7 @@ limited by category_penalty_cap. Tune everything in SCORING_WEIGHTS and SEVERITY
 
 from __future__ import annotations
 
-from openosint.exposure.models import STATUS_OK, CheckResult, Finding
+from openosint.exposure.models import STATUS_OK, CheckResult, Data, Finding, data
 
 SCORING_WEIGHTS = {
     # Points deducted per finding of that severity (before the category multiplier).
@@ -73,10 +73,21 @@ _GRADE_RANK = {"A": 0, "B": 1, "C": 2, "D": 3, "F": 4}
 
 
 def finding(
-    id: str, category: str, title: str, evidence: str, recommendation: str, days_left: int | None = None
+    id: str,
+    category: str,
+    title: str,
+    evidence: str,
+    recommendation: str,
+    days_left: int | None = None,
+    ev: tuple[str, Data] | None = None,
 ) -> Finding:
-    """Build a Finding; severity always comes from SEVERITY_BY_ID."""
-    return Finding(id, category, SEVERITY_BY_ID[id], title, evidence, recommendation, days_left)
+    """Build a Finding; severity always comes from SEVERITY_BY_ID. `ev` = (template id, data) for the report."""
+    ev_id, ev_data = ev or (None, ())
+    return Finding(id, category, SEVERITY_BY_ID[id], title, evidence, recommendation, days_left, ev_id, ev_data)
+
+
+def ev(id: str, **values: object) -> tuple[str, Data]:
+    return id, data(**values)
 
 
 def _grade_for(score: int) -> str:

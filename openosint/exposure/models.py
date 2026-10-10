@@ -5,6 +5,7 @@ from __future__ import annotations
 from dataclasses import asdict, dataclass
 
 STATUS_OK, STATUS_ERROR, STATUS_SKIPPED = "ok", "error", "skipped"
+_REPORT_ONLY = ("days_left", "ev_id", "ev_data")  # Finding fields kept out of --json
 
 
 # Stable codes for why a check errored or was skipped. Each needs IT and EN text in the report
@@ -49,6 +50,21 @@ class CheckSkipped(Exception):
         self.code = _checked_code(code)
 
 
+Data = tuple[tuple[str, "str | None"], ...]  # template values; None renders as "unknown"
+
+
+def data(**values: object) -> Data:
+    return tuple((k, None if v is None else str(v)) for k, v in values.items())
+
+
+@dataclass(frozen=True)
+class Passed:
+    """A check that came out fine. `id` keys a catalog template filled with `data`."""
+
+    id: str
+    data: Data = ()
+
+
 @dataclass(frozen=True)
 class Finding:
     id: str  # stable snake_case, see scoring.SEVERITY_BY_ID
@@ -58,6 +74,8 @@ class Finding:
     evidence: str  # the raw value observed
     recommendation: str  # one sentence
     days_left: int | None = None  # expiry findings only; used by the HTML report, not in --json
+    ev_id: str | None = None  # catalog evidence template for the HTML report; not in --json
+    ev_data: Data = ()
 
 
 @dataclass(frozen=True)
@@ -69,6 +87,7 @@ class CheckResult:
     detail: str | None = None  # full technical message; only in --json
     reason_code: str | None = None  # one of REASON_CODES; drives the translated report text
     findings: tuple[Finding, ...] = ()
+    passed: tuple[Passed, ...] = ()
     notes: tuple[str, ...] = ()  # non-finding remarks, e.g. "www has no DNS record"
     note_codes: tuple[str, ...] = ()  # REASON_CODES entries parallel to notes, for the report
 
@@ -99,8 +118,8 @@ class ExposureReport:
             "grade_capped_by_critical": self.grade_capped_by_critical,
             "excluded_checks": list(self.excluded_checks),
             "checks": {
-                c.name: {"status": c.status, "reason": c.reason, "reason_code": c.reason_code, "detail": c.detail, "noise": c.noise, "notes": list(c.notes)}
+                c.name: {"status": c.status, "reason": c.reason, "reason_code": c.reason_code, "detail": c.detail, "noise": c.noise, "notes": list(c.notes), "passed": [{"id": p.id, "data": dict(p.data)} for p in c.passed]}
                 for c in self.checks
             },
-            "findings": [{k: v for k, v in asdict(f).items() if k != "days_left"} for f in self.findings],
+            "findings": [{k: v for k, v in asdict(f).items() if k not in _REPORT_ONLY} for f in self.findings],
         }

@@ -5,8 +5,8 @@ from __future__ import annotations
 import dns.exception
 import dns.resolver
 
-from openosint.exposure.models import STATUS_OK, CheckError, CheckResult
-from openosint.exposure.scoring import finding
+from openosint.exposure.models import STATUS_OK, CheckError, CheckResult, Passed, data
+from openosint.exposure.scoring import ev, finding
 from openosint.tool_policy import Noise
 from openosint.tools.search_dns import probe_dkim
 
@@ -71,12 +71,13 @@ def count_spf_lookups(spf: str, depth: int = 0) -> int:
     return count
 
 
-def _spf_findings(domain: str, has_mail: bool) -> list:
+def _spf_findings(domain: str, has_mail: bool) -> tuple[list, list]:
+    """(findings, passed)."""
     records = _spf_records(domain)
     if not records:
         return [finding("spf_missing", CAT, "No SPF record", f"no v=spf1 TXT record at {domain}",
                         "Publish an SPF record listing the servers allowed to send mail for the domain."
-                        if has_mail else NO_MAIL_SPF_FIX)]
+                        if has_mail else NO_MAIL_SPF_FIX, ev=ev("spf_missing", host=domain))], []
     spf, out = records[0], []
     terms = spf.lower().split()
     qualifier = next((t[0] if t[0] in "+-~?" else "+" for t in terms if t.lstrip("+-~?") == "all"), None)
@@ -93,11 +94,12 @@ def _spf_findings(domain: str, has_mail: bool) -> list:
     if lookups > SPF_MAX_LOOKUPS:
         out.append(finding("spf_too_many_lookups", CAT, f"SPF needs more than {SPF_MAX_LOOKUPS} DNS lookups",
                            f"{lookups}{'+' if lookups > SPF_MAX_LOOKUPS else ''} lookups in: {spf}",
-                           "Flatten or trim include: entries; receivers treat >10 lookups as a permanent error."))
-    return out
+                           "Flatten or trim include: entries; receivers treat >10 lookups as a permanent error.",
+                           ev=ev("spf_lookups", n=f"{lookups}+", record=spf)))
+    return out, [Passed("spf_present", data(record=spf))]
 
 
-def _dmarc_findings(host: str, registrable: str, has_mail: bool) -> list:
+def _dmarc_findings(host: str, registrable: str, has_mail: bool) -> tuple[list, list]:
     """DMARC at _dmarc.<host>, else the organizational domain (RFC 7489 6.6.3)."""
     checked = [host] if host == registrable else [host, registrable]
     for name in checked:
@@ -109,37 +111,47 @@ def _dmarc_findings(host: str, registrable: str, has_mail: bool) -> list:
         return [finding("dmarc_missing", CAT, "No DMARC record",
                         "no v=DMARC1 TXT at " + " or ".join(f"_dmarc.{n}" for n in checked),
                         "Publish a DMARC record, starting with p=none and a rua= address, then move to reject."
-                        if has_mail else NO_MAIL_DMARC_FIX)]
+                        if has_mail else NO_MAIL_DMARC_FIX,
+                        ev=ev("dmarc_missing", where=" / ".join(f"_dmarc.{n}" for n in checked)))], []
     raw = f"{records[0]} (found at {source})"
+    found_ev = ev("found_at", record=records[0], source=source)
     records_text = records[0]
     tags = {k.strip().lower(): v.strip() for k, _, v in (p.partition("=") for p in records_text.split(";")) if k.strip()}
     out = []
     if tags.get("p", "none").lower() == "none":
         out.append(finding("dmarc_policy_none", CAT, "DMARC policy is p=none (monitoring only)", raw,
-                           "Move to p=quarantine, then p=reject, once reports show legitimate mail passes."))
+                           "Move to p=quarantine, then p=reject, once reports show legitimate mail passes.", ev=found_ev))
     pct = tags.get("pct")
     if pct is not None and pct.isdigit() and int(pct) < 100:
         out.append(finding("dmarc_pct_below_100", CAT, f"DMARC applies to only {pct}% of mail", raw,
-                           "Raise pct to 100 so the policy covers all mail."))
+                           "Raise pct to 100 so the policy covers all mail.", ev=found_ev))
     if "rua" not in tags:
         out.append(finding("dmarc_no_rua", CAT, "DMARC has no aggregate report address", raw,
-                           "Add rua=mailto:... so you receive reports on who sends mail as your domain."))
-    return out
+                           "Add rua=mailto:... so you receive reports on who sends mail as your domain.", ev=found_ev))
+    return out, [Passed("dmarc_present", data(policy=tags.get("p", "none").lower(), source=source))]
 
 
 def run(domain: str, registrable: str) -> CheckResult:
     mx = _mx(domain)
-    findings = []
+    findings, passed = [], []
     if not mx:
         findings.append(finding("mx_missing", CAT, "No MX record", "no MX records",
-                                "If the domain should receive mail, add MX records; otherwise publish a null MX."))
-    findings += _spf_findings(domain, has_mail=bool(mx))
-    findings += _dmarc_findings(domain, registrable, has_mail=bool(mx))
+                                "If the domain should receive mail, add MX records; otherwise publish a null MX.",
+                                ev=ev("mx_missing")))
+    else:
+        passed.append(Passed("mx_present", data(n=len(mx))))
+    for f, p in (_spf_findings(domain, has_mail=bool(mx)), _dmarc_findings(domain, registrable, has_mail=bool(mx))):
+        findings += f
+        passed += p
     # Always probed here (DNS-only, info-only, never scored); search_dns keeps its own active-tools gate.
     found, wildcard = _probe_dkim(domain)
     if not found:
         why = "wildcard DKIM DNS answers every selector" if wildcard else "none of the common selectors answered"
         findings.append(finding(
             "dkim_not_found_common_selectors", CAT, "DKIM not found on common selectors (best-effort, not conclusive)",
-            why, "Confirm DKIM signing is enabled; a custom selector would not be found by this check."))
-    return CheckResult("email", STATUS_OK, Noise.PASSIVE.value, findings=tuple(findings))
+            why, "Confirm DKIM signing is enabled; a custom selector would not be found by this check.",
+            ev=ev("dkim_wildcard" if wildcard else "dkim_none")))
+    else:
+        selectors = ", ".join(dict.fromkeys(r.split(":", 1)[0] for r in found))
+        passed.append(Passed("dkim_found", data(selectors=selectors)))
+    return CheckResult("email", STATUS_OK, Noise.PASSIVE.value, findings=tuple(findings), passed=tuple(passed))
