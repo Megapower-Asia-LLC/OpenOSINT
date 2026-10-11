@@ -38,7 +38,12 @@ from openosint.proxy import (  # noqa: E402
     redact_proxy_url,
     set_cli_proxy_url,
 )
-from openosint.tool_policy import ENV_ALLOW_ACTIVE, disabled_result, humanize, is_tool_enabled  # noqa: E402
+from openosint.tool_policy import (  # noqa: E402
+    ENV_ALLOW_ACTIVE,
+    disabled_result,
+    humanize,
+    is_tool_enabled,
+)
 from openosint.tools.scrape_url import run_scrape_url_osint  # noqa: E402
 from openosint.tools.search_abuseipdb import run_abuseipdb_osint  # noqa: E402
 from openosint.tools.search_breach import run_breach_osint  # noqa: E402
