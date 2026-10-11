@@ -71,9 +71,9 @@ def world(monkeypatch):
         "headers": dict(GOOD_HEADERS),
     }
 
-    monkeypatch.setattr(email_check, "_txt", lambda name: w["txt"].get(name, []))
-    monkeypatch.setattr(email_check, "_mx", lambda domain: w["mx"])
-    monkeypatch.setattr(email_check, "_probe_dkim", lambda domain: w["dkim"])
+    monkeypatch.setattr(email_check, "_txt", lambda name, zone=None: w["txt"].get(name, []))
+    monkeypatch.setattr(email_check, "_mx", lambda domain, zone=None: w["mx"])
+    monkeypatch.setattr(email_check, "_probe_dkim", lambda domain, zone=None: (*w["dkim"], w.get("dkim_unknown", [])))
     monkeypatch.setattr(registration_check, "_bootstrap", lambda: w["bootstrap"])
     w["rdap_queried"] = []
     w["tls_hosts"] = []

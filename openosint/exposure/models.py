@@ -4,6 +4,8 @@ from __future__ import annotations
 
 from dataclasses import asdict, dataclass
 
+from openosint.exposure.dns_auth import Lookup
+
 STATUS_OK, STATUS_ERROR, STATUS_SKIPPED = "ok", "error", "skipped"
 _REPORT_ONLY = ("days_left", "ev_id", "ev_data")  # Finding fields kept out of --json
 
@@ -21,6 +23,7 @@ REASON_CODES = (
     "rdap_error",
     "unexpected_error",
     "check_failed",
+    "recursive_fallback",  # note only: the zone's own nameservers did not answer
 )
 
 
@@ -90,6 +93,54 @@ class CheckResult:
     passed: tuple[Passed, ...] = ()
     notes: tuple[str, ...] = ()  # non-finding remarks, e.g. "www has no DNS record"
     note_codes: tuple[str, ...] = ()  # REASON_CODES entries parallel to notes, for the report
+    dns_lookups: tuple[Lookup, ...] = ()  # where each scored in-zone DNS lookup was answered; JSON only
+
+
+@dataclass(frozen=True)
+class Lookalike:
+    domain: str  # ASCII/punycode only, never the Unicode form
+    technique: str
+    state: str  # registered | not_registered | unknown
+    has_mx: bool = False  # a real MX exists (the null MX "0 ." of RFC 7505 does not count)
+    has_a: bool = False  # an A or AAAA answer exists; no web server is ever contacted
+    unknown_reason: str | None = None  # wildcard_tld | dns_error | deadline
+
+
+@dataclass(frozen=True)
+class LookalikeScan:
+    """Result of the opt-in --lookalikes step. A separate category: never part of score or grade."""
+
+    status: str  # ok | error
+    generated: int  # valid candidates before the cap
+    skipped_over_cap: int
+    results: tuple[Lookalike, ...] = ()  # every candidate that was checked
+    findings: tuple[Finding, ...] = ()
+    reason_code: str | None = None  # set when status is error
+    noise: str = "passive"  # DNS only
+
+    def count(self, state: str, reason: str | None = None) -> int:
+        return sum(1 for r in self.results if r.state == state and (reason is None or r.unknown_reason == reason))
+
+    def to_dict(self) -> dict:
+        return {
+            "scoring": "excluded",  # the grade measures the company's own configuration
+            "dns_only": True,
+            "noise": self.noise,
+            "status": self.status,
+            "reason_code": self.reason_code,
+            "generated": self.generated,
+            "checked": len(self.results),
+            "skipped_over_cap": self.skipped_over_cap,
+            "counts": {
+                "registered": self.count("registered"),
+                "not_registered": self.count("not_registered"),
+                "unknown_wildcard_tld": self.count("unknown", "wildcard_tld"),
+                "unknown_deadline": self.count("unknown", "deadline"),
+                "unknown_dns_error": self.count("unknown", "dns_error"),
+            },
+            "candidates": [asdict(r) for r in self.results if r.state != "not_registered"],
+            "findings": [{k: v for k, v in asdict(f).items() if k not in _REPORT_ONLY} for f in self.findings],
+        }
 
 
 @dataclass(frozen=True)
@@ -105,6 +156,7 @@ class ExposureReport:
     grade_capped_by_critical: bool
     excluded_checks: tuple[str, ...]  # every check with status error/skipped
     findings: tuple[Finding, ...]
+    lookalikes: LookalikeScan | None = None  # None unless --lookalikes was given
 
     def to_dict(self) -> dict:
         return {
@@ -118,8 +170,9 @@ class ExposureReport:
             "grade_capped_by_critical": self.grade_capped_by_critical,
             "excluded_checks": list(self.excluded_checks),
             "checks": {
-                c.name: {"status": c.status, "reason": c.reason, "reason_code": c.reason_code, "detail": c.detail, "noise": c.noise, "notes": list(c.notes), "passed": [{"id": p.id, "data": dict(p.data)} for p in c.passed]}
+                c.name: {"status": c.status, "reason": c.reason, "reason_code": c.reason_code, "detail": c.detail, "noise": c.noise, "notes": list(c.notes), "dns_lookups": [{"name": lk.name, "type": lk.rtype, "dns_source": lk.dns_source, "ns_ip": lk.ns_ip} for lk in c.dns_lookups], "passed": [{"id": p.id, "data": dict(p.data)} for p in c.passed]}
                 for c in self.checks
             },
             "findings": [{k: v for k, v in asdict(f).items() if k not in _REPORT_ONLY} for f in self.findings],
+            "lookalikes": self.lookalikes.to_dict() if self.lookalikes else None,
         }

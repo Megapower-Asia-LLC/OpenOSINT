@@ -13,7 +13,15 @@ from datetime import date, datetime
 from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 
 from openosint import __version__
-from openosint.exposure.models import STATUS_ERROR, STATUS_OK, CheckResult, ExposureReport, Finding
+from openosint.exposure.lookalikes_check import defang
+from openosint.exposure.models import (
+    STATUS_ERROR,
+    STATUS_OK,
+    CheckResult,
+    ExposureReport,
+    Finding,
+    LookalikeScan,
+)
 from openosint.exposure.report import catalog_en, catalog_it
 from openosint.exposure.report.priorities import sort_key, top_priorities
 from openosint.exposure.scoring import INCOMPLETE, REQUIRED_CHECKS
@@ -23,7 +31,7 @@ CATALOGS = {"en": catalog_en.CATALOG, "it": catalog_it.CATALOG}
 DYNAMIC_TITLE_IDS = catalog_en.DYNAMIC_TITLE_IDS
 CATEGORY_ORDER = ("email", "tls", "registration", "http_headers")
 # info findings whose "why it matters" adds something the title does not
-KEEP_WHY_IDS = ("mx_missing", "dkim_not_found_common_selectors", "tls_unreachable_443")
+KEEP_WHY_IDS = ("mx_missing", "dkim_not_found_common_selectors", "dkim_unverified", "tls_unreachable_443")
 HIDDEN_IDS = ("domain_age",)  # shown as a "Verified" line instead of a card
 DATE_KEYS = ("date", "created")
 GROUPED_SEVERITIES = ("low", "info")  # header findings this mild share one table card
@@ -61,6 +69,7 @@ pre.ev{font:12px/1.4 ui-monospace,Menlo,Consolas,monospace;background:#fff;borde
 .status{border-left:4px solid #9a6700;background:#fff8c5;padding:6px 10px;margin:10px 0;break-inside:avoid}
 .small{font-size:.85rem;color:var(--muted)}
 table.gl th{background:none;width:150px;font-size:inherit;white-space:nowrap}table.gl td{font-size:inherit}table.gl tr{break-inside:avoid}
+table.lk tr{break-inside:avoid}table.lk thead{display:table-header-group}
 code,.nb{font:12px/1.4 ui-monospace,Menlo,Consolas,monospace}.nb{white-space:nowrap}td code{font-size:inherit}
 footer{margin-top:32px;padding-top:10px;border-top:1px solid var(--line);color:var(--muted);font-size:.85rem}
 @page{size:A4;margin:12mm}
@@ -73,14 +82,14 @@ def esc(value: object) -> str:
 
 
 def format_checked_at(iso: str, lang: str) -> str:
-    """EN: UTC. IT: Europe/Rome local time with UTC in brackets (UTC only if tzdata is missing)."""
+    """EN: UTC. IT: Europe/Rome local time with the UTC time alongside (UTC only if tzdata is missing)."""
     utc = datetime.fromisoformat(iso)
     if lang == "it":
         try:
             local = utc.astimezone(ZoneInfo(ROME))
         except ZoneInfoNotFoundError:
             return f"{utc:%d/%m/%Y %H:%M} UTC"
-        return f"{local:%d/%m/%Y %H:%M} (ora di Roma) [{utc:%d/%m/%Y %H:%M} UTC]"
+        return f"{local:%d/%m/%Y %H:%M} (ora di Roma, {utc:%H:%M} UTC)"
     return f"{utc:%Y-%m-%d %H:%M} UTC"
 
 
@@ -203,6 +212,25 @@ def _summary(cat: dict, rep: ExposureReport, priorities: list[Finding]) -> str:
     return f'{first} {ui[key].format(n=len(issues), counts=counts)} {ui["summary_top"].format(title=_title(cat, priorities[0]))}'
 
 
+def _lookalike_summary(cat: dict, scan: LookalikeScan | None) -> str:
+    """One sentence for the summary paragraph; empty without the flag or when the step failed."""
+    if scan is None or scan.status != STATUS_OK:
+        return ""
+    ui = cat["ui"]
+    t = ui["lk_summary"]
+    n_unknown = scan.count("unknown")
+    unknown = "" if not n_unknown else t["unknown_one"] if n_unknown == 1 else t["unknown_many"].format(n=n_unknown)
+    registered = [r for r in scan.results if r.state == "registered"]
+    mail = sum(1 for r in registered if r.has_mx)
+    if not registered:
+        key = "none"
+    elif len(registered) == 1:
+        key = "one_mail" if mail else "one_nomail"
+    else:
+        key = "many_nomail" if not mail else "many_one_mail" if mail == 1 else "many_mail"
+    return t[key].format(checked=len(scan.results), n=len(registered), mail=mail, unknown=unknown, section=ui["lookalikes_title"])
+
+
 def _reason_text(cat: dict, code: str | None) -> str:
     """Translated reason; raw English detail never reaches the report (it stays in --json)."""
     return cat["reasons"].get(code or "", cat["reasons"]["unexpected_error"])
@@ -250,6 +278,45 @@ def _section(cat: dict, rep: ExposureReport, category: str, anchors: dict[int, s
     if not items and (check is None or check.status == STATUS_OK):
         body = f'<p class="small">{esc(cat["ui"]["no_findings"])}</p>'
     return f"<section><h2>{esc(cat['category'][category])}</h2>{_check_status(cat, check)}{body}{_verified(cat, check)}</section>"
+
+
+def _lookalike_table(cat: dict, scan: LookalikeScan) -> str:
+    """Registered lookalikes only, with email first. Names are defanged, escaped text: never links."""
+    ui = cat["ui"]
+    registered = sorted((r for r in scan.results if r.state == "registered"), key=lambda r: (not r.has_mx, r.domain))
+    if not registered:
+        return f'<p class="small">{esc(ui["lookalikes_none"])}</p>'
+    yes_no = lambda flag: esc(ui["yes"] if flag else ui["no"])  # noqa: E731
+    rows = "".join(
+        f'<tr><td><code>{esc(defang(r.domain))}</code></td><td>{esc(ui["lookalike_types"].get(r.technique, r.technique))}</td>'
+        f'<td>{yes_no(r.has_mx)}</td><td>{yes_no(r.has_a)}</td></tr>'
+        for r in registered
+    )
+    return (
+        f'<table class="lk"><thead><tr><th>{esc(ui["col_domain"])}</th><th>{esc(ui["col_variation"])}</th>'
+        f'<th>{esc(ui["col_mail"])}</th><th>{esc(ui["col_web"])}</th></tr></thead><tbody>{rows}</tbody></table>'
+        f'<p class="small">{esc(ui["lookalikes_defang_note"])}</p>'
+    )
+
+
+def _lookalikes_section(cat: dict, scan: LookalikeScan | None) -> str:
+    if scan is None:
+        return ""
+    ui = cat["ui"]
+    head = f'<h2>{esc(ui["lookalikes_title"])}</h2><p class="small">{esc(ui["lookalikes_not_scored"])}</p>'
+    if scan.status != STATUS_OK:
+        failed = f'<div class="status"><strong>{esc(ui["check_error"])}:</strong> {esc(_reason_text(cat, scan.reason_code))} {esc(ui["excluded_note"])}</div>'
+        return f"<section>{head}{failed}</section>"
+    unknown = scan.count("unknown")
+    counts = " ".join([
+        ui["lookalikes_checked"].format(checked=len(scan.results)),
+        *([ui["lookalikes_unknown"].format(unknown=unknown)] if unknown else []),
+        *([ui["lookalikes_skipped"].format(skipped=scan.skipped_over_cap)] if scan.skipped_over_cap else []),
+    ])
+    return (
+        f'<section>{head}<p>{esc(ui["lookalikes_intro"])}</p><p>{esc(ui["lookalikes_todo"])}</p>'
+        f'{_lookalike_table(cat, scan)}<p class="small">{esc(counts)}</p></section>'
+    )
 
 
 def _area_status(check: CheckResult | None, items: list[Finding]) -> str:
@@ -313,8 +380,11 @@ def render_html(rep: ExposureReport, lang: str = "en") -> str:
         else f" &middot; {esc(ui['registrable'])}: <strong>{esc(rep.registrable_domain)}</strong>"
     )
     sections = "".join(_section(cat, rep, c, anchors) for c in CATEGORY_ORDER)
-    method = "".join(f"<li>{esc(p)}</li>" for p in ui["method_points"])
-    glossary = "".join(f'<tr><th scope="row">{esc(t)}</th><td>{esc(d)}</td></tr>' for t, d in ui["glossary_items"])
+    method_points = [*ui["method_points"], *([ui["method_lookalikes"]] if rep.lookalikes else [])]
+    method = "".join(f"<li>{esc(p)}</li>" for p in method_points)
+    glossary_items = [*ui["glossary_items"], *([ui["glossary_lookalike"]] if rep.lookalikes else [])]
+    glossary = "".join(f'<tr><th scope="row">{esc(t)}</th><td>{esc(d)}</td></tr>' for t, d in glossary_items)
+    summary = " ".join(filter(None, (_summary(cat, rep, priorities), _lookalike_summary(cat, rep.lookalikes))))
     return f"""<!doctype html>
 <html lang="{esc(ui['html_lang'])}"><head><meta charset="utf-8">
 <meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'">
@@ -325,10 +395,11 @@ def render_html(rep: ExposureReport, lang: str = "en") -> str:
 <p class="meta">{esc(ui['checked'])}: {esc(format_checked_at(rep.checked_at, lang))}</p>
 <div class="head"><div class="badge {esc(badge_class)}"><span class="g{' long' if is_incomplete else ''}">{esc(badge_text)}</span><span>{esc(ui['grade'])}</span></div>
 <div><div class="score">{esc(score_label)}{esc(ui['score'])}: {esc(score)}</div>{meaning_html}<div class="small">{esc(ui['cap_note'])}</div></div></div></header>
-<section><h2>{esc(ui['summary'])}</h2><p>{esc(_summary(cat, rep, priorities))}</p></section>
+<section><h2>{esc(ui['summary'])}</h2><p>{esc(summary)}</p></section>
 <section><h2>{esc(ui['area_summary'])}</h2>{_area_table(cat, rep)}</section>
 <section><h2>{esc(ui['priorities'])}</h2>{_priority_list(cat, priorities, anchors)}</section>
 <h2>{esc(ui['details'])}</h2>{sections}
+{_lookalikes_section(cat, rep.lookalikes)}
 <section><h2>{esc(ui['method'])}</h2><ul>{method}</ul></section>
 <section><h2>{esc(ui['glossary'])}</h2><table class="gl">{glossary}</table></section>
 <footer>{esc(ui['footer'])} &middot; {esc(ui['version'])} {esc(__version__)} &middot; {esc(ui['report_version'])} {esc(REPORT_VERSION)}</footer>

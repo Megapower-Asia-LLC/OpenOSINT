@@ -393,6 +393,19 @@ def _build_parser() -> argparse.ArgumentParser:
         help="Also write a self-contained HTML report (prints cleanly to PDF from a browser).",
     )
     exposure_cmd.add_argument(
+        "--lookalikes",
+        action="store_true",
+        help="Also look for registered lookalike domains (typos, homoglyphs, TLD swaps). DNS only; "
+        "not part of the score or grade.",
+    )
+    exposure_cmd.add_argument(
+        "--resolver",
+        type=_ip_literal,
+        metavar="IP",
+        default=None,
+        help="Recursive DNS resolver for lookups outside the domain's own nameservers (default: system resolver).",
+    )
+    exposure_cmd.add_argument(
         "--lang", choices=("en", "it"), default="en", help="Report language (default: en). Used with --report."
     )
 
@@ -811,15 +824,29 @@ async def _handle_dns(
         _print_result(result)
 
 
+def _ip_literal(value: str) -> str:
+    from openosint.exposure.dns_auth import parse_ip
+
+    try:
+        return parse_ip(value)
+    except ValueError:
+        raise argparse.ArgumentTypeError(f"'{value}' is not an IP address (e.g. 1.1.1.1)") from None
+
+
 async def _handle_exposure(
-    domain: str, json_output: bool = False, report_path: str | None = None, lang: str = "en"
+    domain: str,
+    json_output: bool = False,
+    report_path: str | None = None,
+    lang: str = "en",
+    lookalikes: bool = False,
+    resolver: str | None = None,
 ) -> None:
     from openosint.exposure import run_exposure
     from openosint.exposure.render import render
 
     print(f"[*] Exposure report: {domain}", file=sys.stderr)
     try:
-        report = await run_exposure(domain)
+        report = await run_exposure(domain, lookalikes, resolver)
     except ValueError as exc:
         print(f"[!] {exc}", file=sys.stderr)
         sys.exit(2)
@@ -1184,7 +1211,7 @@ async def _async_main() -> None:
         await _handle_dns(args.domain, args.timeout, json_output=json_output)
     elif args.command == "exposure":
         await _handle_exposure(
-            args.domain, json_output=json_output, report_path=args.report, lang=args.lang
+            args.domain, json_output=json_output, report_path=args.report, lang=args.lang, lookalikes=args.lookalikes, resolver=args.resolver
         )
     elif args.command == "abuseipdb":
         await _handle_abuseipdb(args.ip, args.timeout, json_output=json_output)

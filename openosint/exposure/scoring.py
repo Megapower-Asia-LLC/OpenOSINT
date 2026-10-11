@@ -46,6 +46,7 @@ SEVERITY_BY_ID = {
     "dmarc_no_rua": "low",
     "mx_missing": "info",  # the domain may simply not receive mail
     "dkim_not_found_common_selectors": "info",  # best-effort, not conclusive
+    "dkim_unverified": "info",  # added: some selectors timed out/SERVFAILed twice and none was found; a timeout never means "absent"
     # tls (apex and www evaluated separately)
     "tls_cert_expired": "critical",
     "tls_hostname_mismatch": "critical",
@@ -67,6 +68,10 @@ SEVERITY_BY_ID = {
     "x_content_type_options_missing": "low",
     "frame_protection_missing": "low",
     "referrer_policy_missing": "info",
+    # lookalikes: an external threat, NOT scored (assess() only sees the four scored checks)
+    "lookalike_with_mx": "medium",  # added: a registered near-copy of the name that can send/receive email (invoice fraud)
+    "lookalike_registered": "low",  # added: registered near-copy without MX; still usable on a website
+    "lookalikes_none_found": "info",  # added: nothing registered among the variants checked
 }
 
 _GRADE_RANK = {"A": 0, "B": 1, "C": 2, "D": 3, "F": 4}

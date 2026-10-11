@@ -54,7 +54,7 @@ def test_both_catalogs_have_the_same_ui_keys_and_labels():
     assert EN["severity"].keys() == IT["severity"].keys() == {"critical", "high", "medium", "low", "info"}
     assert list(IT["severity"].values()) == ["Critico", "Alto", "Medio", "Basso", "Informativo"]
     assert EN["category"].keys() == IT["category"].keys()
-    assert len(EN["ui"]["glossary_items"]) == len(IT["ui"]["glossary_items"]) == 7
+    assert len(EN["ui"]["glossary_items"]) == len(IT["ui"]["glossary_items"]) == 8
     assert len(EN["ui"]["method_points"]) == len(IT["ui"]["method_points"])
 
 
@@ -255,7 +255,7 @@ def test_domain_expiry_days_in_title(world):
 
 def test_dates_en_utc_and_it_rome_with_utc_in_brackets():
     assert format_checked_at("2026-07-10T12:00:00+00:00", "en") == "2026-07-10 12:00 UTC"
-    assert format_checked_at("2026-07-10T12:00:00+00:00", "it") == "10/07/2026 14:00 (ora di Roma) [10/07/2026 12:00 UTC]"
+    assert format_checked_at("2026-07-10T12:00:00+00:00", "it") == "10/07/2026 14:00 (ora di Roma, 12:00 UTC)"
     assert format_checked_at("2026-01-10T12:00:00+00:00", "it").startswith("10/01/2026 13:00")  # winter time
 
 
@@ -291,7 +291,7 @@ def test_report_option_does_not_change_json_output(world, tmp_path, capsys, monk
 
     fixed = report()
 
-    async def fake_run(domain):
+    async def fake_run(domain, lookalikes=False, resolver=None):
         return fixed
 
     monkeypatch.setattr(openosint.exposure, "run_exposure", fake_run)

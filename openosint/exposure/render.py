@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from openosint.exposure.models import ExposureReport
+from openosint.exposure.models import ExposureReport, LookalikeScan
 
 _SEVERITY_ORDER = ("critical", "high", "medium", "low", "info")
 
@@ -31,4 +31,22 @@ def render(rep: ExposureReport) -> str:
         lines += [f"  [{f.severity.upper()}] {f.title} ({f.id})", f"      evidence: {f.evidence}", f"      fix: {f.recommendation}"]
     if not ordered:
         lines.append("  none")
+    if rep.lookalikes:
+        lines += _lookalike_lines(rep.lookalikes)
     return "\n".join(lines)
+
+
+def _lookalike_lines(scan: LookalikeScan) -> list[str]:
+    lines = ["", "Lookalike domains (DNS only; NOT part of the score or grade):"]
+    if scan.status != "ok":
+        return lines + [f"  check failed ({scan.reason_code}); no lookalike result."]
+    c = scan.to_dict()["counts"]
+    unknown = c["unknown_wildcard_tld"] + c["unknown_deadline"] + c["unknown_dns_error"]
+    lines.append(
+        f"  checked {len(scan.results)} of {scan.generated} variants; registered {c['registered']}; "
+        f"unknown {unknown} (wildcard TLD {c['unknown_wildcard_tld']}, time limit {c['unknown_deadline']}, "
+        f"DNS error {c['unknown_dns_error']}); skipped over the cap {scan.skipped_over_cap}"
+    )
+    for f in sorted(scan.findings, key=lambda f: _SEVERITY_ORDER.index(f.severity)):
+        lines += [f"  [{f.severity.upper()}] {f.title} ({f.id})", f"      evidence: {f.evidence}", f"      fix: {f.recommendation}"]
+    return lines

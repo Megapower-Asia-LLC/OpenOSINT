@@ -12,7 +12,14 @@ from datetime import datetime, timezone
 import dns.exception
 import requests
 
-from openosint.exposure import email_check, headers_check, registration_check, tls_check
+from openosint.exposure import (
+    email_check,
+    headers_check,
+    lookalikes_check,
+    registration_check,
+    tls_check,
+)
+from openosint.exposure.dns_auth import DnsConfig
 from openosint.exposure.domains import registrable_domain
 from openosint.exposure.models import (
     STATUS_ERROR,
@@ -22,6 +29,7 @@ from openosint.exposure.models import (
     CheckSkipped,
     DomainNotRegistered,
     ExposureReport,
+    LookalikeScan,
 )
 from openosint.exposure.scoring import INCOMPLETE, assess
 from openosint.tool_policy import Noise
@@ -38,6 +46,9 @@ CHECKS = {
     "tls": (tls_check.run, Noise.TOUCHES_TARGET.value),
     "http_headers": (headers_check.run, Noise.TOUCHES_TARGET.value),
 }
+
+
+DNS_CHECKS = frozenset({"email"})  # the checks that do recursive DNS and so take the run's DnsConfig
 
 
 def normalize_domain(raw: str) -> str:
@@ -81,11 +92,11 @@ def classify(exc: Exception) -> str:
     return "unexpected_error"
 
 
-def _guarded(name: str, domain: str, registrable: str) -> CheckResult:
+def _guarded(name: str, domain: str, registrable: str, dns_config: DnsConfig) -> CheckResult:
     """Run one check; any failure becomes an error/skipped result, never an exception."""
     fn, noise = CHECKS[name]
     try:
-        return fn(domain, registrable)
+        return fn(domain, registrable, dns_config) if name in DNS_CHECKS else fn(domain, registrable)
     except DomainNotRegistered:
         raise
     except CheckSkipped as exc:
@@ -96,14 +107,23 @@ def _guarded(name: str, domain: str, registrable: str) -> CheckResult:
                            detail=f"{type(exc).__name__}: {exc}", reason_code=classify(exc))
 
 
-async def run_exposure(domain: str) -> ExposureReport:
+def _lookalike_scan(registrable: str, dns_config: DnsConfig) -> LookalikeScan:
+    """The opt-in step; a failure becomes status=error, never an exception or a score change."""
+    try:
+        return lookalikes_check.scan(registrable, dns_config)
+    except Exception as exc:  # noqa: BLE001 - must not crash the command
+        return LookalikeScan(STATUS_ERROR, 0, 0, reason_code=classify(exc))
+
+
+async def run_exposure(domain: str, lookalikes: bool = False, resolver: str | None = None) -> ExposureReport:
     domain = normalize_domain(domain)
+    dns_config = DnsConfig.of(resolver)  # ValueError for a non-IP; applies to the recursive path only
     registrable = registrable_domain(domain)
     started = time.monotonic()
     loop = asyncio.get_running_loop()
     # ponytail: threads cannot be killed; per-call 5-10s timeouts bound stragglers. Add process isolation if that proves false.
     pool = ThreadPoolExecutor(max_workers=len(CHECKS))
-    tasks = {name: loop.run_in_executor(pool, _guarded, name, domain, registrable) for name in CHECKS}
+    tasks = {name: loop.run_in_executor(pool, _guarded, name, domain, registrable, dns_config) for name in CHECKS}
     done, pending = await asyncio.wait(tasks.values(), timeout=OVERALL_TIMEOUT, return_when=asyncio.FIRST_EXCEPTION)
     pool.shutdown(wait=False, cancel_futures=True)
     for task in done:  # an unregistered domain aborts the whole report
@@ -115,7 +135,9 @@ async def run_exposure(domain: str) -> ExposureReport:
         else CheckResult(n, STATUS_ERROR, CHECKS[n][1], reason=f"timed out after {OVERALL_TIMEOUT:.0f}s", reason_code="timeout")
         for n in CHECKS
     )
-    score, grade, capped = assess(checks)
+    score, grade, capped = assess(checks)  # lookalikes are never passed in: they do not affect the grade
+    # After the scored checks, never alongside them: the lookalike pool competes for the same resolver.
+    scan = await loop.run_in_executor(None, _lookalike_scan, registrable, dns_config) if lookalikes else None
     return ExposureReport(
         domain=domain,
         registrable_domain=registrable,
@@ -128,4 +150,5 @@ async def run_exposure(domain: str) -> ExposureReport:
         grade_capped_by_critical=capped,
         excluded_checks=tuple(c.name for c in checks if c.status != "ok"),
         findings=tuple(f for c in checks if c.status == "ok" for f in c.findings),
+        lookalikes=scan,
     )

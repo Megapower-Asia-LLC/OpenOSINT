@@ -33,6 +33,8 @@ from tests.exposure_helpers import (  # noqa: F401
 
 # --- scoring ---------------------------------------------------------------
 
+REAL_PROBE_DKIM = email_check._probe_dkim  # captured at import, before any fixture stubs it
+
 
 def test_perfect_domain_gets_a(world):
     rep = report()
@@ -83,7 +85,7 @@ def test_severity_table_matches_review():
     assert SEVERITY_BY_ID["domain_age"] == "info"
     assert SEVERITY_BY_ID["dnssec_not_enabled"] == "low"
     assert SEVERITY_BY_ID["referrer_policy_missing"] == "info"
-    assert len(SEVERITY_BY_ID) == 29
+    assert len(SEVERITY_BY_ID) == 33  # 29 + 3 lookalike ids + dkim_unverified
 
 
 # --- coverage rule ---------------------------------------------------------
@@ -187,17 +189,20 @@ def test_dkim_probe_runs_without_active_tools(world, monkeypatch):
 
 
 def test_titan1_only_domain_does_not_get_dkim_not_found(world, monkeypatch):
-    from unittest.mock import MagicMock
+    import dns.rdata
+    import dns.resolver
 
     from openosint.exposure import email_check
-    from openosint.tools.search_dns import probe_dkim
-    from tests.test_dns import _dkim_side_effect
 
-    resolver = MagicMock()
-    resolver.resolve.side_effect = _dkim_side_effect(
-        {"titan1": ['"v=DKIM1; k=rsa; p=MIGfMA0GCSqGSIb3"']}, None
-    )
-    monkeypatch.setattr(email_check, "_probe_dkim", lambda domain: probe_dkim(resolver, domain))
+    key = dns.rdata.from_text("IN", "TXT", '"v=DKIM1; k=rsa; p=MIGfMA0GCSqGSIb3"')
+
+    def resolve(name, rtype, timeout=5.0, dns_config=None):
+        if name == "titan1._domainkey.example.com":
+            return [key]
+        raise dns.resolver.NXDOMAIN()
+
+    monkeypatch.setattr(email_check, "_resolve", resolve)
+    monkeypatch.setattr(email_check, "_probe_dkim", REAL_PROBE_DKIM)  # the fixture stubs it; this test wants the real one
     rep = report()
     assert "dkim_not_found_common_selectors" not in ids(rep)
 

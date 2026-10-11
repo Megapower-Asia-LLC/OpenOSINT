@@ -264,7 +264,7 @@ def test_italian_dates_are_dd_mm_yyyy_and_english_iso(world):
     it, en = render_html(rep, "it"), render_html(rep, "en")
     assert f"Dominio registrato in data {d}/{m}/{y} (9 anni fa)" in it
     assert f"Domain registered on {iso} (9 years ago)" in en
-    assert not re.search(r"\b20\d\d-\d\d-\d\d\b", it.split("<h2>Metodo")[0].replace(" (ora di Roma)", ""))
+    assert not re.search(r"\b20\d\d-\d\d-\d\d\b", it.split("<h2>Metodo")[0].replace(" (ora di Roma, ", " ("))
     assert re.search(r"valido fino al \d\d/\d\d/\d{4}", it) and re.search(r"valid until 20\d\d-\d\d-\d\d", en)
 
 
@@ -302,7 +302,7 @@ def test_header_table_is_monospace_and_wraps_only_at_spaces(world):
 
 def test_glossary_rows_are_table_rows_that_do_not_split(world):
     out = render_html(report(), "en")
-    assert out.count('<th scope="row">') == 7 and "<dl" not in out
+    assert out.count('<th scope="row">') == 8 and "<dl" not in out
     assert "table.gl tr{break-inside:avoid}" in out
 
 
@@ -317,3 +317,13 @@ def test_italian_dates_never_follow_il_or_a_bare_article():
     for key in ("evidence", "passed"):
         for name, template in IT[key].items():
             assert not re.search(r"\bil \{(date|created)\}", template), name
+
+
+@pytest.mark.parametrize("lang", ["en", "it"])
+def test_glossary_defines_mx_and_lookalike_only_with_the_flag(world, lang):
+    from tests.test_exposure_lookalikes import RESULTS, _scan_with, _with
+
+    cat = LANGS[lang]["ui"]
+    assert "MX" in dict(cat["glossary_items"]) and cat["glossary_lookalike"][0] not in render_html(report(), lang)
+    with_flag = render_html(_with(report(), _scan_with(*RESULTS)), lang)
+    assert f'<th scope="row">{cat["glossary_lookalike"][0]}</th>' in with_flag and with_flag.count('<th scope="row">') == 9
