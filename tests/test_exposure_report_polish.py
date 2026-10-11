@@ -146,11 +146,11 @@ def test_templates_use_same_placeholders_in_both_languages(section_name):
 # --- 3. evidence ---------------------------------------------------------------------
 
 
-def test_evidence_has_no_python_repr_and_json_is_unchanged(world):
+def test_evidence_has_no_python_repr_in_terminal_or_json(world):
     world["rdap"] = rdap_body(signed=False)
     rep = report()
     f = next(f for f in rep.findings if f.id == "dnssec_not_enabled")
-    assert f.evidence == "secureDNS: {'delegationSigned': False}"  # --json value as before
+    assert f.evidence == "DNSSEC: not signed"  # terminal and --json
     assert next(j for j in rep.to_dict()["findings"] if j["id"] == "dnssec_not_enabled")["evidence"] == f.evidence
     it, en = render_html(rep, "it"), render_html(rep, "en")
     assert "DNSSEC: non firmato" in it and "DNSSEC: not signed" in en

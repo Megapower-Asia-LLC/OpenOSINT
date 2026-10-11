@@ -9,6 +9,23 @@ OpenOSINT adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [2.34.0] — 2026-10-11
+
+### Added
+
+- `openosint exposure DOMAIN`: a passive, point-in-time external exposure report graded A-F (beta, no AI provider needed). Checks email authentication (SPF, DMARC, DKIM, MX), TLS, domain registration (age, expiry, DNSSEC via RDAP) and security headers. Email and RDAP checks use DNS or the registry only; the TLS and header checks contact the target on port 443. It does not scan ports, log in or collect personal data, and the grade is not a compliance certification.
+- `--json` for structured output, `--report FILE.html --lang it|en` for a self-contained, printable HTML report with top priorities, passed checks and a glossary, and `--resolver IP` to choose the recursive DNS resolver.
+- `--lookalikes`: DNS-only search for registered typo, homoglyph and TLD-swap domains. Never part of the score or grade.
+- DNS lookups for the domain's own email records (MX, SPF, DMARC, DKIM) go to its authoritative nameservers, with retries and a recursive fallback, so the grade does not depend on stale resolver caches. Lookalikes and third-party SPF includes use the recursive resolver. Common provider DKIM selectors are probed concurrently.
+
+### Changed
+
+- The report format is beta and may change; the HTML report footer shows its `report_version`.
+
+### Fixed
+
+- DNSSEC evidence reads "DNSSEC: not signed" instead of a Python dict repr; a test now scans all evidence for dict and list reprs.
+
 ## [2.33.1] — 2026-10-10
 
 ### Fixed

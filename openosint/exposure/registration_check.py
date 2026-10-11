@@ -80,7 +80,7 @@ def run(host: str, registrable: str) -> CheckResult:
     secure = raw.get("secureDNS") or {}
     if not secure.get("delegationSigned"):
         findings.append(finding("dnssec_not_enabled", CAT, "DNSSEC is not enabled",
-                                f"secureDNS: {secure or 'not reported'}",
+                                "DNSSEC: not signed" if secure else "DNSSEC: not reported by the registry",
                                 "Enable DNSSEC at the registrar if the DNS provider supports it.",
                                 ev=ev("dnssec_unsigned" if secure else "dnssec_not_reported")))
     else:

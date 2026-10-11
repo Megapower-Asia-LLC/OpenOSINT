@@ -515,3 +515,37 @@ def test_www_checked_only_for_apex_input(world):
     world["txt"]["app.example.com"] = [GOOD_SPF]
     report("app.example.com")
     assert set(world["tls_hosts"]) == {"app.example.com"}
+
+
+# --- evidence is plain text ------------------------------------------------
+
+
+def _texts(rep) -> list[str]:
+    out = [f.evidence for f in rep.findings] + [n for c in rep.checks for n in c.notes]
+    out += [render(rep)]
+    return out
+
+
+@pytest.mark.parametrize("rdap_secure", [{"delegationSigned": False}, {}, None])
+def test_evidence_never_contains_a_dict_or_list_repr(world, rdap_secure):
+    # Arrange: break as much as possible so most evidence strings are produced
+    w = world
+    w["rdap"] = {**rdap_body(), "secureDNS": rdap_secure}
+    w["txt"] = {}
+    w["mx"] = []
+    w["headers"] = {}
+    # Act
+    rep = report()
+    # Assert
+    assert "dnssec_not_enabled" in ids(rep)
+    for text in _texts(rep):
+        assert "{'" not in text and "['" not in text, text
+
+
+def test_dnssec_evidence_is_human_readable(world):
+    world["rdap"] = {**rdap_body(), "secureDNS": {"delegationSigned": False}}
+    ev = {f.id: f.evidence for f in report().findings}["dnssec_not_enabled"]
+    assert ev == "DNSSEC: not signed"
+    world["rdap"] = {**rdap_body(), "secureDNS": None}
+    ev = {f.id: f.evidence for f in report().findings}["dnssec_not_enabled"]
+    assert ev == "DNSSEC: not reported by the registry"
