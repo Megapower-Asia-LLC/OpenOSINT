@@ -186,6 +186,22 @@ def test_dkim_probe_runs_without_active_tools(world, monkeypatch):
     assert rep.grade == "A"  # info only, never scored
 
 
+def test_titan1_only_domain_does_not_get_dkim_not_found(world, monkeypatch):
+    from unittest.mock import MagicMock
+
+    from openosint.exposure import email_check
+    from openosint.tools.search_dns import probe_dkim
+    from tests.test_dns import _dkim_side_effect
+
+    resolver = MagicMock()
+    resolver.resolve.side_effect = _dkim_side_effect(
+        {"titan1": ['"v=DKIM1; k=rsa; p=MIGfMA0GCSqGSIb3"']}, None
+    )
+    monkeypatch.setattr(email_check, "_probe_dkim", lambda domain: probe_dkim(resolver, domain))
+    rep = report()
+    assert "dkim_not_found_common_selectors" not in ids(rep)
+
+
 # --- TLS -------------------------------------------------------------------
 
 

@@ -205,7 +205,7 @@ A publicly reachable or demo instance can never enable active tools, whatever th
 | `search_abuseipdb` | passive | on | One request to api.abuseipdb.com. |
 | `search_breach` | passive | on | One request to haveibeenpwned.com. |
 | `search_censys` | passive | on | Censys API; returns data Censys already holds. |
-| `search_dns` | passive | on | Record lookups go through your DNS resolver; the target's nameservers see the resolver, not you. **Active part:** 9 DKIM selector probes (enumeration) run only with active tools enabled. |
+| `search_dns` | passive | on | Record lookups go through your DNS resolver; the target's nameservers see the resolver, not you. **Active part:** DKIM selector probes (enumeration) run only with active tools enabled. |
 | `search_domain` | noisy | **off** | sublist3r scrapes several search engines and aggregators from your IP; expect captchas and blocks. |
 | `search_dorks_live` | passive | on | Google results via Bright Data; the target is sent to those two services. |
 | `search_email` | noisy | **off** | holehe probes many sites' sign-up/reset flows with the email from your IP; may notify the account owner or trigger security alerts. |

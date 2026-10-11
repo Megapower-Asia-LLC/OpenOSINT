@@ -6,12 +6,16 @@ from __future__ import annotations
 from unittest.mock import MagicMock, patch
 
 import dns.exception
+import dns.name
+import dns.rdataclass
+import dns.rdatatype
 import dns.resolver
 
 from openosint.tools.search_dns import (
     RecordSet,
     _is_valid_dkim_record,
     _is_null_mx,
+    DKIM_SELECTORS,
     _probe_dkim,
     _spf_authorizes_senders,
     compute_email_security_grade,
@@ -289,6 +293,73 @@ class TestProbeDkimWildcard:
         found, wildcard = _probe_dkim(resolver, "example.com")
         assert wildcard is False
         assert found == []
+
+
+class TestDkimSelectorList:
+    def test_titan1_only_domain_is_found(self):
+        resolver = MagicMock()
+        resolver.resolve.side_effect = _dkim_side_effect(
+            known_selector_answers={"titan1": ['"v=DKIM1; k=rsa; p=MIGfMA0GCSqGSIb3"']},
+            wildcard_answer=None,
+        )
+        found, wildcard = _probe_dkim(resolver, "openosint.tech")
+        assert wildcard is False
+        assert [f.split(":")[0] for f in found] == ["titan1"]
+
+    def test_revoked_fm1_key_is_not_counted(self):
+        resolver = MagicMock()
+        resolver.resolve.side_effect = _dkim_side_effect({"fm1": ['"v=DKIM1; k=rsa; p="']}, None)
+        assert _probe_dkim(resolver, "example.com") == ([], False)
+
+    def test_txt_behind_a_cname_is_found(self):
+        import dns.message
+
+        qname = "protonmail._domainkey.example.com."
+        msg = dns.message.from_text(
+            "id 1\nopcode QUERY\nrcode NOERROR\nflags QR RD RA\n"
+            f";QUESTION\n{qname} IN TXT\n"
+            ";ANSWER\n"
+            f"{qname} 300 IN CNAME protonmail.domainkey.example.net.\n"
+            'protonmail.domainkey.example.net. 300 IN TXT "v=DKIM1; k=rsa; p=MIGfMA0GCSqGSIb3"\n'
+            ";AUTHORITY\n;ADDITIONAL\n"
+        )
+        cname_answer = dns.resolver.Answer(dns.name.from_text(qname), dns.rdatatype.TXT, dns.rdataclass.IN, msg)
+
+        def resolve(name, rdtype):
+            if name == qname[:-1]:
+                return cname_answer
+            raise dns.resolver.NoAnswer()
+
+        resolver = MagicMock()
+        resolver.resolve.side_effect = resolve
+        found, wildcard = _probe_dkim(resolver, "example.com")
+        assert wildcard is False
+        assert [f.split(":")[0] for f in found] == ["protonmail"]
+
+    def test_concurrent_probe_matches_sequential(self):
+        answers = {s: [f'"v=DKIM1; k=rsa; p=KEY{s}"'] for s in ("fm1", "default", "titan1", "k1")}
+        resolver = MagicMock()
+        resolver.resolve.side_effect = _dkim_side_effect(answers, None)
+        found, wildcard = _probe_dkim(resolver, "example.com")
+        expected = [f"{s}: v=DKIM1; k=rsa; p=KEY{s}" for s in DKIM_SELECTORS if s in answers]
+        assert (found, wildcard) == (expected, False)
+
+    def test_probe_stays_fast_when_dns_is_slow(self):
+        import time
+
+        def slow(name, rdtype):
+            time.sleep(0.2)
+            raise dns.resolver.NoAnswer()
+
+        resolver = MagicMock()
+        resolver.resolve.side_effect = slow
+        start = time.monotonic()
+        _probe_dkim(resolver, "example.com")
+        # 18 lookups sequentially would take 3.6s; 8 workers need 3 rounds (~0.6s)
+        assert time.monotonic() - start < 1.5
+
+    def test_selector_list_stays_within_cap(self):
+        assert len(DKIM_SELECTORS) <= 20
 
 
 # ---------------------------------------------------------------------------

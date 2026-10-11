@@ -14,6 +14,7 @@ import asyncio
 import logging
 import re
 import secrets
+from concurrent.futures import ThreadPoolExecutor
 from typing import NamedTuple
 
 import dns.exception
@@ -25,6 +26,7 @@ from openosint.tools.exceptions import OSINTError
 logger = logging.getLogger(__name__)
 
 _DEFAULT_TIMEOUT = 10
+_DKIM_MAX_WORKERS = 8
 _DKIM_SELECTORS = [
     "default",
     "google",
@@ -34,7 +36,15 @@ _DKIM_SELECTORS = [
     "s2",
     "selector1",
     "selector2",
-    "k1",
+    "k1",  # Mailchimp
+    "titan1",  # Titan Email, verified via dig, 2026-10-11
+    "protonmail",  # Proton Mail, verified via dig, 2026-10-11
+    "protonmail2",  # Proton Mail, same provider scheme
+    "protonmail3",  # Proton Mail, same provider scheme
+    "fm1",  # Fastmail, verified via dig, 2026-10-11
+    "fm2",  # Fastmail, same provider scheme
+    "fm3",  # Fastmail, same provider scheme
+    "mandrill",  # Mailchimp Transactional (Mandrill), verified via dig, 2026-10-11
 ]
 # +all allows any sender (dangerous); ~all is a soft-fail (weak)
 _WEAK_SPF_MECHANISMS = ("+all", "~all")
@@ -123,24 +133,25 @@ def _probe_dkim(resolver: dns.resolver.Resolver, domain: str) -> tuple[list[str]
     selector first: if it answers, real selector matches are meaningless and
     none are reported.
     """
-    probe_selector = f"zzprobe{secrets.token_hex(6)}"
-    try:
-        answers = resolver.resolve(f"{probe_selector}._domainkey.{domain}", "TXT")
-        if any(_is_valid_dkim_record(str(r).strip('"')) for r in answers):
-            return [], True
-    except Exception:
-        pass
-
-    found = []
-    for selector in _DKIM_SELECTORS:
+    def lookup(selector: str) -> list[str]:
+        # resolve() follows CNAMEs (Proton, Fastmail), so the TXT behind a CNAME is returned.
         try:
-            answers = resolver.resolve(f"{selector}._domainkey.{domain}", "TXT")
-            for r in answers:
-                txt = str(r).strip('"')
-                if _is_valid_dkim_record(txt):
-                    found.append(f"{selector}: {txt[:80]}")
+            return [str(r).strip('"') for r in resolver.resolve(f"{selector}._domainkey.{domain}", "TXT")]
         except Exception:
-            pass
+            return []
+
+    names = [f"zzprobe{secrets.token_hex(6)}", *_DKIM_SELECTORS]
+    with ThreadPoolExecutor(max_workers=_DKIM_MAX_WORKERS) as pool:
+        results = list(pool.map(lookup, names))  # map keeps selector order
+
+    if any(_is_valid_dkim_record(t) for t in results[0]):
+        return [], True
+    found = [
+        f"{selector}: {txt[:80]}"
+        for selector, txts in zip(_DKIM_SELECTORS, results[1:])
+        for txt in txts
+        if _is_valid_dkim_record(txt)
+    ]
     return found, False
 
 
@@ -304,7 +315,7 @@ async def collect_dns_records(domain: str, timeout_seconds: int = _DEFAULT_TIMEO
     """
     Collect DNS records for domain as structured data.
 
-    The 9 DKIM selector probes are enumeration, so they run only when active
+    The DKIM selector probes are enumeration, so they run only when active
     tools are enabled (see openosint.tool_policy).
 
     Raises

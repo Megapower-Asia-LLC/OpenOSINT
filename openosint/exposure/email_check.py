@@ -12,7 +12,7 @@ from openosint.tools.search_dns import probe_dkim
 
 CAT = "email"
 DNS_TIMEOUT = 5.0
-DKIM_PROBE_TIMEOUT = 2.0  # 10 sequential probes must fit the command's time budget
+DKIM_PROBE_TIMEOUT = 2.0  # sequential probes (len(DKIM_SELECTORS)) must fit the command's time budget
 SPF_MAX_LOOKUPS = 10  # RFC 7208 4.6.4
 # A domain that receives no mail can still be used to send spoofed mail.
 NO_MAIL_SPF_FIX = 'This domain has no MX: publish "v=spf1 -all" so nobody can send mail as it.'

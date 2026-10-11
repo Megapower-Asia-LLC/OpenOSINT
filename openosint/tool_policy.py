@@ -74,7 +74,7 @@ TOOL_POLICY: dict[str, ToolPolicy] = {
     "search_dns": ToolPolicy(
         Noise.PASSIVE,
         "Record lookups go through your DNS resolver; the target's nameservers see the resolver, not you.",
-        active_part="9 DKIM selector probes (enumeration) run only with active tools enabled.",
+        active_part="DKIM selector probes (enumeration) run only with active tools enabled.",
     ),
     "search_virustotal": ToolPolicy(
         Noise.PASSIVE,
