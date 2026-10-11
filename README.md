@@ -205,7 +205,7 @@ A publicly reachable or demo instance can never enable active tools, whatever th
 | `search_abuseipdb` | passive | on | One request to api.abuseipdb.com. |
 | `search_breach` | passive | on | One request to haveibeenpwned.com. |
 | `search_censys` | passive | on | Censys API; returns data Censys already holds. |
-| `search_dns` | passive | on | Record lookups go through your DNS resolver; the target's nameservers see the resolver, not you. **Active part:** 9 DKIM selector probes (enumeration) run only with active tools enabled. |
+| `search_dns` | passive | on | Record lookups go through your DNS resolver; the target's nameservers see the resolver, not you. **Active part:** DKIM selector probes (enumeration) run only with active tools enabled. |
 | `search_domain` | noisy | **off** | sublist3r scrapes several search engines and aggregators from your IP; expect captchas and blocks. |
 | `search_dorks_live` | passive | on | Google results via Bright Data; the target is sent to those two services. |
 | `search_email` | noisy | **off** | holehe probes many sites' sign-up/reset flows with the email from your IP; may notify the account owner or trigger security alerts. |
@@ -517,6 +517,32 @@ of this README.
 
 ---
 
+## External exposure report (beta)
+
+`openosint exposure` checks one domain from the outside and gives it an A-F grade. It is passive and point-in-time: organisation-level checks of email authentication, TLS, domain registration and security headers, plus optional lookalike domains. No AI provider or API key is needed.
+
+```bash
+openosint exposure example.com                       # terminal summary and grade
+openosint exposure example.com --json                # structured JSON
+openosint exposure example.com --report out.html --lang it   # self-contained HTML report (it or en)
+openosint exposure example.com --lookalikes          # also look for registered typo/homoglyph/TLD-swap domains
+openosint exposure example.com --resolver 1.1.1.1    # recursive resolver for lookups outside the domain's own nameservers
+```
+
+| Check | Noise level | What it contacts |
+|---|---|---|
+| Email authentication (SPF, DMARC, DKIM, MX) | passive | DNS only |
+| Domain registration (age, expiry, DNSSEC) | passive | RDAP registry, not the target |
+| Lookalike domains (`--lookalikes`) | passive | DNS only; no lookalike web server is ever contacted |
+| TLS certificate and protocol | touches target | A TLS handshake with the target on port 443 (the domain and `www`) |
+| Security headers | touches target | One HTTPS GET to `https://DOMAIN/` (redirects are followed) |
+
+It does **not** scan ports, log in to anything, or collect personal data. The grade is not a certification and not proof of NIS2 or any other compliance. Lookalikes are found by DNS only and are never part of the grade.
+
+This feature is **beta**: checks, scoring and the report format may change between releases. The HTML report footer shows its `report_version`.
+
+---
+
 ## Interfaces
 
 ### Web UI
@@ -697,7 +723,7 @@ claude mcp add openosint -e SHODAN_API_KEY=your-key -e HIBP_API_KEY=your-key -- 
 
 API keys go in the client's `env` block. MCP hosts launch the server with a cwd unrelated to your project, so a `.env` file is not picked up reliably; to use one, set `"OPENOSINT_ENV_FILE": "/absolute/path/to/.env"` in the same `env` block.
 
-By default the server lists **passive tools only**, so a client LLM cannot see the noisy ones. Each tool description carries its noise label. Pin a release with `--from openosint==2.33.1`. Running from a source checkout instead: `"command": "python", "args": ["-m", "openosint.mcp_server"]`.
+By default the server lists **passive tools only**, so a client LLM cannot see the noisy ones. Each tool description carries its noise label. Pin a release with `--from openosint==2.34.0`. Running from a source checkout instead: `"command": "python", "args": ["-m", "openosint.mcp_server"]`.
 
 **Agentic use via Claude Code:**
 
@@ -867,6 +893,7 @@ On a fresh install with no keys at all, these still work: `generate_dorks`,
 | `openosint scrape URL [-t N]` | Fetch a URL via Bright Data Web Unlocker |
 | `openosint footprint TARGET [--max-queries N] [-t N]` | SERP footprint via Bright Data |
 | `openosint multi TARGETS` | Parallel multi-target investigation (max 10) |
+| `openosint exposure DOMAIN [--lookalikes] [--report FILE.html] [--lang it\|en] [--resolver IP]` | External exposure report graded A-F (beta) |
 | `openosint playbook RECIPE TARGET` | Run a deterministic investigation playbook (no AI) |
 | `openosint history [--all] [open N] [clear]` | View/manage REPL session history |
 | `openosint proxy-test` | Verify the configured upstream proxy |
@@ -1022,7 +1049,7 @@ OpenOSINT is open source under the [MIT License](./LICENSE) — free for any use
 
 *For authorized security research only. See [DISCLAIMER.md](DISCLAIMER.md).*
 
-*OpenOSINT v2.33.1 — October 2026*
+*OpenOSINT v2.34.0 — October 2026*
 
 ## Star History
 

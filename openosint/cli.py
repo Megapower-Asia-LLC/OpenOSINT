@@ -38,7 +38,12 @@ from openosint.proxy import (  # noqa: E402
     redact_proxy_url,
     set_cli_proxy_url,
 )
-from openosint.tool_policy import ENV_ALLOW_ACTIVE, disabled_result, humanize, is_tool_enabled  # noqa: E402
+from openosint.tool_policy import (  # noqa: E402
+    ENV_ALLOW_ACTIVE,
+    disabled_result,
+    humanize,
+    is_tool_enabled,
+)
 from openosint.tools.scrape_url import run_scrape_url_osint  # noqa: E402
 from openosint.tools.search_abuseipdb import run_abuseipdb_osint  # noqa: E402
 from openosint.tools.search_breach import run_breach_osint  # noqa: E402
@@ -372,6 +377,41 @@ def _build_parser() -> argparse.ArgumentParser:
         default=10,
         metavar="SECONDS",
         help="DNS query timeout (default: 10).",
+    )
+
+    # exposure
+    exposure_cmd = subparsers.add_parser(
+        "exposure",
+        help="External exposure report graded A-F (no AI). Email and RDAP checks are DNS/registry only; "
+        "the TLS and HTTP-header checks contact the target directly (port 443).",
+    )
+    exposure_cmd.add_argument("domain", type=str, metavar="DOMAIN", help="Target domain (e.g. example.com).")
+    # default=SUPPRESS: a subparser default would overwrite the global --json given before the command
+    exposure_cmd.add_argument(
+        "--json", action="store_true", dest="json_output", default=argparse.SUPPRESS, help="Output structured JSON."
+    )
+    exposure_cmd.add_argument(
+        "--report",
+        type=str,
+        metavar="PATH.html",
+        default=None,
+        help="Also write a self-contained HTML report (prints cleanly to PDF from a browser).",
+    )
+    exposure_cmd.add_argument(
+        "--lookalikes",
+        action="store_true",
+        help="Also look for registered lookalike domains (typos, homoglyphs, TLD swaps). DNS only; "
+        "not part of the score or grade.",
+    )
+    exposure_cmd.add_argument(
+        "--resolver",
+        type=_ip_literal,
+        metavar="IP",
+        default=None,
+        help="Recursive DNS resolver for lookups outside the domain's own nameservers (default: system resolver).",
+    )
+    exposure_cmd.add_argument(
+        "--lang", choices=("en", "it"), default="en", help="Report language (default: en). Used with --report."
     )
 
     # abuseipdb
@@ -789,6 +829,48 @@ async def _handle_dns(
         _print_result(result)
 
 
+def _ip_literal(value: str) -> str:
+    from openosint.exposure.dns_auth import parse_ip
+
+    try:
+        return parse_ip(value)
+    except ValueError:
+        raise argparse.ArgumentTypeError(f"'{value}' is not an IP address (e.g. 1.1.1.1)") from None
+
+
+async def _handle_exposure(
+    domain: str,
+    json_output: bool = False,
+    report_path: str | None = None,
+    lang: str = "en",
+    lookalikes: bool = False,
+    resolver: str | None = None,
+) -> None:
+    from openosint.exposure import run_exposure
+    from openosint.exposure.render import render
+
+    print(f"[*] Exposure report: {domain}", file=sys.stderr)
+    try:
+        report = await run_exposure(domain, lookalikes, resolver)
+    except ValueError as exc:
+        print(f"[!] {exc}", file=sys.stderr)
+        sys.exit(2)
+    if json_output:
+        _emit_json(report.to_dict())
+    else:
+        print(render(report))
+    if report_path:
+        from openosint.exposure.report import render_html
+
+        try:
+            with open(report_path, "w", encoding="utf-8") as fh:
+                fh.write(render_html(report, lang))
+        except OSError as exc:
+            print(f"[!] Could not write report to {report_path}: {exc.strerror or exc}", file=sys.stderr)
+            sys.exit(1)
+        print(f"[*] Report written: {report_path}", file=sys.stderr)
+
+
 async def _handle_ip2location(
     ip: str,
     timeout: int,
@@ -1132,6 +1214,10 @@ async def _async_main() -> None:
         await _handle_github(args.query, args.timeout, json_output=json_output)
     elif args.command == "dns":
         await _handle_dns(args.domain, args.timeout, json_output=json_output)
+    elif args.command == "exposure":
+        await _handle_exposure(
+            args.domain, json_output=json_output, report_path=args.report, lang=args.lang, lookalikes=args.lookalikes, resolver=args.resolver
+        )
     elif args.command == "abuseipdb":
         await _handle_abuseipdb(args.ip, args.timeout, json_output=json_output)
     elif args.command == "ip2location":
