@@ -9,6 +9,11 @@ OpenOSINT adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Added
+
+- `openosint.exposure.api`: the supported library API of the exposure engine (`run_exposure`, `ExposureReport`, `render_html`, `normalize_domain`, `registrable_domain`, `DomainNotRegistered`).
+- `openosint exposure --public-only` (and `run_exposure(..., public_only=True)`), for hosted use. The TLS and header checks resolve the host once, refuse it when any answer is non-public (loopback, private, link-local, CGNAT, multicast, reserved, IPv6 ULA, and IPv4-mapped forms), and connect to the vetted IP with SNI and certificate verification against the hostname. Redirects are followed by hand (at most 3, https on port 443 only) and every hop is vetted and pinned the same way. A refused target is reported as a skipped check. Environment proxy settings are ignored in this mode. Off by default; behaviour without the flag is unchanged.
+
 ## [2.34.0] — 2026-10-11
 
 ### Added

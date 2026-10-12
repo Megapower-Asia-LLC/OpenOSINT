@@ -3,10 +3,15 @@
 from __future__ import annotations
 
 import ssl
+from urllib.parse import urljoin, urlsplit
 
+import certifi
 import requests
+import urllib3
+from urllib3 import HTTPSConnectionPool
 
 from openosint import __version__
+from openosint.exposure import netguard
 from openosint.exposure.models import STATUS_OK, CheckResult, CheckSkipped, Passed, data
 from openosint.exposure.scoring import ev, finding
 from openosint.proxy import get_requests_proxies
@@ -45,9 +50,60 @@ def _get(url: str) -> dict:
     return dict(resp.headers)
 
 
-def run(domain: str, registrable: str) -> CheckResult:
+REDIRECT_STATUSES = (301, 302, 303, 307, 308)
+
+
+def _fetch(ip: str, host: str, path: str) -> tuple[int, dict]:
+    """One GET to the vetted `ip`; Host, SNI and certificate verification use `host`. No redirects."""
+    pool = HTTPSConnectionPool(
+        ip, 443, server_hostname=host, assert_hostname=host, cert_reqs="CERT_REQUIRED", ca_certs=certifi.where(),
+        timeout=TIMEOUT, retries=False,
+    )
     try:
-        response_headers = _get(f"https://{domain}/")
+        resp = pool.urlopen("GET", path, headers={"Host": host, "User-Agent": USER_AGENT}, redirect=False,
+                            retries=False, preload_content=False)
+        try:
+            return resp.status, dict(resp.headers)
+        finally:
+            resp.close()
+    finally:
+        pool.close()
+
+
+def _get_public(url: str) -> dict:
+    """public_only: redirects followed by hand (https on 443 only), every hop resolved, vetted and pinned.
+
+    Environment proxies are not used: a proxy would resolve the name itself and bypass the pin.
+    """
+    for _ in range(MAX_REDIRECTS + 1):
+        parts = urlsplit(url)
+        try:
+            port = parts.port or 443
+        except ValueError:
+            port = -1
+        if parts.scheme != "https" or port != 443 or not parts.hostname:
+            raise netguard.RedirectBlocked
+        host = parts.hostname
+        ip = netguard.pin(host)
+        path = (parts.path or "/") + (f"?{parts.query}" if parts.query else "")
+        try:
+            status, headers = _fetch(ip, host, path)
+        except urllib3.exceptions.SSLError as exc:
+            raise requests.exceptions.SSLError(str(exc)) from exc
+        except urllib3.exceptions.TimeoutError as exc:
+            raise requests.Timeout(str(exc)) from exc
+        except urllib3.exceptions.HTTPError as exc:
+            raise requests.ConnectionError(str(exc)) from exc
+        location = next((v for k, v in headers.items() if k.lower() == "location"), None)
+        if status not in REDIRECT_STATUSES or not location:
+            return headers
+        url = urljoin(url, location)
+    raise requests.TooManyRedirects(f"more than {MAX_REDIRECTS} redirects")
+
+
+def run(domain: str, registrable: str, public_only: bool = False) -> CheckResult:
+    try:
+        response_headers = (_get_public if public_only else _get)(f"https://{domain}/")
     except requests.exceptions.SSLError as exc:
         if _is_cert_failure(exc):  # never retried unverified: the TLS check already reports it
             raise CheckSkipped("TLS verification failed (see TLS findings)", "tls_verification_failed") from exc

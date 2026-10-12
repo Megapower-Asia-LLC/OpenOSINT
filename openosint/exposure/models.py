@@ -23,6 +23,8 @@ REASON_CODES = (
     "rdap_error",
     "unexpected_error",
     "check_failed",
+    "non_public_target",  # --public-only: the host resolves to a non-public address
+    "redirect_blocked",  # --public-only: a redirect left https on port 443
     "recursive_fallback",  # note only: the zone's own nameservers did not answer
 )
 

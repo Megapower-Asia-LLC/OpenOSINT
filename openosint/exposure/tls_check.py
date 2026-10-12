@@ -9,6 +9,7 @@ from datetime import datetime, timezone
 from cryptography import x509
 from cryptography.x509.oid import NameOID
 
+from openosint.exposure import netguard
 from openosint.exposure.models import STATUS_OK, CheckError, CheckResult, Passed
 from openosint.exposure.scoring import ev, finding
 from openosint.tool_policy import Noise
@@ -21,8 +22,12 @@ _VERIFY_EXPIRED, _VERIFY_HOSTNAME = 10, 62
 _OLD_VERSIONS = ("SSLv2", "SSLv3", "TLSv1", "TLSv1.1")
 
 
-def _connect(host: str, verify: bool) -> tuple[bytes, str]:
-    """Handshake on 443; return (DER certificate, negotiated version)."""
+def _connect(host: str, verify: bool, ip: str | None = None) -> tuple[bytes, str]:
+    """Handshake on 443; return (DER certificate, negotiated version).
+
+    With `ip` (public_only) the TCP connection goes to that vetted address, while SNI and
+    certificate verification still use `host`.
+    """
     ctx = ssl.create_default_context()
     if not verify:  # only used to read cert details after verification failed
         ctx.check_hostname, ctx.verify_mode = False, ssl.CERT_NONE
@@ -30,7 +35,7 @@ def _connect(host: str, verify: bool) -> tuple[bytes, str]:
         ctx.minimum_version = ssl.TLSVersion.TLSv1  # so a legacy server shows its version, not a handshake error
     except (ValueError, ssl.SSLError):
         pass  # ponytail: OpenSSL builds that refuse TLS<1.2 report such servers as a failed handshake instead
-    with socket.create_connection((host, PORT), timeout=TIMEOUT) as sock:
+    with socket.create_connection((ip or host, PORT), timeout=TIMEOUT) as sock:
         with ctx.wrap_socket(sock, server_hostname=host) as tls:
             return tls.getpeercert(binary_form=True), tls.version() or "unknown"
 
@@ -47,17 +52,23 @@ def _describe(der: bytes) -> tuple[datetime, str, list[str]]:
     return not_after, str(issuer), list(sans)
 
 
-def _check_host(host: str) -> tuple[list, list]:
+def _check_host(host: str, public_only: bool = False) -> tuple[list, list]:
     """(findings, passed) for one host. gaierror/OSError propagate to the caller."""
     failure: ssl.SSLCertVerificationError | None = None
+    # Resolved and vetted once; all attempts below use the same address (no re-resolution).
+    pinned = (netguard.pin(host),) if public_only else ()
+
+    def connect(verify: bool) -> tuple[bytes, str]:
+        return _connect(host, verify, *pinned)
+
     try:
         try:
-            der, version = _connect(host, verify=True)
+            der, version = connect(True)
         except ssl.SSLCertVerificationError as exc:
             failure = exc
-            der, version = _connect(host, verify=False)
+            der, version = connect(False)
         except ssl.SSLError:  # handshake itself failed; retry unverified before giving up
-            der, version = _connect(host, verify=False)
+            der, version = connect(False)
     except ssl.SSLError as exc:
         return [finding("tls_handshake_failed", CAT, f"TLS handshake with {host} failed",
                         f"{host}: port 443 accepts connections but no TLS handshake succeeded: {exc}",
@@ -94,14 +105,19 @@ def _check_host(host: str) -> tuple[list, list]:
     return out, passed
 
 
-def run(domain: str, registrable: str) -> CheckResult:
+def run(domain: str, registrable: str, public_only: bool = False) -> CheckResult:
     findings, passed, notes, note_codes = [], [], [], []
     # www.<input> only for an apex input; a subdomain input checks just that host.
     for host in (domain, f"www.{domain}") if domain == registrable else (domain,):
         try:
-            host_findings, host_passed = _check_host(host)
+            host_findings, host_passed = _check_host(host, public_only)
             findings += host_findings
             passed += host_passed
+        except netguard.NonPublicTarget:
+            if host == domain:
+                raise  # the runner reports the whole check as skipped
+            notes.append(f"{host} skipped: {netguard.REFUSED_MESSAGE}")
+            note_codes.append("non_public_target")
         except socket.gaierror as exc:
             if host == domain:
                 raise CheckError(f"{host} does not resolve: {exc}", "name_not_resolved") from exc
