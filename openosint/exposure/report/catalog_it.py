@@ -120,6 +120,8 @@ CATALOG = {
         "no_rdap_for_tld": "Il registro di questa estensione di dominio non offre un servizio pubblico di consultazione, quindi i dati di registrazione non sono stati verificati.",
         "tls_verification_failed": "Il certificato di sicurezza del sito non ha superato la verifica, quindi le intestazioni di sicurezza non sono state lette (vedere i rilievi sul certificato).",
         "www_not_in_dns": "La versione \"www\" del dominio non esiste nel DNS, quindi non è stata verificata.",
+        "non_public_target": "Il bersaglio risolve in un indirizzo non pubblico, quindi non è stato contattato.",
+        "redirect_blocked": "Il sito ha reindirizzato verso un indirizzo HTTP non cifrato o su una porta non standard, quindi le intestazioni di sicurezza non sono state lette.",
         "timeout": "La verifica è scaduta prima di ricevere una risposta.",
         "dns_error": "I server DNS non hanno fornito una risposta utilizzabile.",
         "unreachable": "Il server non è raggiungibile.",

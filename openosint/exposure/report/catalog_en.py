@@ -127,6 +127,8 @@ CATALOG = {
         "no_rdap_for_tld": "The registry for this domain extension offers no public lookup service, so the registration details could not be checked.",
         "tls_verification_failed": "The website's security certificate failed verification, so its security headers were not read (see the certificate findings).",
         "www_not_in_dns": "The \"www\" version of the domain does not exist in the DNS, so it was not checked.",
+        "non_public_target": "The target resolves to a non-public address, so it was not contacted.",
+        "redirect_blocked": "The site redirected to a plain-HTTP or non-standard-port address, so its security headers were not read.",
         "timeout": "The check timed out before an answer was received.",
         "dns_error": "The DNS servers did not give a usable answer.",
         "unreachable": "The server could not be reached.",

@@ -411,6 +411,12 @@ def _build_parser() -> argparse.ArgumentParser:
         help="Recursive DNS resolver for lookups outside the domain's own nameservers (default: system resolver).",
     )
     exposure_cmd.add_argument(
+        "--public-only",
+        action="store_true",
+        help="Refuse to connect to targets that resolve to non-public addresses (loopback, private, link-local, "
+        "CGNAT, ...) and vet every redirect hop. For hosted use; ignores proxy settings.",
+    )
+    exposure_cmd.add_argument(
         "--lang", choices=("en", "it"), default="en", help="Report language (default: en). Used with --report."
     )
 
@@ -845,13 +851,15 @@ async def _handle_exposure(
     lang: str = "en",
     lookalikes: bool = False,
     resolver: str | None = None,
+    public_only: bool = False,
 ) -> None:
     from openosint.exposure import run_exposure
     from openosint.exposure.render import render
 
     print(f"[*] Exposure report: {domain}", file=sys.stderr)
     try:
-        report = await run_exposure(domain, lookalikes, resolver)
+        extra = {"public_only": True} if public_only else {}  # the call is identical to before unless the flag is given
+        report = await run_exposure(domain, lookalikes, resolver, **extra)
     except ValueError as exc:
         print(f"[!] {exc}", file=sys.stderr)
         sys.exit(2)
@@ -1216,7 +1224,8 @@ async def _async_main() -> None:
         await _handle_dns(args.domain, args.timeout, json_output=json_output)
     elif args.command == "exposure":
         await _handle_exposure(
-            args.domain, json_output=json_output, report_path=args.report, lang=args.lang, lookalikes=args.lookalikes, resolver=args.resolver
+            args.domain, json_output=json_output, report_path=args.report, lang=args.lang, lookalikes=args.lookalikes, resolver=args.resolver,
+            public_only=args.public_only,
         )
     elif args.command == "abuseipdb":
         await _handle_abuseipdb(args.ip, args.timeout, json_output=json_output)
