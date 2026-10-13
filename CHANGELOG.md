@@ -9,6 +9,8 @@ OpenOSINT adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [2.35.0] — 2026-10-13
+
 ### Added
 
 - `openosint.exposure.api`: the supported library API of the exposure engine (`run_exposure`, `ExposureReport`, `render_html`, `normalize_domain`, `registrable_domain`, `DomainNotRegistered`).
