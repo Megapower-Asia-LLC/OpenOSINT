@@ -5,6 +5,7 @@
    - `.mcp/server.json` (`version` and `packages[0].version`)
    - `README.md` footer (`*OpenOSINT vX.Y.Z — Month YYYY*`, near the end)
 1a. **Rebuild the site**: `python scripts/build_site.py`. The docs pages show the version from `pyproject.toml`, so `scripts/check_site.py` (and CI) fails until you do. Refresh `stars` in `site/data/site.yaml` if you want the home page count current.
+   - Changed `docs/favicon.svg`? Run `python scripts/render_favicons.py` (needs Pillow and Chrome) to regenerate the ICO and PNG icons.
 2. **CHANGELOG.md**: rename `[Unreleased]` to `[X.Y.Z] — YYYY-MM-DD` and open a fresh `[Unreleased]`.
 3. **Refresh the lock**: `uv lock`, commit it. CI runs `uv lock --check`; the Heroku build runs `uv sync --locked`, so a stale lock breaks the demo deploy.
 4. **Check locally**: `pytest tests -q` and `ruff check openosint tests --extend-ignore I001`. Merge to `main` once CI is green.
