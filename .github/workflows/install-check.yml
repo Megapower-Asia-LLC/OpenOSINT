@@ -38,6 +38,8 @@ jobs:
           tests/test_mcp_version.py scripts/ci/smoke_install.py scripts/ci/check_dist_clean.py
       # Graph tests self-skip here (importorskip: no followthemoney without the extra).
       - run: pytest tests -q
+      # Fails on broken links, missing metadata or a stale docs/ build; rebuild with: python scripts/build_site.py
+      - run: python scripts/check_site.py
 
   build:
     name: Build wheel
