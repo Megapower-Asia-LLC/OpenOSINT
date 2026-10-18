@@ -13,7 +13,7 @@ This surface has its own, separate **Terms of Use** and **Privacy & Cookie Notic
 
 ## 2. Cookies and tracking
 
-This website (openosint.tech) sets no cookies and loads no analytics, advertising, or fingerprinting scripts. There is no Google Analytics, Google Tag Manager, Meta pixel, Hotjar, or any other third-party tracker on any page. No cookie consent banner is shown because none is required — there are no non-essential cookies or trackers to consent to. If that changes, this policy and the site will be updated before any tracking is introduced.
+This website (openosint.tech) sets no cookies and loads no advertising or fingerprinting scripts. It uses Cloudflare Web Analytics, which is cookieless and does no cross-site tracking. It collects the page URL, referrer, browser and device type and country, and is processed by Cloudflare, Inc. There is no Google Analytics, Google Tag Manager, Meta pixel, Hotjar, or any other third-party tracker on any page. No cookie consent banner is shown because none is required — there are no non-essential cookies or trackers to consent to. If that changes, this policy and the site will be updated before any tracking is introduced.
 
 ## 3. OpenOSINT Cloud API
 

@@ -125,3 +125,16 @@ def test_checker_accepts_a_clean_page(tmp_path, monkeypatch):
 def test_no_unexpanded_tokens_in_output():
     leaked = [str(p.relative_to(ROOT)) for p in (ROOT / "docs").rglob("*.html") if "%%" in p.read_text(encoding="utf-8")]
     assert leaked == []
+
+
+def test_checker_requires_exactly_one_analytics_beacon(tmp_path, monkeypatch):
+    monkeypatch.setattr(check_site, "DOCS", tmp_path)
+    beacon = '<script defer src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon=\'{"token": "t"}\'></script>'
+    _write(tmp_path, "img.png", "x")
+    _write(tmp_path, "none/index.html", GOOD_HEAD + "</head><body><h1>A</h1></body></html>")
+    _write(tmp_path, "two/index.html", GOOD_HEAD + "</head><body><h1>B</h1>" + beacon * 2 + "</body></html>")
+    _write(tmp_path, "one/index.html", GOOD_HEAD.replace("Page", "Other").replace("A page.", "Another.") + "</head><body><h1>C</h1>" + beacon + "</body></html>")
+    text = "\n".join(check_site.check_pages(check_site.load_pages()))
+    assert "none/index.html: 0 Cloudflare Analytics beacons" in text
+    assert "two/index.html: 2 Cloudflare Analytics beacons" in text
+    assert "one/index.html: 1 Cloudflare" not in text

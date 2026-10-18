@@ -2,3 +2,6 @@
 # The home page shows it rounded down. Refresh it when you rebuild before a release.
 stars: 1773
 docs_groups: [Get started, Use, Reference]
+# Cloudflare Web Analytics site token. Public by design (it ships in every page).
+# REPLACE the placeholder with the token from the Cloudflare dashboard, then rebuild.
+cf_analytics_token: "REPLACE_WITH_CLOUDFLARE_TOKEN"

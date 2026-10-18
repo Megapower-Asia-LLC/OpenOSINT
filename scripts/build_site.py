@@ -419,6 +419,7 @@ def build() -> dict[str, str]:
         "version": project_version(),
         "stars_display": stars_display(cfg["stars"]),
         "tool_count": len(tool_names()),
+        "cf_analytics_token": cfg["cf_analytics_token"],
         "docs_groups": groups,
         "nav": NAV,
         "footer": FOOTER,

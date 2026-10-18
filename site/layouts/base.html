@@ -88,5 +88,6 @@ document.querySelectorAll("pre").forEach(function (pre) {
 {%- for src in page.scripts %}
 <script src="{{ src }}" defer></script>
 {%- endfor %}
+<script defer src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon='{"token": "{{ site.cf_analytics_token }}"}'></script>
 </body>
 </html>

@@ -25,6 +25,7 @@ from urllib.request import Request, urlopen
 ROOT = Path(__file__).resolve().parent.parent
 DOCS = ROOT / "docs"
 SITE_HOST = "openosint.tech"
+BEACON_HOST = "static.cloudflareinsights.com"  # Cloudflare Web Analytics beacon, the one allowed third-party script
 MAX_TITLE = 60
 MAX_DESCRIPTION = 155
 EXTERNAL_TIMEOUT_SECONDS = 15
@@ -48,6 +49,7 @@ class PageInfo(HTMLParser):
         self.links: list[str] = []  # <a href>
         self.resources: list[str] = []  # everything the browser loads
         self.json_ld: list[str] = []
+        self.beacons = 0
         self.meta_names: set[str] = set()
         self._ld_buffer: list[str] | None = None
 
@@ -71,6 +73,8 @@ class PageInfo(HTMLParser):
             self.links.append(a["href"])
         elif tag == "script" and a.get("type") == "application/ld+json":
             self._ld_buffer = []
+        if tag == "script" and BEACON_HOST in a.get("src", "") and a.get("data-cf-beacon"):
+            self.beacons += 1
         if tag in RESOURCE_TAGS and a.get("src"):
             self.resources.append(a["src"])
         if a.get("srcset"):
@@ -178,6 +182,8 @@ def check_pages(pages: dict[Path, PageInfo]) -> list[str]:
                 for tag in ("og:title", "og:description", "og:image", "twitter:card")
                 if tag not in info.meta_names
             ]
+        if info.beacons != 1:
+            problems.append(f"{name}: {info.beacons} Cloudflare Analytics beacons (need exactly 1)")
         for block in info.json_ld:
             try:
                 json.loads(block)
