@@ -1,661 +1,171 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>OpenOSINT — OSINT Framework for Claude &amp; AI Agents</title>
-<meta name="description" content="Open-source OSINT framework with 21 tools, MCP server for Claude, and AI-powered REPL. Investigate emails, IPs, domains, and usernames automatically.">
-<meta name="keywords" content="OSINT, open source intelligence, MCP server, Claude AI agent, IP intelligence API, IP geolocation API, proxy VPN detection API, domain intelligence API, email investigation, username search">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>OpenOSINT: open-source engine, hosted checks</title>
+<meta name="description" content="OpenOSINT is an open-source engine for passive checks of public information. Monitor watches your domain's security, Diligence compares company records with their digital footprint.">
 <link rel="canonical" href="https://openosint.tech/">
-<meta property="og:title" content="OpenOSINT — OSINT Framework for Claude &amp; AI Agents">
-<meta property="og:description" content="Open-source OSINT framework with 21 intelligence tools, MCP server, and AI-powered REPL. Investigate emails, IPs, domains, and usernames.">
-<meta property="og:url" content="https://openosint.tech/">
-<meta property="og:type" content="website">
+<meta name="theme-color" content="#16181b">
+<link rel="icon" href="/logo.svg" type="image/svg+xml">
+
 <meta property="og:site_name" content="OpenOSINT">
+<meta property="og:type" content="website">
+<meta property="og:title" content="OpenOSINT: open-source engine, hosted checks">
+<meta property="og:description" content="OpenOSINT is an open-source engine for passive checks of public information. Monitor watches your domain's security, Diligence compares company records with their digital footprint.">
+<meta property="og:url" content="https://openosint.tech/">
+<meta property="og:image" content="https://app.openosint.tech/static/og-image.png?v=3c660b6667">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="OpenOSINT: open-source checks of public information about domains and companies">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="OpenOSINT — OSINT Framework for Claude &amp; AI Agents">
-<meta name="twitter:description" content="Open-source OSINT framework with 21 intelligence tools, MCP server, and AI-powered REPL for AI agents.">
-<link rel="icon" type="image/svg+xml" href="logo.svg">
-<link rel="stylesheet" href="style.css">
-<script src="assets/metrics.js" defer></script>
-<script src="assets/waitlist.js" defer></script>
-<script>
-  window.addEventListener('load', function () {
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-      var el = document.querySelector('.hero-video');
-      if (el) { el.removeAttribute('autoplay'); el.setAttribute('controls', ''); }
-    }
-  });
-</script>
+<meta name="twitter:title" content="OpenOSINT: open-source engine, hosted checks">
+<meta name="twitter:description" content="OpenOSINT is an open-source engine for passive checks of public information. Monitor watches your domain's security, Diligence compares company records with their digital footprint.">
+<meta name="twitter:image" content="https://app.openosint.tech/static/og-image.png?v=3c660b6667">
+<meta name="twitter:image:alt" content="OpenOSINT: open-source checks of public information about domains and companies">
+
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
-  "@type": "SoftwareApplication",
+  "@type": "Organization",
   "name": "OpenOSINT",
-  "description": "MCP-native OSINT framework for AI agents. 21 intelligence-gathering tools exposed via Model Context Protocol for automated investigations.",
-  "applicationCategory": "SecurityApplication",
-  "operatingSystem": "Linux, macOS, Windows",
-  "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
-  "url": "https://openosint.tech",
-  "sameAs": "https://github.com/OpenOSINT/OpenOSINT"
+  "url": "https://openosint.tech/",
+  "logo": "https://openosint.tech/logo.svg",
+  "description": "Open-source engine for passive checks of public information, with hosted products Monitor and Diligence.",
+  "email": "commercial@openosint.tech",
+  "sameAs": ["https://github.com/OpenOSINT/OpenOSINT", "https://app.openosint.tech/"]
 }
 </script>
-<script type="application/ld+json">
-[
-  {
-    "@context": "https://schema.org",
-    "@type": "Product",
-    "name": "AI OSINT Complete Kit",
-    "description": "The AI OSINT Prompt Pack and the Operator's Playbook, bundled — the full OpenOSINT investigation methodology.",
-    "url": "https://tommasodev.gumroad.com/l/ai-osint-complete-kit",
-    "offers": { "@type": "Offer", "price": "55", "priceCurrency": "USD", "availability": "https://schema.org/InStock", "url": "https://tommasodev.gumroad.com/l/ai-osint-complete-kit" }
-  },
-  {
-    "@context": "https://schema.org",
-    "@type": "Product",
-    "name": "AI OSINT Prompt Pack",
-    "description": "30+ tested prompts across 8 target types for OpenOSINT investigations, with one repeatable collect, pivot, verify, document flow.",
-    "url": "https://tommasodev.gumroad.com/l/ai-osint-prompt-pack",
-    "offers": { "@type": "Offer", "price": "29", "priceCurrency": "USD", "availability": "https://schema.org/InStock", "url": "https://tommasodev.gumroad.com/l/ai-osint-prompt-pack" }
-  },
-  {
-    "@context": "https://schema.org",
-    "@type": "Product",
-    "name": "The AI OSINT Operator's Playbook",
-    "description": "Step-by-step workflows for running OSINT investigations with ChatGPT, Claude, and OpenOSINT.",
-    "url": "https://tommasodev.gumroad.com/l/ai-osint-playbook",
-    "offers": { "@type": "Offer", "price": "39", "priceCurrency": "USD", "availability": "https://schema.org/InStock", "url": "https://tommasodev.gumroad.com/l/ai-osint-playbook" }
-  }
-]
-</script>
+
+<style>
+/* Visual language of app.openosint.tech: editorial, light, square corners, Hanken Grotesk + IBM Plex Mono. */
+@font-face { font-family: "Hanken Grotesk"; font-style: normal; font-weight: 400 700; font-display: swap; src: url("/assets/fonts/HankenGrotesk.woff2") format("woff2"); }
+@font-face { font-family: "IBM Plex Mono"; font-style: normal; font-weight: 400; font-display: swap; src: url("/assets/fonts/IBMPlexMono-Regular.woff2") format("woff2"); }
+:root {
+  color-scheme: light;
+  --ink: #16181b; --body: #3f454b; --muted: #5b6168; --line: #dadde0;
+  --white: #fff; --band-light: #f1f2f3; --band-dark: #1e2124; --on-dark: #fff; --on-dark-muted: #b9bec3;
+  --gutter: clamp(16px, 4vw, 48px); --max: 1280px;
+  --font: "Hanken Grotesk", system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+*, *::before, *::after { box-sizing: border-box; border-radius: 0; }
+html { -webkit-text-size-adjust: 100%; }
+body { margin: 0; min-height: 100vh; display: flex; flex-direction: column; background: var(--white); color: var(--ink); font-family: var(--font); font-size: 1rem; line-height: 1.55; }
+a { color: var(--ink); text-underline-offset: 3px; }
+a:hover { color: #000; }
+:focus-visible { outline: 3px solid var(--ink); outline-offset: 2px; }
+.wrap { width: 100%; max-width: var(--max); margin: 0 auto; padding: 0 var(--gutter); }
+.skip-link { position: absolute; left: -999px; top: 0; background: var(--white); padding: .5rem 1rem; z-index: 10; }
+.skip-link:focus { left: 0; }
+
+.site-header { border-bottom: 1px solid var(--line); }
+.site-header .wrap { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 16px; min-height: 72px; }
+.logo { font-size: 18px; font-weight: 700; letter-spacing: -0.01em; text-decoration: none; }
+.nav { display: flex; flex-wrap: wrap; gap: 4px 28px; font-size: 15px; font-weight: 500; }
+.nav a { text-decoration: none; }
+@media (max-width: 480px) { .nav { gap: 4px 16px; font-size: 14px; } }
+
+main { flex: 1; }
+.intro { padding: clamp(56px, 9vw, 120px) 0 clamp(32px, 5vw, 56px); }
+h1 { margin: 0 0 24px; font-size: clamp(44px, 7vw, 92px); font-weight: 600; line-height: .98; letter-spacing: -0.035em; }
+.lead { max-width: 40rem; margin: 0 0 32px; font-size: 19px; line-height: 1.5; color: var(--body); }
+.btn { display: inline-flex; align-items: center; justify-content: center; min-height: 44px; padding: 12px 20px; border: 1px solid var(--ink); background: var(--ink); color: var(--white); font-size: 15px; font-weight: 600; line-height: 1.2; text-decoration: none; text-align: center; }
+.btn:hover { background: #000; color: var(--white); }
+.btn-secondary { background: var(--white); color: var(--ink); }
+.btn-secondary:hover { background: var(--band-light); color: var(--ink); }
+
+.products { padding-bottom: clamp(40px, 6vw, 72px); }
+.plans { display: flex; flex-wrap: wrap; border-top: 2px solid var(--ink); }
+.plan { flex: 1 1 300px; min-width: 0; padding: 32px; display: flex; flex-direction: column; gap: 24px; }
+.plan:first-child { padding-left: 0; }
+.plan:last-child { padding-right: 0; }
+@media (max-width: 640px) { .plan { padding-left: 0; padding-right: 0; } }
+.plan h2 { margin: 0 0 12px; font-size: clamp(26px, 3vw, 32px); font-weight: 600; line-height: 1.1; letter-spacing: -0.02em; }
+.plan p { margin: 0; color: var(--body); }
+.plan .btn { align-self: flex-start; }
+.plan-body { flex-grow: 1; }
+
+.band-light { background: var(--band-light); padding: clamp(40px, 6vw, 72px) 0; }
+.band-light h2 { margin: 0 0 16px; font-size: 22px; font-weight: 600; letter-spacing: -0.01em; }
+.band-light p { max-width: 46rem; margin: 0 0 12px; color: var(--body); }
+.band-light p:last-child { margin-bottom: 0; }
+
+.site-footer { background: var(--band-dark); color: var(--on-dark-muted); font-size: 14px; }
+.site-footer .wrap { padding-top: 32px; padding-bottom: 32px; display: flex; flex-direction: column; gap: 16px; }
+.site-footer a { color: var(--on-dark); }
+.footer-links { list-style: none; padding: 0; margin: 0; display: flex; flex-wrap: wrap; gap: 8px 20px; }
+</style>
 </head>
 <body>
-<div id="nav">
-<a href="/" style="color:#3fb950;font-weight:bold;">← Back to App</a>
-<a href="/blog/" style="color:#58a6ff;">BLOG</a>
-<a href="/tools/" style="color:#58a6ff;">TOOLS</a>
-<a href="/cloud/" style="color:#f0a732;font-weight:bold;">CLOUD API</a>
-<a href="/learn/" style="color:#58a6ff;">LEARN</a>
-<a href="#name">NAME</a>
-<a href="#synopsis">SYNOPSIS</a>
-<a href="#description">DESCRIPTION</a>
-<a href="#demo">DEMO</a>
-<a href="#installation">INSTALLATION</a>
-<a href="#web">WEB UI</a>
-<a href="#repl">REPL</a>
-<a href="#tools">TOOLS</a>
-<a href="#commands">COMMANDS</a>
-<a href="#mcp">MCP SERVER</a>
-<a href="#examples">EXAMPLES</a>
-<a href="#legal">LEGAL</a>
-<a href="#license">LICENSE</a>
-<a href="/prompt-pack.html">PROMPT PACK</a>
-<a href="/commercial/" style="color:#f0a732;font-weight:bold;">FOR TEAMS</a>
-<a href="https://github.com/OpenOSINT/OpenOSINT" target="_blank" rel="noopener">GITHUB</a>
-<span class="nav-sep">|</span><a href="https://demo.openosint.tech" class="nav-cta">&#9654; LIVE DEMO</a>
-<span class="nav-sep">|</span><a href="/sponsors.html" class="nav-cta">&#10084; Sponsor</a>
-</div>
-
-<div id="content">
-
-<div id="masthead">
-<table width="100%" cellpadding="0" cellspacing="0" border="0">
-<tr>
-<td class="mhead-l">OPENOSINT(1)</td>
-<td class="mhead-c">General Commands Manual</td>
-<td class="mhead-r">OPENOSINT(1)</td>
-</tr>
-</table>
-</div>
-
-<p style="text-align:center;font-family:monospace;color:#444;margin:12px 0 0;">OSINT agent for security researchers and analysts: 21 investigation tools behind a natural-language interface.</p>
-
-<div style="background:#f0fff4;border:2px solid #3fb950;border-radius:6px;padding:18px 24px;margin:12px 0 0;text-align:center;font-family:monospace;">
-  <p style="margin:0 0 6px;font-size:1.15rem;font-weight:bold;color:#000;">&#9729; OpenOSINT Cloud &mdash; zero install</p>
-  <p style="color:#444;margin:0 0 14px;font-size:0.88rem;">No Python, no binaries in PATH, no API keys. Pay per use. Works as MCP tools in Claude, Cursor, and Windsurf via the Apify MCP Server.</p>
-  <div style="display:flex;flex-wrap:wrap;justify-content:center;gap:10px;">
-    <a href="https://apify.com/complete_analogy/openosint-email-recon?utm_source=site&amp;utm_medium=hero&amp;utm_campaign=cloud-hero-email" style="display:inline-block;background:#3fb950;color:#000;padding:10px 20px;border-radius:4px;text-decoration:none;font-weight:bold;font-family:monospace;font-size:14px;">Email Recon &rarr;</a>
-    <a href="https://apify.com/complete_analogy/openosint-username-recon?utm_source=site&amp;utm_medium=hero&amp;utm_campaign=cloud-hero-username" style="display:inline-block;background:#3fb950;color:#000;padding:10px 20px;border-radius:4px;text-decoration:none;font-weight:bold;font-family:monospace;font-size:14px;">Username Recon &rarr;</a>
-    <a href="https://apify.com/complete_analogy/openosint-domain-recon?utm_source=site&amp;utm_medium=hero&amp;utm_campaign=cloud-hero-domain" style="display:inline-block;background:#3fb950;color:#000;padding:10px 20px;border-radius:4px;text-decoration:none;font-weight:bold;font-family:monospace;font-size:14px;">Domain Recon &rarr;</a>
+<a class="skip-link" href="#main">Skip to content</a>
+<header class="site-header">
+  <div class="wrap">
+    <a class="logo" href="/">OpenOSINT</a>
+    <nav class="nav" aria-label="Main">
+      <a href="https://app.openosint.tech/monitor?utm_source=openosint.tech&amp;utm_medium=referral&amp;utm_campaign=nav">Monitor</a>
+      <a href="https://app.openosint.tech/diligence?utm_source=openosint.tech&amp;utm_medium=referral&amp;utm_campaign=nav">Diligence</a>
+      <a href="/blog/">Blog</a>
+      <a href="https://github.com/OpenOSINT/OpenOSINT" rel="noopener">GitHub</a>
+    </nav>
   </div>
-  <p style="color:#444;margin:14px 0 0;font-size:0.82rem;">From $0.02 per lookup &middot; free Apify credit to try &middot; <a href="/cloud/" style="color:#000;">compare all Cloud tools</a></p>
-</div>
+</header>
 
-<div style="background:#eef6ff;border:1px solid #58a6ff;border-radius:6px;padding:18px 24px;margin:12px 0 0;text-align:center;font-family:monospace;">
-  <p style="margin:0 0 6px;font-size:1.05rem;font-weight:bold;color:#000;">OpenOSINT Cloud is coming &mdash; hosted MCP + REST API, data sources included.</p>
-  <p style="color:#444;margin:0 0 14px;font-size:0.88rem;">The open-source framework stays free (MIT). Join the waitlist for early access and a founding-member price.</p>
-
-  <form data-waitlist-form data-form-location="homepage" novalidate class="wl-form" style="max-width:420px;margin:0 auto;text-align:left;">
-
-    <div class="wl-field" style="margin-bottom:10px;">
-      <label for="hp-wl-email">Email <span aria-hidden="true">*</span></label>
-      <input type="email" id="hp-wl-email" name="email" data-wl-email autocomplete="email" required>
+<main id="main">
+  <section class="intro" aria-label="Introduction">
+    <div class="wrap">
+      <h1>OpenOSINT</h1>
+      <p class="lead">OpenOSINT is an open-source engine for passive checks of public information: DNS, certificates and official registers.</p>
+      <a class="btn btn-secondary" href="https://github.com/OpenOSINT/OpenOSINT" rel="noopener">View the engine on GitHub</a>
     </div>
+  </section>
 
-    <div class="wl-honeypot" aria-hidden="true">
-      <label for="hp-wl-gotcha">Company website</label>
-      <input type="text" id="hp-wl-gotcha" name="_gotcha" data-wl-gotcha tabindex="-1" autocomplete="off">
+  <section class="products" aria-label="Products">
+    <div class="wrap">
+      <div class="plans">
+        <div class="plan">
+          <div class="plan-body">
+            <h2>Monitor</h2>
+            <p>Know when your domain&rsquo;s security gets worse. External checks of email authentication, TLS, security headers and lookalike domains, and one email when something changes.</p>
+          </div>
+          <a class="btn" href="https://app.openosint.tech/monitor?utm_source=openosint.tech&amp;utm_medium=referral&amp;utm_campaign=home">Open Monitor</a>
+        </div>
+        <div class="plan">
+          <div class="plan-body">
+            <h2>Diligence</h2>
+            <p>For analysts, investors and banks. Official company records compared with the company&rsquo;s public footprint, each signal with its source and retrieval time.</p>
+          </div>
+          <a class="btn" href="https://app.openosint.tech/diligence?utm_source=openosint.tech&amp;utm_medium=referral&amp;utm_campaign=home">Open Diligence</a>
+        </div>
+      </div>
     </div>
+  </section>
 
-    <div class="wl-consent">
-      <input type="checkbox" id="hp-wl-consent" name="consent" data-wl-consent required style="margin-top:3px;">
-      <label for="hp-wl-consent">I agree to receive emails about OpenOSINT Cloud launch. Unsubscribe anytime. See the <a href="/privacy/">Privacy Policy</a>.</label>
+  <section class="band-light" id="sponsors" aria-label="Sponsors">
+    <div class="wrap">
+      <h2>Sponsors</h2>
+      <p>OpenOSINT is proudly sponsored by <b><a href="https://www.ip2location.com" target="_blank" rel="noopener sponsored">IP2Location</a></b> (IP Geolocation &amp; Threat Intelligence category).</p>
+      <p>Featured Integration sponsorships are available for two open categories: <b>breach/compromised-credential data</b> and <b>email/identity lookup</b>. One vendor per category — exclusive placement in the README, docs, CLI banner, and Web UI.</p>
+      <p>&rarr; <a href="/sponsors.html"><b>Full media kit and pricing</b></a> &mdash; <a href="https://opencollective.com/openosint_oss" target="_blank" rel="noopener">Open Collective</a> &mdash; <a href="mailto:commercial@openosint.tech?subject=OpenOSINT%20Sponsorship%20Inquiry">commercial@openosint.tech</a></p>
     </div>
+  </section>
+</main>
 
-    <div style="text-align:center;">
-      <button type="submit" class="wl-submit" id="hp-wl-submit" data-wl-submit>Join the waitlist</button>
-    </div>
-    <p class="wl-status" id="hp-wl-status" data-wl-status role="status" aria-live="polite" style="text-align:center;"></p>
-  </form>
-
-  <p style="margin:10px 0 0;font-size:0.82rem;"><a href="/cloud/waitlist/" style="color:#000;">See planned plans &amp; FAQ &rarr;</a></p>
-</div>
-
-<div style="border:1px solid #ccc;border-radius:6px;padding:14px 24px;margin:12px 0 0;text-align:center;font-family:monospace;">
-  <video class="hero-video" autoplay muted loop playsinline preload="metadata"
-         poster="assets/demo-web-graph-poster.jpg"
-         style="width:100%;max-width:860px;height:auto;display:block;margin:0 auto 12px;border-radius:4px;border:1px solid #ccc;">
-    <source src="assets/demo-web-graph.mp4" type="video/mp4">
-  </video>
-  <p style="color:#444;margin:0 0 12px;font-size:0.88rem;">Or self-host it &mdash; free and MIT-licensed:</p>
-  <pre style="text-align:left;display:inline-block;margin:0 0 12px;">pip install openosint</pre>
-  <p style="margin:0;font-size:0.88rem;"><a href="https://demo.openosint.tech" style="color:#000;font-weight:bold;">Try the live demo &rarr;</a> &mdash; bring your own Anthropic / OpenRouter / Ollama key, no signup.</p>
-</div>
-
-<hr>
-
-<p style="text-align:center;color:#9fb0c3;font-family:monospace;font-size:0.85rem;margin:0 0 12px;">Maintainer of OpenOSINT &mdash; <a href="https://github.com/OpenOSINT/OpenOSINT/stargazers"><img src="https://img.shields.io/github/stars/OpenOSINT/OpenOSINT?style=flat-square" alt="GitHub stars" style="vertical-align:middle;"></a></p>
-
-<h2 id="name">NAME</h2>
-<div class="indent">
-<p><b>openosint</b> &mdash; AI-powered OSINT agent, MCP server, and CLI for Open Source Intelligence</p>
-</div>
-
-<h2 id="synopsis">SYNOPSIS</h2>
-<div class="indent">
-<pre>openosint                          # interactive AI REPL (default)
-openosint shell                    # same as above
-openosint email <u>address</u> [<b>-t</b> <u>seconds</u>]  # direct scan, no AI
-openosint username <u>handle</u> [<b>-t</b> <u>seconds</u>] # direct scan, no AI
-openosint ip2location <u>address</u> [<b>-t</b> <u>seconds</u>]   # IP2Location lookup
-openosint abuseipdb <u>address</u> [<b>-t</b> <u>seconds</u>]    # AbuseIPDB reputation check
-openosint [<b>-v</b>] [<b>--api-key</b> <u>key</u>]</pre>
-</div>
-
-<h2 id="description">DESCRIPTION</h2>
-<div class="indent">
-<p><b>openosint</b> is a modular OSINT framework with three interfaces:</p>
-<p><b>Interactive REPL</b> (default) &mdash; a Claude Code-style terminal where you type targets or questions in natural language. The AI agent decides which tools to run, chains them based on findings, and compiles a structured report.</p>
-<p><b>Direct CLI</b> &mdash; run individual OSINT tools without AI for scripting or quick lookups.</p>
-<p><b>MCP Server</b> &mdash; expose all 21 tools to any MCP-compatible AI client (Claude Code, Claude Desktop).</p>
-<p>The AI layer uses the Anthropic native tool use API. The model issues hard stops when it needs a tool — the real tool executes and real output goes back. Tool results come from real executions and every finding is shown with the tool call that produced it; the model can still misread or misattribute them, so treat AI summaries as leads to verify, not proof.</p>
-</div>
-
-<h2 id="commercial">FOR TEAMS &amp; ORGANIZATIONS</h2>
-<div class="indent">
-<div style="border:1px solid #000;padding:14px 18px;margin:10px 0 16px 0;font-family:monospace;font-size:13px;">
-<p style="margin:0 0 6px 0;"><b>OpenOSINT is free and MIT-licensed for everyone</b> &mdash; personal, commercial, SaaS, closed-source. No purchase required.</p>
-<p style="margin:0 0 8px 0;">For organizations that need a <em>vendor relationship</em> &mdash; a signed contract, written warranty, indemnification, SLA, or priority support for procurement and legal compliance &mdash; an optional commercial service agreement is available.</p>
-<p style="margin:0;"><a href="/commercial/?utm_source=site&amp;utm_medium=hero&amp;utm_campaign=commercial" style="color:#000;font-weight:bold;">View plans (Starter &euro;300/yr &middot; Business &euro;600/yr &middot; Enterprise custom) &rarr;</a> &nbsp;&middot;&nbsp; <a href="mailto:commercial@openosint.tech?subject=OpenOSINT%20Commercial%20%E2%80%94%20%5Byour%20org%5D" style="color:#000;">commercial@openosint.tech</a></p>
-</div>
-</div>
-
-<h2 id="demo">DEMO</h2>
-<div class="indent">
-<div style="display:flex; gap:24px; flex-wrap:wrap; margin-bottom:14px;">
-  <div style="flex:1; min-width:280px;">
-    <p><b>Web Interface</b></p>
-    <img src="assets/demo-web-graph.gif"
-         alt="OpenOSINT web interface demo"
-         style="max-width:100%; border:1px solid #333; display:block;">
-    <p style="margin-top:6px;"><em>Browser-based chat UI &mdash; run <code>openosint web</code></em></p>
+<footer class="site-footer">
+  <div class="wrap">
+    <ul class="footer-links">
+      <li><a href="/blog/">Blog</a></li>
+      <li><a href="/tools/">Tools</a></li>
+      <li><a href="/commercial/">Commercial</a></li>
+      <li><a href="/sponsors.html">Sponsors</a></li>
+      <li><a href="/terms/">Terms</a></li>
+      <li><a href="/privacy/">Privacy</a></li>
+      <li><a href="/acceptable-use/">Acceptable Use</a></li>
+      <li><a href="/subprocessors/">Subprocessors</a></li>
+      <li><a href="mailto:commercial@openosint.tech">Contact</a></li>
+    </ul>
+    <span>&copy; 2026 Tommaso Bertocchi, Trieste, Italy</span>
   </div>
-  <div style="flex:1; min-width:280px;">
-    <p><b>Terminal</b></p>
-    <img src="https://raw.githubusercontent.com/OpenOSINT/OpenOSINT/main/assets/demo.gif"
-         alt="OpenOSINT terminal demo"
-         style="max-width:100%; border:1px solid #333; display:block;">
-    <p style="margin-top:6px;"><em>Interactive REPL and CLI</em></p>
-  </div>
-</div>
-<div style="margin-bottom:14px;">
-  <p><b>Graph module web UI</b> &mdash; provenance and human-reviewed deduplication</p>
-  <video autoplay loop muted playsinline preload="metadata"
-         style="max-width:100%; border:1px solid #333; display:block;">
-    <source src="assets/graph-web-demo.webm" type="video/webm">
-    <img src="https://raw.githubusercontent.com/OpenOSINT/OpenOSINT/main/demo/graph-web-demo.gif"
-         alt="Graph web UI demo (synthetic data): the entity graph explorer shows two Organization nodes observed by the openosint:github and openosint:whois datasets, linked by a dashed same_as candidate edge scored 0.83; clicking a node opens a side panel with each statement's dataset, extractor, run id, and confidence; clicking the dashed edge opens the human review card comparing both entities field by field with matching values green and differing values amber; the reviewer accepts and the graph updates in place: the pair clusters and the edge becomes a solid same_as check"
-         style="max-width:100%; display:block;">
-  </video>
-  <p style="margin-top:6px;"><em>Synthetic data only &mdash; every entity shown is fictional. Worked example: the entities are seeded at the statement layer, not produced by today's mappers &mdash; see <a href="https://github.com/OpenOSINT/OpenOSINT/blob/main/demo/README.md">demo/README.md</a>. Regenerate with <code>python demo/web_demo.py</code>; the terminal walkthrough lives in <a href="https://github.com/OpenOSINT/OpenOSINT/blob/main/docs/graph.md">docs/graph.md</a></em></p>
-</div>
-</div>
-
-<h2 id="architecture">ARCHITECTURE</h2>
-<div class="indent">
-<table>
-<tr><th>Layer</th><th>Path</th><th>Responsibility</th></tr>
-<tr><td>Core tools</td><td><code>openosint/tools/</code></td><td>Async wrappers around external OSINT binaries and APIs. Stateless.</td></tr>
-<tr><td>AI agent</td><td><code>openosint/agent.py</code></td><td>Anthropic tool use loop. Maintains conversation history per session.</td></tr>
-<tr><td>REPL</td><td><code>openosint/repl.py</code></td><td>Interactive terminal session. prompt_toolkit + Rich.</td></tr>
-<tr><td>MCP server</td><td><code>openosint/mcp_server.py</code></td><td>MCP tool schema exposure for external AI clients.</td></tr>
-<tr><td>CLI</td><td><code>openosint/cli.py</code></td><td>Entry point. Launches REPL or direct commands.</td></tr>
-</table>
-<p>No layer imports from a layer above it.</p>
-</div>
-
-<h2 id="installation">INSTALLATION</h2>
-<div class="indent">
-<p>Requires Python 3.10 or later.</p>
-<pre>$ git clone https://github.com/OpenOSINT/OpenOSINT.git
-$ cd OpenOSINT
-$ pip install -e .
-$ export ANTHROPIC_API_KEY=sk-ant-...</pre>
-
-<p><b>External dependencies</b> (must be present in <code>PATH</code>):</p>
-<table>
-<tr><th>Binary</th><th>Purpose</th><th>Install</th></tr>
-<tr><td><code>holehe</code></td><td>Email account enumeration</td><td><code>pip install holehe</code></td></tr>
-<tr><td><code>sherlock</code></td><td>Username enumeration (400+ platforms)</td><td><code>pip install sherlock-project</code></td></tr>
-<tr><td><code>sublist3r</code></td><td>Subdomain enumeration</td><td><code>pip install sublist3r</code></td></tr>
-<tr><td><code>phoneinfoga</code></td><td>Phone number intelligence</td><td><a href="https://github.com/sundowndev/phoneinfoga/releases" target="_blank" rel="noopener">Download binary</a></td></tr>
-</table>
-<p>If a binary is absent, the corresponding tool returns a descriptive error. All other tools remain operational.</p>
-
-<p><b>Optional environment variables:</b></p>
-<table>
-<tr><th>Variable</th><th>Tool</th><th>Purpose</th></tr>
-<tr><td><code>HIBP_API_KEY</code></td><td><code>search_breach</code></td><td>HaveIBeenPwned API key &mdash; <a href="https://haveibeenpwned.com/API/Key" target="_blank" rel="noopener">get one here</a></td></tr>
-<tr><td><code>IPINFO_TOKEN</code></td><td><code>search_ip</code></td><td>ipinfo.io token for higher rate limits</td></tr>
-<tr><td><code>IP2LOCATION_API_KEY</code></td><td><code>search_ip2location</code></td><td>IP2Location API key &mdash; <a href="https://www.ip2location.io/pricing" target="_blank" rel="noopener">get one here</a></td></tr>
-<tr><td><code>ABUSEIPDB_API_KEY</code></td><td><code>search_abuseipdb</code></td><td>AbuseIPDB API key &mdash; <a href="https://www.abuseipdb.com/register" target="_blank" rel="noopener">get one here</a></td></tr>
-</table>
-</div>
-
-<h2 id="web">WEB INTERFACE</h2>
-<div class="indent">
-<p>A browser-based AI chat interface for all OSINT tools with real-time streaming output, tool result cards, and light/dark theme.</p>
-
-<p><b>Local</b></p>
-<pre>pip install "openosint[web]"
-openosint web</pre>
-<p>Opens automatically at <code>http://localhost:8080</code></p>
-
-<p><b>Features</b></p>
-<ul>
-<li>AI chat interface with tool results inline</li>
-<li>Light/dark theme toggle (preference saved in browser)</li>
-<li>Full conversation history per session</li>
-<li>Ollama support for local inference (no API key required)</li>
-<li>API key management via Settings modal</li>
-</ul>
-
-<p>Prefer zero setup? Run Email, Username, or Domain Recon as an <a href="/cloud/">OpenOSINT Cloud</a> Actor instead &mdash; no local install.</p>
-</div>
-
-<h2 id="repl">INTERACTIVE REPL</h2>
-<div class="indent">
-<p>Run <code>openosint</code> with no arguments to start the AI-powered REPL. Type targets or questions in natural language.</p>
-<pre>openosint ❯ investigate target@example.com
-
-  → generate_dorks('target@example.com')
-  → search_email('target@example.com')
-  ✓ Found: Spotify, WordPress, Gravatar, Office365
-
-  → search_breach('target@example.com')
-  ✓ Found in 2 breaches: LinkedIn (2016), Adobe (2013)
-
-  ╭──────────────── Report ────────────────╮
-  │ ## Summary                             │
-  │ Single target — high confidence.       │
-  │                                        │
-  │ ## Online Presence                     │
-  │ Spotify · WordPress · Gravatar         │
-  │                                        │
-  │ ## Data Breaches                       │
-  │ LinkedIn (2016) · Adobe (2013)         │
-  ╰────────────────────────────────────────╯
-
-  ✓ Report saved → reports/2026-05-11_report.md</pre>
-
-<p><b>REPL commands:</b></p>
-<table>
-<tr><th>Command</th><th>Description</th></tr>
-<tr><td><code>&lt;target&gt;</code></td><td>Investigate any target — email, username, domain, IP, or name</td></tr>
-<tr><td><code>clear</code></td><td>Reset conversation memory</td></tr>
-<tr><td><code>save</code></td><td>Save last report to <code>reports/</code></td></tr>
-<tr><td><code>tools</code></td><td>List available tools and their status</td></tr>
-<tr><td><code>config</code></td><td>Show current configuration</td></tr>
-<tr><td><code>help</code></td><td>Show all commands</td></tr>
-<tr><td><code>exit</code> / Ctrl-D</td><td>Exit</td></tr>
-</table>
-<p>Reports are auto-saved after every investigation containing structured findings.</p>
-</div>
-
-<h2 id="tools">TOOLS</h2>
-<div class="indent">
-
-<p>Quick reference:</p>
-<table>
-<tr><th>Tool</th><th>Method</th><th>What it finds</th></tr>
-<tr><td><code>search_email</code></td><td>holehe</td><td>Social accounts linked to an email (noisy, off by default; enable with --allow-active)</td></tr>
-<tr><td><code>search_username</code></td><td>sherlock</td><td>Accounts across 400+ platforms (noisy, off by default; enable with --allow-active)</td></tr>
-<tr><td><code>search_breach</code></td><td>HaveIBeenPwned API</td><td>Data breach exposure and leaked data</td></tr>
-<tr><td><code>search_whois</code></td><td>python-whois</td><td>Domain registrant, registrar, dates</td></tr>
-<tr><td><code>search_ip</code></td><td>ipinfo.io</td><td>Geolocation, ASN, hostname</td></tr>
-<tr><td><code>search_domain</code></td><td>sublist3r</td><td>Subdomain enumeration</td></tr>
-<tr><td><code>generate_dorks</code></td><td>built-in</td><td>12 targeted Google dork URLs</td></tr>
-<tr><td><code>search_paste</code></td><td>psbdmp.ws</td><td>Pastebin dump mentions</td></tr>
-<tr><td><code>search_phone</code></td><td>phoneinfoga</td><td>Carrier, country, line type</td></tr>
-<tr><td><code>search_censys</code></td><td>Censys API</td><td>Open ports, services, certificate history</td></tr>
-<tr><td><code>search_ip2location</code></td><td>IP2Location API</td><td>Geolocation, ISP, VPN/Proxy/Tor/Datacenter detection</td></tr>
-<tr><td><code>search_abuseipdb</code></td><td>AbuseIPDB v2 API</td><td>IP abuse confidence score, reports, country, ISP</td></tr>
-<tr><td><code>search_shodan</code></td><td>Shodan API</td><td>Open ports, banners, CVEs</td></tr>
-<tr><td><code>search_virustotal</code></td><td>VirusTotal API v3</td><td>Verdict from 70+ antivirus engines</td></tr>
-<tr><td><code>search_github</code></td><td>GitHub REST API</td><td>Profile, repos, commit-discovered emails, username/keyword search</td></tr>
-<tr><td><code>search_dns</code></td><td>dnspython (built-in)</td><td>A/AAAA/MX/NS/TXT/CNAME/SOA records; SPF, DMARC, DKIM analysis</td></tr>
-<tr><td><code>search_gdelt_geo</code></td><td>GDELT 15-minute GKG feed</td><td>Recent worldwide news on a map: headline, link, place; GeoJSON output</td></tr>
-<tr><td><code>search_dorks_live</code></td><td>Bright Data SERP API</td><td>Live Google search results for dork queries</td></tr>
-<tr><td><code>scrape_url</code></td><td>Bright Data Web Unlocker</td><td>Fetch any URL bypassing Cloudflare/CAPTCHA, returns clean Markdown</td></tr>
-<tr><td><code>search_footprint</code></td><td>Bright Data SERP API</td><td>Entity-type-aware public search-engine footprint + Entity Correlation Graph</td></tr>
-</table>
-<p>Full per-tool docs, CLI flags, and output formats: <a href="/tools/">openosint.tech/tools</a>.</p>
-<p><b>ℹ️ Note:</b> The IP2Location integration is sponsored — a Security Plan API key is provided free of charge by <a href="https://www.ip2location.com" target="_blank" rel="noopener">IP2Location</a>.</p>
-
-<hr>
-<h3>search_email</h3>
-<p>Enumerates online services linked to an email using <a href="https://github.com/megadose/holehe" target="_blank" rel="noopener">holehe</a>.</p>
-<p><b>MCP parameter:</b> <code>email</code> (string, required)</p>
-<pre>$ openosint email target@example.com -t 60</pre>
-<pre>OSINT results for 'target@example.com':
-[+] Spotify        https://open.spotify.com/user/target
-[+] WordPress      https://wordpress.com/target
-[+] Gravatar       https://gravatar.com/target
-[+] Office365      email used</pre>
-
-<hr>
-<h3>search_username</h3>
-<p>Searches 400+ platforms using <a href="https://github.com/sherlock-project/sherlock" target="_blank" rel="noopener">sherlock</a>. <b>Noisy and off by default:</b> it sends requests from your IP to hundreds of sites, which can trigger rate limits and WAF blocks. Enable with <code>--allow-active</code>.</p>
-<p><b>MCP parameter:</b> <code>username</code> (string, required)</p>
-<pre>$ openosint username johndoe99</pre>
-<pre>OSINT results for username 'johndoe99':
-[+] GitHub         https://github.com/johndoe99
-[+] Twitter        https://twitter.com/johndoe99
-[+] Reddit         https://reddit.com/user/johndoe99</pre>
-
-<hr>
-<h3>search_breach</h3>
-<p>Checks data breach exposure via <a href="https://haveibeenpwned.com/API/v3" target="_blank" rel="noopener">HaveIBeenPwned v3 API</a>. Requires <code>HIBP_API_KEY</code>.</p>
-<p><b>MCP parameter:</b> <code>email</code> (string, required)</p>
-<pre>Found in 2 breach(es) for 'target@example.com':
-[+] LinkedIn (2016-05-05) — leaked: Email addresses, Passwords
-[+] Adobe (2013-10-04) — leaked: Email addresses, Password hints</pre>
-
-<hr>
-<h3>search_whois</h3>
-<p>Retrieves WHOIS registration data via <a href="https://github.com/richardpenman/whois" target="_blank" rel="noopener">python-whois</a>.</p>
-<p><b>MCP parameter:</b> <code>domain</code> (string, required)</p>
-<pre>WHOIS results for 'example.com':
-[+] Registrar: ICANN
-[+] Created: 1995-08-14
-[+] Name Servers: A.IANA-SERVERS.NET</pre>
-
-<hr>
-<h3>search_ip</h3>
-<p>Retrieves geolocation and ASN data via <a href="https://ipinfo.io" target="_blank" rel="noopener">ipinfo.io</a>. Free tier: 50k requests/month.</p>
-<p><b>MCP parameter:</b> <code>ip</code> (string, required)</p>
-<pre>IP intelligence for '8.8.8.8':
-[+] Hostname: dns.google
-[+] Org: AS15169 Google LLC
-[+] City: Mountain View, CA, US</pre>
-
-<hr>
-<h3>search_domain</h3>
-<p>Enumerates subdomains via <a href="https://github.com/aboul3la/Sublist3r" target="_blank" rel="noopener">sublist3r</a>.</p>
-<p><b>MCP parameter:</b> <code>domain</code> (string, required)</p>
-<pre>Subdomains found for 'example.com':
-[+] mail.example.com
-[+] dev.example.com
-[+] api.example.com</pre>
-
-<hr>
-<h3>generate_dorks</h3>
-<p>Generates 12 targeted Google dork URLs. No network calls required.</p>
-<p><b>MCP parameter:</b> <code>target</code> (string, required)</p>
-<pre>Google dork URLs for 'johndoe':
-[+] "johndoe" site:linkedin.com
-    https://www.google.com/search?q=%22johndoe%22+site%3Alinkedin.com
-[+] "johndoe" leaked OR breach OR dump
-    https://www.google.com/search?q=%22johndoe%22+leaked+OR+breach</pre>
-
-<hr>
-<h3>search_paste</h3>
-<p>Searches Pastebin dumps via <a href="https://psbdmp.ws" target="_blank" rel="noopener">psbdmp.ws</a>.</p>
-<p><b>MCP parameter:</b> <code>query</code> (string, required)</p>
-<pre>Found in 3 paste(s) for 'target@example.com':
-[+] https://pastebin.com/aB1cD2eF (2023-04-12)
-[+] https://pastebin.com/xY3zA4bC (2022-11-08)</pre>
-
-<hr>
-<h3>search_phone</h3>
-<p>Phone intelligence via <a href="https://github.com/sundowndev/phoneinfoga" target="_blank" rel="noopener">phoneinfoga</a>. Use E.164 format.</p>
-<p><b>MCP parameter:</b> <code>phone</code> (string, required)</p>
-<pre>Phone intelligence for '+14155552671':
-[+] Country: United States
-[+] Carrier: AT&amp;T
-[+] Line type: Mobile</pre>
-
-<hr>
-<h3>search_ip2location</h3>
-<p>Queries the <a href="https://www.ip2location.io" target="_blank" rel="noopener">IP2Location.io</a> API for enhanced IP intelligence. Returns geolocation (country, region, city, coordinates, ZIP), ISP, domain, and ASN. On the Security Plan, also detects whether the address is a VPN, proxy, Tor exit node, or datacenter host. Sponsored integration.</p>
-<p><b>MCP parameter:</b> <code>ip</code> (string, required) &mdash; IPv4 or IPv6 address</p>
-<p><b>Requires:</b> <code>IP2LOCATION_API_KEY</code> environment variable &mdash; <a href="https://www.ip2location.io/pricing" target="_blank" rel="noopener">get one here</a></p>
-<pre>$ openosint ip2location 8.8.8.8
-$ openosint ip2location 2001:4860:4860::8888
-$ openosint ip2location 8.8.8.8 -t 30</pre>
-<pre>[IP2Location] IP: 8.8.8.8
-[IP2Location] Country: United States (US)
-[IP2Location] Region: California
-[IP2Location] City: Mountain View
-[IP2Location] Latitude: 37.38605
-[IP2Location] Longitude: -122.08385
-[IP2Location] ZIP: 94035
-[IP2Location] ISP: Google LLC
-[IP2Location] Domain: google.com
-[IP2Location] ASN: AS15169 Google LLC
-[IP2Location] Proxy: No
-[IP2Location] VPN: No
-[IP2Location] TOR: No
-[IP2Location] Datacenter: Yes
-[IP2Location] Threat: clean</pre>
-<p>If a VPN, proxy, or Tor exit node is detected, the output appends: <code>&#9888;&#65039;  FLAGGED: VPN/Proxy/Tor detected</code></p>
-
-<hr>
-<h3>search_abuseipdb</h3>
-<p>Checks an IP address against the <a href="https://www.abuseipdb.com" target="_blank" rel="noopener">AbuseIPDB</a> v2 API for abuse reputation. Returns abuse confidence score (0–100%), total reports, country, ISP, domain, and last reported timestamp. Shows a prominent warning when score exceeds 50%.</p>
-<p><b>MCP parameter:</b> <code>ip</code> (string, required) &mdash; IPv4 or IPv6 address</p>
-<p><b>Requires:</b> <code>ABUSEIPDB_API_KEY</code> environment variable &mdash; <a href="https://www.abuseipdb.com/register" target="_blank" rel="noopener">get one here</a></p>
-<pre>$ openosint abuseipdb 198.51.100.1
-$ openosint abuseipdb 198.51.100.1 -t 30</pre>
-<pre>Abuse intelligence for '198.51.100.1':
-
-[AbuseIPDB] IP: 198.51.100.1
-[AbuseIPDB] Abuse Confidence Score: 87%
-[AbuseIPDB] Total Reports: 143
-[AbuseIPDB] Country: US
-[AbuseIPDB] ISP: Example ISP LLC
-[AbuseIPDB] Domain: example-isp.net
-[AbuseIPDB] Last Reported: 2026-05-20T14:33:00+00:00
-&#9888;&#65039;  HIGH ABUSE CONFIDENCE &mdash; flagged by AbuseIPDB</pre>
-<p>The warning line only appears when <code>abuseConfidenceScore</code> exceeds 50%.</p>
-
-</div>
-
-<h2 id="commands">DIRECT CLI COMMANDS</h2>
-<div class="indent">
-<p><b>email</b> <u>ADDRESS</u> [<b>-t</b> <u>SECONDS</u>] &mdash; Enumerate services via holehe. Default timeout: 120s.</p>
-<p><b>username</b> <u>HANDLE</u> [<b>-t</b> <u>SECONDS</u>] &mdash; Enumerate platforms via sherlock. Default timeout: 180s.</p>
-<table>
-<tr><th>Flag</th><th>Description</th></tr>
-<tr><td><code>-v, --verbose</code></td><td>Enable debug logging to stderr.</td></tr>
-<tr><td><code>-t, --timeout N</code></td><td>Override subprocess timeout (seconds).</td></tr>
-<tr><td><code>--api-key KEY</code></td><td>Anthropic API key (overrides env var).</td></tr>
-</table>
-</div>
-
-<h2 id="mcp">MCP SERVER CONFIGURATION</h2>
-<div class="indent">
-<p><b>Claude Code</b></p>
-<p>Requires <a href="https://docs.astral.sh/uv/getting-started/installation/">uv</a>. Passive tools (20) by default; add <code>--allow-active</code> for all 25.</p>
-<pre>$ claude mcp add openosint -- uvx --from openosint openosint-mcp
-$ claude mcp list</pre>
-
-<p><b>Claude Desktop</b></p>
-<p>Add to <code>~/Library/Application Support/Claude/claude_desktop_config.json</code> (macOS) or <code>%APPDATA%\Claude\claude_desktop_config.json</code> (Windows). Cursor uses the same block in <code>~/.cursor/mcp.json</code>.</p>
-<pre>{
-  "mcpServers": {
-    "openosint": {
-      "command": "uvx",
-      "args": ["--from", "openosint", "openosint-mcp"],
-      "env": { "SHODAN_API_KEY": "your-key" }
-    }
-  }
-}</pre>
-</div>
-
-<h2 id="examples">EXAMPLES</h2>
-<div class="indent">
-<p>Interactive REPL:</p>
-<pre>$ openosint
-openosint ❯ investigate target@example.com
-openosint ❯ find all accounts for johndoe99
-openosint ❯ what subdomains does example.com have?
-openosint ❯ check if +14155552671 is mobile</pre>
-
-<p>Direct CLI:</p>
-<pre>$ openosint email target@example.com -t 60
-$ openosint username johndoe99
-$ openosint -v email target@example.com</pre>
-
-<p>Agentic via Claude Code:</p>
-<pre>$ claude
-&gt; Investigate target@example.com. Trace any username found
-  across other platforms and compile a full report.</pre>
-</div>
-
-<h2 id="files">FILES</h2>
-<div class="indent">
-<table>
-<tr><th>Path</th><th>Description</th></tr>
-<tr><td><code>openosint/agent.py</code></td><td>AI agent loop (Anthropic tool use).</td></tr>
-<tr><td><code>openosint/repl.py</code></td><td>Interactive REPL session.</td></tr>
-<tr><td><code>openosint/mcp_server.py</code></td><td>MCP server entry point (stdio).</td></tr>
-<tr><td><code>openosint/cli.py</code></td><td>CLI entry point.</td></tr>
-<tr><td><code>openosint/tools/search_email.py</code></td><td>Email enumeration.</td></tr>
-<tr><td><code>openosint/tools/search_username.py</code></td><td>Username enumeration.</td></tr>
-<tr><td><code>openosint/tools/search_breach.py</code></td><td>Data breach check.</td></tr>
-<tr><td><code>openosint/tools/search_whois.py</code></td><td>WHOIS lookup.</td></tr>
-<tr><td><code>openosint/tools/search_ip.py</code></td><td>IP intelligence.</td></tr>
-<tr><td><code>openosint/tools/search_domain.py</code></td><td>Subdomain enumeration.</td></tr>
-<tr><td><code>openosint/tools/generate_dorks.py</code></td><td>Google dork generator.</td></tr>
-<tr><td><code>openosint/tools/search_paste.py</code></td><td>Pastebin search.</td></tr>
-<tr><td><code>openosint/tools/search_phone.py</code></td><td>Phone intelligence.</td></tr>
-<tr><td><code>openosint/tools/search_ip2location.py</code></td><td>IP2Location enhanced IP intelligence.</td></tr>
-<tr><td><code>openosint/tools/search_abuseipdb.py</code></td><td>IP abuse reputation module.</td></tr>
-<tr><td><code>openosint/tools/exceptions.py</code></td><td>Shared exception hierarchy.</td></tr>
-<tr><td><code>pyproject.toml</code></td><td>Build configuration (PEP 621).</td></tr>
-<tr><td><code>DISCLAIMER.md</code></td><td>Legal notice and ethical use policy.</td></tr>
-</table>
-</div>
-
-<h2 id="exit">EXIT STATUS</h2>
-<div class="indent">
-<table>
-<tr><th>Code</th><th>Meaning</th></tr>
-<tr><td>0</td><td>Successful execution.</td></tr>
-<tr><td>1</td><td>General error (invalid arguments, tool failure).</td></tr>
-<tr><td>130</td><td>Terminated by SIGINT (Ctrl-C).</td></tr>
-</table>
-</div>
-
-<h2 id="legal">LEGAL &amp; ETHICS</h2>
-<div class="indent">
-<p><b>openosint</b> is for authorised security research, penetration testing, and investigative journalism only. Users are solely responsible for compliance with applicable law including GDPR, CCPA, and the Computer Fraud and Abuse Act.</p>
-<table>
-<tr><th>Permitted</th><th>Prohibited</th></tr>
-<tr><td>Authorised penetration testing</td><td>Stalking or harassment</td></tr>
-<tr><td>Investigating your own accounts</td><td>Doxxing or targeted exposure</td></tr>
-<tr><td>Journalistic investigation</td><td>Unauthorised surveillance</td></tr>
-<tr><td>Law enforcement with legal basis</td><td>Identity theft or fraud</td></tr>
-</table>
-<p>See <a href="https://github.com/OpenOSINT/OpenOSINT/blob/main/DISCLAIMER.md" target="_blank" rel="noopener">DISCLAIMER.md</a> for the full legal notice.</p>
-</div>
-
-<h2 id="license">LICENSE</h2>
-<div class="indent">
-<p>Released under the <strong>MIT License</strong> &mdash; free for <em>any</em> use: personal, commercial, SaaS, closed-source, academic. No purchase required. See <code>LICENSE</code> in the source distribution.</p>
-<p>For organizations that need a vendor contract, written warranty, indemnification clause, or SLA on top of the MIT license, an optional commercial service agreement is available. Purchasing a plan does <em>not</em> restrict or replace your MIT rights &mdash; it is a separate service layer.</p>
-<table>
-<tr><th>Tier</th><th>Price</th><th>What you get</th></tr>
-<tr><td><b>Starter</b></td><td>&euro;300 / year</td><td>Commercial use agreement, license assurance letter, email support</td></tr>
-<tr><td><b>Business</b></td><td>&euro;600 / year</td><td>Everything in Starter + priority support (2-day SLA), named contact, indemnification</td></tr>
-<tr><td><b>Enterprise</b></td><td>&euro;1,000+ / year</td><td>Everything in Business + SLA docs, compliance docs, vendor onboarding, PO/net-30</td></tr>
-</table>
-<p>&rarr; <a href="/commercial/?utm_source=site&amp;utm_medium=license&amp;utm_campaign=commercial">Full commercial plan details</a> &nbsp;&middot;&nbsp; <a href="mailto:commercial@openosint.tech?subject=OpenOSINT%20Commercial%20%E2%80%94%20%5Byour%20org%5D">commercial@openosint.tech</a></p>
-</div>
-
-<h2 id="github">GITHUB</h2>
-<div class="indent">
-<p>
-  Source code, issues, and contributions:
-  <a href="https://github.com/OpenOSINT/OpenOSINT" target="_blank" rel="noopener">
-    github.com/OpenOSINT/OpenOSINT
-  </a>
-</p>
-<pre>$ git clone https://github.com/OpenOSINT/OpenOSINT.git
-$ cd OpenOSINT
-$ pip install -e .</pre>
-<p>Pull requests welcome. See <a href="https://github.com/OpenOSINT/OpenOSINT/blob/main/DISCLAIMER.md" target="_blank" rel="noopener">DISCLAIMER.md</a> before contributing.</p>
-</div>
-
-<h2 id="sponsors">SPONSORS</h2>
-<div class="indent">
-<p>OpenOSINT is proudly sponsored by <b><a href="https://www.ip2location.com" target="_blank" rel="noopener sponsored">IP2Location</a></b> (IP Geolocation &amp; Threat Intelligence category).</p>
-<p>Featured Integration sponsorships are available for two open categories: <b>breach/compromised-credential data</b> and <b>email/identity lookup</b>. One vendor per category — exclusive placement in the README, docs, CLI banner, and Web UI.</p>
-<p>&rarr; <a href="/sponsors.html"><b>Full media kit and pricing</b></a> &mdash; <a href="https://opencollective.com/openosint_oss" target="_blank" rel="noopener">Open Collective</a> &mdash; <a href="mailto:commercial@openosint.tech?subject=OpenOSINT%20Sponsorship%20Inquiry">commercial@openosint.tech</a></p>
-</div>
-
-<h2 id="resources">RESOURCES</h2>
-<div class="indent">
-<p>&rarr; <a href="/free-prompts/?ref=resources&amp;utm_source=site&amp;utm_medium=resources&amp;utm_campaign=free-osint-prompts">AI OSINT Prompts &mdash; 5-prompt Starter Set (free)</a></p>
-<p>&rarr; <a href="https://tommasodev.gumroad.com/l/ai-osint-complete-kit?utm_source=site&amp;utm_medium=resources&amp;utm_campaign=ai-osint-complete-kit">AI OSINT Complete Kit &mdash; $55</a></p>
-<p>Purchases directly fund OpenOSINT's development.</p>
-</div>
-
-<hr>
-<div id="footer">
-<table width="100%" cellpadding="0" cellspacing="0" border="0">
-<tr>
-<td class="mhead-l">OpenOSINT 2.36.0</td>
-<td class="mhead-c">August 2026</td>
-<td class="mhead-r">OPENOSINT(1)</td>
-</tr>
-</table>
-</div>
-
-<div style="margin-top:24px; padding-top:12px; border-top:1px solid #ccc; font-family:monospace; font-size:12px; text-align:center;">
-<a href="/">Home</a> &middot;
-<a href="/blog/">Blog</a> &middot;
-<a href="/tools/">Tools</a> &middot;
-<a href="https://github.com/OpenOSINT/OpenOSINT" target="_blank" rel="noopener">GitHub</a>
-<br>
-<span style="color:#888;">&mdash; OpenOSINT Cloud &mdash;</span>
-<a href="/terms/">Terms</a> &middot;
-<a href="/privacy/">Privacy</a> &middot;
-<a href="/acceptable-use/">Acceptable Use</a> &middot;
-<a href="/subprocessors/">Subprocessors</a>
-</div>
-
-</div>
+</footer>
 </body>
 </html>
