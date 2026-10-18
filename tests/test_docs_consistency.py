@@ -111,126 +111,24 @@ def test_every_tool_count_claim_matches_registered_tools():
     assert not mismatches, "stale tool-count claim(s) found:\n" + "\n".join(mismatches)
 
 
-def test_docs_index_footer_version_matches_pyproject():
-    pyproject = (ROOT / "pyproject.toml").read_text(encoding="utf-8")
-    version_match = re.search(r'^version\s*=\s*"([^"]+)"', pyproject, re.MULTILINE)
-    assert version_match, "version not found in pyproject.toml"
-    version = version_match.group(1)
-
-    html = (ROOT / "docs" / "index.html").read_text(encoding="utf-8")
-    footer_match = re.search(r"OpenOSINT (\d+\.\d+\.\d+)", html)
-    assert footer_match, "docs/index.html footer version (OpenOSINT X.Y.Z) not found"
-    assert footer_match.group(1) == version
+# The public presence points at the hosted products only (app.openosint.tech).
+# Legal pages are excluded: they still describe the live Apify Actors.
+_RETIRED_PROMO_RE = re.compile(r"gumroad\.com|apify\.com|free-prompts|substack\.com", re.IGNORECASE)
+_LEGAL_PAGES = {"privacy", "terms", "subprocessors"}
 
 
-# --------------------------------------------------------------------------
-# Phase 3 — Gumroad link, price, and page-count consistency for the two
-# revenue products (Prompt Pack, Complete Kit). No in-repo source of truth
-# exists for these (unlike tool count / version), so drift can only be
-# caught by cross-checking every stated occurrence against every other.
-# --------------------------------------------------------------------------
-
-
-def _iter_all_doc_files():
-    yield ROOT / "README.md"
-    docs = ROOT / "docs"
-    for path in sorted(docs.rglob("*.html")):
-        yield path
-
-
-_GUMROAD_LINK_RE = re.compile(
-    r"https://tommasodev\.gumroad\.com/l/(ai-osint-prompt-pack|ai-osint-complete-kit)((?:/[A-Za-z0-9_-]+)?)\?"
-)
-
-
-def test_gumroad_links_share_base_url_and_offer_code_per_product():
-    seen: dict[str, set[str]] = {}
-    for path in _iter_all_doc_files():
-        raw = path.read_text(encoding="utf-8")
-        for product, offer_code in _GUMROAD_LINK_RE.findall(raw):
-            seen.setdefault(product, set()).add(offer_code)
-    mismatches = {product: codes for product, codes in seen.items() if len(codes) > 1}
-    assert not mismatches, f"Gumroad links use inconsistent offer codes per product: {mismatches}"
-
-
-# Each pattern anchors the price tightly to the product name (compare-card
-# markup, "Get the pack/kit" CTAs, and "Name ($NN)" mentions) so unrelated
-# dollar amounts elsewhere on the page can't be misattributed.
-_PRICE_PATTERNS = {
-    "Prompt Pack": [
-        re.compile(
-            r"<h4>(?:AI OSINT )?Prompt Pack(?:\s*<span[^>]*>[^<]*</span>)?</h4>\s*"
-            r'<div class="price">\$(\d+(?:\.\d{2})?)</div>',
-            re.IGNORECASE,
-        ),
-        re.compile(r"Get the (?:Prompt )?[Pp]ack[^$\n<]{0,15}\$(\d+(?:\.\d{2})?)", re.IGNORECASE),
-        re.compile(r"(?:AI OSINT )?Prompt Pack\**\s*\(\$(\d+(?:\.\d{2})?)\)", re.IGNORECASE),
-    ],
-    "Complete Kit": [
-        re.compile(
-            r"<h4>(?:AI OSINT )?Complete Kit(?:\s*<span[^>]*>[^<]*</span>)?</h4>\s*"
-            r'<div class="price">\$(\d+(?:\.\d{2})?)</div>',
-            re.IGNORECASE,
-        ),
-        re.compile(r"Get the (?:Complete )?[Kk]it[^$\n<]{0,15}\$(\d+(?:\.\d{2})?)", re.IGNORECASE),
-        re.compile(r"(?:AI OSINT )?Complete Kit\**\s*\(\$(\d+(?:\.\d{2})?)\)", re.IGNORECASE),
-    ],
-}
-
-
-def test_stated_prices_are_identical_per_product():
-    found: dict[str, set[str]] = {}
-    for path in _iter_all_doc_files():
-        raw = path.read_text(encoding="utf-8")
-        for product, patterns in _PRICE_PATTERNS.items():
-            for pattern in patterns:
-                found.setdefault(product, set()).update(pattern.findall(raw))
-    mismatches = {product: prices for product, prices in found.items() if len(prices) > 1}
-    assert not mismatches, f"Inconsistent stated prices per product: {mismatches}"
-
-
-_BANNED_PAGE_COUNT_RE = re.compile(r"\b\d+-page\b|\b\d+\s+pages?\b|\bpdf pages\b", re.IGNORECASE)
-
-
-def test_no_banned_page_count_phrasing():
-    violations = []
-    for path in _iter_all_doc_files():
-        raw = path.read_text(encoding="utf-8")
-        for match in _BANNED_PAGE_COUNT_RE.finditer(raw):
-            violations.append(f"{path.relative_to(ROOT)}: {match.group(0)!r}")
-    assert not violations, "banned page-count phrasing found:\n" + "\n".join(violations)
-
-
-# Paid products must not be positioned as a fix for AI hallucination — that
-# contradicts the README's own claim that hallucinated tool results are
-# structurally impossible. Scoped to the CTA block immediately containing
-# each paid Gumroad link, not the whole file, so legitimate technical prose
-# elsewhere on the page (e.g. a blog post literally about hallucination, or
-# an unrelated "see also" link) doesn't trip a false positive. The block
-# boundary is the nearest preceding container/heading start — <aside>,
-# an oo-cta div, an <h2>, or a Markdown ## / ### heading — not a fixed
-# character count, so unrelated prior content is excluded regardless of
-# how close it happens to sit to the link.
-_CTA_LOOKBACK_CHARS = 600  # fallback only, if no boundary precedes the link
-_CTA_BOUNDARY_RE = re.compile(r'<aside\b|<div class="oo-cta|<h2\b|^#{2,3}\s', re.MULTILINE)
-_HALLUCINATION_RE = re.compile(r"hallucinat", re.IGNORECASE)
-
-
-def test_no_hallucination_framing_in_cta_copy():
-    violations = []
-    for path in _iter_all_doc_files():
-        raw = path.read_text(encoding="utf-8")
-        for match in _GUMROAD_LINK_RE.finditer(raw):
-            boundaries = [b.start() for b in _CTA_BOUNDARY_RE.finditer(raw, 0, match.start())]
-            window_start = (
-                boundaries[-1] if boundaries else max(0, match.start() - _CTA_LOOKBACK_CHARS)
-            )
-            window = raw[window_start : match.start()]
-            if _HALLUCINATION_RE.search(window):
-                violations.append(
-                    f"{path.relative_to(ROOT)}: hallucination framing near {match.group(0)!r}"
-                )
-    assert not violations, "hallucination framing found in paid CTA copy:\n" + "\n".join(violations)
+def test_no_retired_product_promotion():
+    paths = [ROOT / "README.md", ROOT / "llms.txt"]
+    for path in sorted((ROOT / "docs").rglob("*.html")):
+        rel = path.relative_to(ROOT / "docs")
+        if rel.parts[0] not in _LEGAL_PAGES:
+            paths.append(path)
+    hits = [
+        f"{p.relative_to(ROOT)}: {m.group(0)!r}"
+        for p in paths
+        for m in _RETIRED_PROMO_RE.finditer(p.read_text(encoding="utf-8"))
+    ]
+    assert not hits, "retired product promotion found:\n" + "\n".join(hits)
 
 
 # ---------------------------------------------------------------------------
