@@ -120,3 +120,8 @@ def test_checker_accepts_a_clean_page(tmp_path, monkeypatch):
     _write(tmp_path, "sitemap.xml", "<urlset><url><loc>https://openosint.tech/</loc></url></urlset>")
     pages = check_site.load_pages()
     assert check_site.check_pages(pages) + check_site.check_links(pages) + check_site.check_sitemap(pages) == []
+
+
+def test_no_unexpanded_tokens_in_output():
+    leaked = [str(p.relative_to(ROOT)) for p in (ROOT / "docs").rglob("*.html") if "%%" in p.read_text(encoding="utf-8")]
+    assert leaked == []

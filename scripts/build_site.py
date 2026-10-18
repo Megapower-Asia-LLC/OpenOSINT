@@ -304,7 +304,7 @@ def docs_pages(group_order: list[str]) -> tuple[list[dict], list[dict]]:
             jsonld.insert(0, ld(software_ld()))
         pages.append(
             make_page(
-                entry["url"], "doc.html", meta, render_markdown(body), section="docs", jsonld=jsonld,
+                entry["url"], "doc.html", expand_meta(meta), render_markdown(body), section="docs", jsonld=jsonld,
                 breadcrumbs=crumbs, source=rel(path), edit_url=f"{REPO_URL}/edit/main/{rel(path)}",
                 prev=entries[i - 1] if i else None,
                 next=entries[i + 1] if i + 1 < len(entries) else None,

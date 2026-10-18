@@ -2,7 +2,7 @@
 title: "Safety and responsible use"
 label: "Safety"
 seo_title: "OpenOSINT safety: passive mode, tool-call cap, noise labels"
-description: "OpenOSINT is passive by default. How active tools are enabled, the per-request tool-call cap of 15, what each noise label means, and responsible use."
+description: "OpenOSINT is passive by default. How active tools are enabled, the per-request tool-call cap of %%MAX_CALLS%%, what each noise label means, and responsible use."
 group: Reference
 order: 7
 ---
