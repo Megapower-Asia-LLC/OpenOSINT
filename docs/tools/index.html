@@ -1,72 +1,88 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>OpenOSINT Tools — 20 Intelligence Modules Reference</title>
-<meta name="description" content="Complete reference for all 21 OpenOSINT intelligence tools. Email enumeration, username search, IP geolocation, breach detection, WHOIS, domain scanning, and more.">
-<meta name="keywords" content="OSINT tools, email enumeration, IP lookup, username search, WHOIS lookup, breach detection, subdomain scanner, AbuseIPDB, IP2Location">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tools reference: 21 OSINT tools | OpenOSINT</title>
+<meta name="description" content="Reference for all 21 OpenOSINT tools: what each finds, its noise level, the API key or binary it needs, and example output.">
 <link rel="canonical" href="https://openosint.tech/tools/">
-<meta property="og:title" content="OpenOSINT Tools — 20 Intelligence Modules Reference">
-<meta property="og:description" content="Reference for all 21 OpenOSINT intelligence tools: email enumeration, username search, IP geolocation, breach detection, WHOIS, domain scanning, and more.">
-<meta property="og:url" content="https://openosint.tech/tools/">
-<meta property="og:type" content="website">
+<meta name="theme-color" content="#16181b">
+<link rel="icon" href="/logo.svg" type="image/svg+xml">
+<link rel="preload" href="/assets/fonts/HankenGrotesk.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/style.css">
 <meta property="og:site_name" content="OpenOSINT">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Tools reference: 21 OSINT tools | OpenOSINT">
+<meta property="og:description" content="Reference for all 21 OpenOSINT tools: what each finds, its noise level, the API key or binary it needs, and example output.">
+<meta property="og:url" content="https://openosint.tech/tools/">
+<meta property="og:image" content="https://openosint.tech/assets/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="OpenOSINT: open-source engine for passive checks of public information">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="OpenOSINT Tools — 20 Intelligence Modules Reference">
-<meta name="twitter:description" content="Reference for all 21 OpenOSINT tools: email, username, IP, WHOIS, breach, domain, phone, dorks, and more.">
-<link rel="icon" type="image/svg+xml" href="../logo.svg">
-<link rel="stylesheet" href="../style.css">
+<meta name="twitter:title" content="Tools reference: 21 OSINT tools | OpenOSINT">
+<meta name="twitter:description" content="Reference for all 21 OpenOSINT tools: what each finds, its noise level, the API key or binary it needs, and example output.">
+<meta name="twitter:image" content="https://openosint.tech/assets/og.png">
 </head>
 <body>
+<a class="skip-link" href="#main">Skip to content</a>
+<header class="site-header">
+  <div class="wrap bar">
+    <a class="logo" href="/"><svg width="22" height="22" viewBox="0 0 22 22" aria-hidden="true"><rect x="2" y="2" width="18" height="18" fill="none" stroke="currentColor" stroke-width="3"/><path d="M11 6v10M6 11h10" stroke="currentColor" stroke-width="1.5"/></svg>OpenOSINT</a>
+    <nav class="nav" aria-label="Main">
+      <a href="/docs/">Docs</a>
+      <a href="/tools/" aria-current="page">Tools</a>
+      <a href="/blog/">Blog</a>
+      <a href="https://github.com/OpenOSINT/OpenOSINT" rel="noopener">GitHub</a>
+    </nav>
+    <div class="bar-right">
+      <a class="btn btn-small" href="https://app.openosint.tech/?utm_source=openosint.tech&amp;utm_medium=referral&amp;utm_campaign=nav">Hosted tools</a>
+      <details class="menu">
+        <summary>Menu</summary>
+        <div class="menu-panel">
+          <a href="/docs/">Docs</a>
+          <a href="/tools/">Tools</a>
+          <a href="/blog/">Blog</a>
+          <a href="https://github.com/OpenOSINT/OpenOSINT" rel="noopener">GitHub</a>
+        </div>
+      </details>
+    </div>
+  </div>
+</header>
 
-<div id="nav">
-<a href="https://app.openosint.tech/monitor?utm_source=openosint.tech&amp;utm_medium=referral&amp;utm_campaign=nav" style="color:#3fb950;font-weight:bold;">MONITOR</a>
-<a href="https://app.openosint.tech/diligence?utm_source=openosint.tech&amp;utm_medium=referral&amp;utm_campaign=nav" style="color:#3fb950;font-weight:bold;">DILIGENCE</a>
-<a href="/blog/" style="color:#58a6ff;">BLOG</a>
-<a href="https://github.com/OpenOSINT/OpenOSINT" style="color:#58a6ff;" target="_blank" rel="noopener">GITHUB</a>
-</div>
+<main id="main">
+<div class="wrap page">
+  <article class="prose">
+    <h1>Tools reference</h1>
+    <p class="lead">OpenOSINT ships 21 investigation tools. Each one wraps an external API, a binary or a local computation. They are available through the <a href="/docs/quickstart/">CLI and REPL</a>, the <a href="/docs/mcp/">MCP server</a> and the <a href="/docs/web-ui/">web UI</a>. The Source, Noise and Needs columns are generated from the code, so they match the version you install.</p>
+<p>Noise levels (<a href="/docs/safety/">what they mean</a>): passive tools are on by default; tools that touch the target or are noisy need <code>--allow-active</code>.</p>
 
-<div id="content">
-
-<h2>TOOLS REFERENCE</h2>
-<div class="indent">
-<p>OpenOSINT exposes 20 intelligence-gathering modules. Each tool is an async Python wrapper around an external binary or API. All tools are available via the <a href="https://github.com/OpenOSINT/OpenOSINT#interactive-repl">interactive REPL</a>, the CLI, and the <a href="https://github.com/OpenOSINT/OpenOSINT#mcp-server">MCP server</a>.</p>
-
-</div>
-
-<h2>QUICK REFERENCE</h2>
-<div class="indent">
-<table>
-<tr><th>Tool</th><th>Method</th><th>What it finds</th><th>Requires</th></tr>
-<tr><td><a href="#search_email"><code>search_email</code></a></td><td>holehe</td><td>Accounts linked to an email (noisy, off by default)</td><td>holehe in PATH; <code>--allow-active</code></td></tr>
-<tr><td><a href="#search_username"><code>search_username</code></a></td><td>sherlock</td><td>Accounts across 300+ platforms (noisy, off by default)</td><td>sherlock in PATH; <code>--allow-active</code></td></tr>
-<tr><td><a href="#search_breach"><code>search_breach</code></a></td><td>HaveIBeenPwned API</td><td>Data breach exposure</td><td>HIBP_API_KEY</td></tr>
-<tr><td><a href="#search_whois"><code>search_whois</code></a></td><td>python-whois</td><td>Domain registration data</td><td>&mdash;</td></tr>
-<tr><td><a href="#search_ip"><code>search_ip</code></a></td><td>ipinfo.io</td><td>Geolocation, ASN, hostname</td><td>&mdash;</td></tr>
-<tr><td><a href="#search_domain"><code>search_domain</code></a></td><td>sublist3r</td><td>Subdomain enumeration</td><td>sublist3r in PATH</td></tr>
-<tr><td><a href="#generate_dorks"><code>generate_dorks</code></a></td><td>built-in</td><td>12 targeted Google dork URLs</td><td>&mdash;</td></tr>
-<tr><td><a href="#search_paste"><code>search_paste</code></a></td><td>psbdmp.ws</td><td>Pastebin dump mentions</td><td>&mdash;</td></tr>
-<tr><td><a href="#search_phone"><code>search_phone</code></a></td><td>phoneinfoga</td><td>Carrier, country, line type</td><td>phoneinfoga in PATH</td></tr>
-<tr><td><a href="#search_censys"><code>search_censys</code></a></td><td>Censys API</td><td>Open ports, services, certs</td><td>CENSYS_API_ID + SECRET</td></tr>
-<tr><td><a href="#search_virustotal"><code>search_virustotal</code></a></td><td>VirusTotal API</td><td>URL / hash / IP analysis</td><td>VIRUSTOTAL_API_KEY</td></tr>
-<tr><td><a href="#search_shodan"><code>search_shodan</code></a></td><td>Shodan API</td><td>Host banners, open ports</td><td>SHODAN_API_KEY</td></tr>
-<tr><td><a href="#search_ip2location"><code>search_ip2location</code></a></td><td>IP2Location API</td><td>Geo, ISP, VPN/Proxy/Tor detection</td><td>IP2LOCATION_API_KEY</td></tr>
-<tr><td><a href="#search_abuseipdb"><code>search_abuseipdb</code></a></td><td>AbuseIPDB v2 API</td><td>Abuse score, reports, ISP</td><td>ABUSEIPDB_API_KEY</td></tr>
-<tr><td><a href="#search_github"><code>search_github</code></a></td><td>GitHub REST API</td><td>Profile, repos, commit-discovered emails</td><td>&mdash;</td></tr>
-<tr><td><a href="#search_dns"><code>search_dns</code></a></td><td>dnspython (built-in)</td><td>A/AAAA/MX/NS/TXT/CNAME/SOA, SPF/DMARC/DKIM</td><td>&mdash;</td></tr>
-<tr><td><a href="#search_rdap"><code>search_rdap</code></a></td><td>RDAP (IANA bootstrap)</td><td>Registrar, dates, name servers, status</td><td>&mdash;</td></tr>
-<tr><td><a href="#search_gdelt_geo"><code>search_gdelt_geo</code></a></td><td>GDELT 15-minute GKG feed</td><td>Recent worldwide news on a map (GeoJSON)</td><td>&mdash;</td></tr>
-<tr><td><a href="#search_dorks_live"><code>search_dorks_live</code></a></td><td>Bright Data SERP API</td><td>Live Google dork results (title, URL, snippet)</td><td>BRIGHTDATA_API_KEY</td></tr>
-<tr><td><a href="#scrape_url"><code>scrape_url</code></a></td><td>Bright Data Web Unlocker</td><td>Fetch any URL bypassing Cloudflare/CAPTCHA</td><td>BRIGHTDATA_API_KEY</td></tr>
-<tr><td><a href="#search_footprint"><code>search_footprint</code></a></td><td>Bright Data SERP API</td><td>Entity-type-aware SERP footprint + correlation graph</td><td>BRIGHTDATA_API_KEY</td></tr>
-</table>
-
-</div>
-
+<div class="table-wrap" tabindex="0" role="region" aria-label="Table"><table>
+<tr><th>Tool</th><th>Source</th><th>What it finds</th><th>Noise</th><th>Needs</th></tr>
+<tr><td><a href="#search_email"><code>search_email</code></a></td><td>holehe</td><td>Accounts linked to an email (noisy, off by default)</td><td>noisy</td><td><code>holehe</code> on PATH; <code>--allow-active</code></td></tr>
+<tr><td><a href="#search_username"><code>search_username</code></a></td><td>sherlock</td><td>Accounts across 300+ platforms (noisy, off by default)</td><td>noisy</td><td><code>sherlock</code> on PATH; <code>--allow-active</code></td></tr>
+<tr><td><a href="#search_breach"><code>search_breach</code></a></td><td>HaveIBeenPwned API</td><td>Data breach exposure</td><td>passive</td><td><code>HIBP_API_KEY</code></td></tr>
+<tr><td><a href="#search_whois"><code>search_whois</code></a></td><td>python-whois</td><td>Domain registration data</td><td>passive</td><td>&mdash;</td></tr>
+<tr><td><a href="#search_ip"><code>search_ip</code></a></td><td>ipinfo.io</td><td>Geolocation, ASN, hostname</td><td>passive</td><td><code>IPINFO_TOKEN</code> (optional)</td></tr>
+<tr><td><a href="#search_domain"><code>search_domain</code></a></td><td>sublist3r</td><td>Subdomain enumeration</td><td>noisy</td><td><code>sublist3r</code> on PATH; <code>--allow-active</code></td></tr>
+<tr><td><a href="#generate_dorks"><code>generate_dorks</code></a></td><td>built-in</td><td>12 targeted Google dork URLs</td><td>passive</td><td>&mdash;</td></tr>
+<tr><td><a href="#search_paste"><code>search_paste</code></a></td><td>psbdmp.ws</td><td>Pastebin dump mentions</td><td>passive</td><td>&mdash;</td></tr>
+<tr><td><a href="#search_phone"><code>search_phone</code></a></td><td>phoneinfoga</td><td>Carrier, country, line type</td><td>unverified</td><td><code>phoneinfoga</code> on PATH; <code>--allow-active</code></td></tr>
+<tr><td><a href="#search_shodan"><code>search_shodan</code></a></td><td>Shodan API</td><td>Host banners, open ports</td><td>passive</td><td><code>SHODAN_API_KEY</code></td></tr>
+<tr><td><a href="#search_virustotal"><code>search_virustotal</code></a></td><td>VirusTotal API</td><td>URL / hash / IP analysis</td><td>passive</td><td><code>VIRUSTOTAL_API_KEY</code></td></tr>
+<tr><td><a href="#search_censys"><code>search_censys</code></a></td><td>Censys API</td><td>Open ports, services, certs</td><td>passive</td><td><code>CENSYS_API_ID</code>; <code>CENSYS_SECRET</code></td></tr>
+<tr><td><a href="#search_ip2location"><code>search_ip2location</code></a></td><td>IP2Location API</td><td>Geo, ISP, VPN/Proxy/Tor detection</td><td>passive</td><td><code>IP2LOCATION_API_KEY</code></td></tr>
+<tr><td><a href="#search_abuseipdb"><code>search_abuseipdb</code></a></td><td>AbuseIPDB v2 API</td><td>Abuse score, reports, ISP</td><td>passive</td><td><code>ABUSEIPDB_API_KEY</code></td></tr>
+<tr><td><a href="#search_github"><code>search_github</code></a></td><td>GitHub REST API</td><td>Profile, repos, commit-discovered emails</td><td>passive</td><td><code>GITHUB_TOKEN</code> (optional)</td></tr>
+<tr><td><a href="#search_rdap"><code>search_rdap</code></a></td><td>RDAP (IANA bootstrap)</td><td>Registrar, dates, name servers, status</td><td>passive</td><td>&mdash;</td></tr>
+<tr><td><a href="#search_dns"><code>search_dns</code></a></td><td>dnspython (built-in)</td><td>A/AAAA/MX/NS/TXT/CNAME/SOA, SPF/DMARC/DKIM</td><td>passive</td><td>&mdash;</td></tr>
+<tr><td><a href="#search_gdelt_geo"><code>search_gdelt_geo</code></a></td><td>GDELT 15-minute GKG feed</td><td>Recent worldwide news on a map (GeoJSON)</td><td>passive</td><td>&mdash;</td></tr>
+<tr><td><a href="#search_dorks_live"><code>search_dorks_live</code></a></td><td>Bright Data SERP API</td><td>Live Google dork results (title, URL, snippet)</td><td>passive</td><td><code>BRIGHTDATA_API_KEY</code>; <code>BRIGHTDATA_SERP_ZONE</code></td></tr>
+<tr><td><a href="#scrape_url"><code>scrape_url</code></a></td><td>Bright Data Web Unlocker</td><td>Fetch any URL bypassing Cloudflare/CAPTCHA</td><td>touches target</td><td><code>BRIGHTDATA_API_KEY</code>; <code>BRIGHTDATA_UNLOCKER_ZONE</code>; <code>--allow-active</code></td></tr>
+<tr><td><a href="#search_footprint"><code>search_footprint</code></a></td><td>Bright Data SERP API</td><td>Entity-type-aware SERP footprint + correlation graph</td><td>passive</td><td><code>BRIGHTDATA_API_KEY</code>; <code>BRIGHTDATA_SERP_ZONE</code></td></tr>
+</table></div>
 <hr>
-
-<h2 id="search_email">SEARCH_EMAIL</h2>
+<h2 id="search_email"><code>search_email</code></h2>
 <div class="indent">
 <p>Enumerates online services linked to an email address using <a href="https://github.com/megadose/holehe" target="_blank" rel="noopener">holehe</a>. Works by sending password-reset probes &mdash; no login required on target services.</p>
 <p><b>MCP parameter:</b> <code>email</code> (string) &nbsp;|&nbsp; <b>CLI:</b> <code>openosint email &lt;address&gt; [-t &lt;seconds&gt;]</code></p>
@@ -80,7 +96,7 @@
 
 <hr>
 
-<h2 id="search_username">SEARCH_USERNAME</h2>
+<h2 id="search_username"><code>search_username</code></h2>
 <div class="indent">
 <p>Searches 300+ platforms using <a href="https://github.com/sherlock-project/sherlock" target="_blank" rel="noopener">sherlock</a>. Returns confirmed URLs for each platform where the username exists. <b>Noisy and off by default:</b> it sends requests from your IP to hundreds of sites, which can trigger rate limits and WAF blocks. Enable with <code>--allow-active</code>.</p>
 <p><b>MCP parameter:</b> <code>username</code> (string) &nbsp;|&nbsp; <b>CLI:</b> <code>openosint username &lt;handle&gt; [-t &lt;seconds&gt;]</code></p>
@@ -92,7 +108,7 @@
 
 <hr>
 
-<h2 id="search_breach">SEARCH_BREACH</h2>
+<h2 id="search_breach"><code>search_breach</code></h2>
 <div class="indent">
 <p>Checks data breach exposure via <a href="https://haveibeenpwned.com/API/v3" target="_blank" rel="noopener">HaveIBeenPwned v3 API</a>. Returns breach name, date, and leaked data categories.</p>
 <p><b>MCP parameter:</b> <code>email</code> (string) &nbsp;|&nbsp; <b>Requires:</b> <code>HIBP_API_KEY</code></p>
@@ -103,7 +119,7 @@
 
 <hr>
 
-<h2 id="search_whois">SEARCH_WHOIS</h2>
+<h2 id="search_whois"><code>search_whois</code></h2>
 <div class="indent">
 <p>Retrieves WHOIS registration data via <a href="https://github.com/richardpenman/whois" target="_blank" rel="noopener">python-whois</a>. Returns registrar, creation date, name servers, and registrant (when not privacy-protected).</p>
 <p><b>MCP parameter:</b> <code>domain</code> (string) &nbsp;|&nbsp; <b>No API key required</b></p>
@@ -115,7 +131,7 @@
 
 <hr>
 
-<h2 id="search_ip">SEARCH_IP</h2>
+<h2 id="search_ip"><code>search_ip</code></h2>
 <div class="indent">
 <p>Retrieves geolocation and ASN data via <a href="https://ipinfo.io" target="_blank" rel="noopener">ipinfo.io</a>. Free tier supports 50,000 requests/month. Set <code>IPINFO_TOKEN</code> for higher limits.</p>
 <p><b>MCP parameter:</b> <code>ip</code> (string) &nbsp;|&nbsp; <b>No API key required</b></p>
@@ -127,7 +143,7 @@
 
 <hr>
 
-<h2 id="search_domain">SEARCH_DOMAIN</h2>
+<h2 id="search_domain"><code>search_domain</code></h2>
 <div class="indent">
 <p>Enumerates subdomains via <a href="https://github.com/aboul3la/Sublist3r" target="_blank" rel="noopener">sublist3r</a>. Uses multiple public sources: Google, Bing, VirusTotal, DNSdumpster, and more.</p>
 <p><b>MCP parameter:</b> <code>domain</code> (string) &nbsp;|&nbsp; <b>Requires:</b> <code>pip install sublist3r</code></p>
@@ -139,7 +155,7 @@
 
 <hr>
 
-<h2 id="generate_dorks">GENERATE_DORKS</h2>
+<h2 id="generate_dorks"><code>generate_dorks</code></h2>
 <div class="indent">
 <p>Generates 12 targeted Google dork URLs for any query string. No network calls &mdash; pure URL generation. Open results in your browser for manual review.</p>
 <p><b>MCP parameter:</b> <code>target</code> (string) &nbsp;|&nbsp; <b>No API key or binary required</b></p>
@@ -150,7 +166,7 @@
 
 <hr>
 
-<h2 id="search_paste">SEARCH_PASTE</h2>
+<h2 id="search_paste"><code>search_paste</code></h2>
 <div class="indent">
 <p>Searches Pastebin dumps via <a href="https://psbdmp.ws" target="_blank" rel="noopener">psbdmp.ws</a>. Returns URLs and timestamps of pastes mentioning the query.</p>
 <p><b>MCP parameter:</b> <code>query</code> (string) &nbsp;|&nbsp; <b>No API key required</b></p>
@@ -160,7 +176,7 @@
 
 <hr>
 
-<h2 id="search_phone">SEARCH_PHONE</h2>
+<h2 id="search_phone"><code>search_phone</code></h2>
 <div class="indent">
 <p>Phone intelligence via <a href="https://github.com/sundowndev/phoneinfoga" target="_blank" rel="noopener">phoneinfoga</a>. Accepts E.164 format (<code>+14155552671</code>). Returns country, carrier, and line type.</p>
 <p><b>MCP parameter:</b> <code>phone</code> (string) &nbsp;|&nbsp; <b>Requires:</b> <a href="https://github.com/sundowndev/phoneinfoga/releases" target="_blank" rel="noopener">phoneinfoga binary</a></p>
@@ -172,7 +188,7 @@
 
 <hr>
 
-<h2 id="search_censys">SEARCH_CENSYS</h2>
+<h2 id="search_censys"><code>search_censys</code></h2>
 <div class="indent">
 <p>Queries the <a href="https://censys.io" target="_blank" rel="noopener">Censys</a> API for host scan data: open ports, running services, TLS certificate history, and banner information.</p>
 <p><b>MCP parameter:</b> <code>query</code> (string) &nbsp;|&nbsp; <b>Requires:</b> <code>CENSYS_API_ID</code> + <code>CENSYS_API_SECRET</code></p>
@@ -180,7 +196,7 @@
 
 <hr>
 
-<h2 id="search_virustotal">SEARCH_VIRUSTOTAL</h2>
+<h2 id="search_virustotal"><code>search_virustotal</code></h2>
 <div class="indent">
 <p>Queries the <a href="https://www.virustotal.com" target="_blank" rel="noopener">VirusTotal</a> API for URL, file hash, or IP analysis. Returns detections across 70+ antivirus engines and threat intelligence feeds.</p>
 <p><b>MCP parameter:</b> <code>target</code> (string &mdash; URL, hash, or IP) &nbsp;|&nbsp; <b>Requires:</b> <code>VIRUSTOTAL_API_KEY</code></p>
@@ -188,7 +204,7 @@
 
 <hr>
 
-<h2 id="search_shodan">SEARCH_SHODAN</h2>
+<h2 id="search_shodan"><code>search_shodan</code></h2>
 <div class="indent">
 <p>Queries <a href="https://www.shodan.io" target="_blank" rel="noopener">Shodan</a> for host banners and keyword searches. Returns open ports, service fingerprints, hostnames, and CVE matches where available.</p>
 <p><b>MCP parameter:</b> <code>query</code> (string) &nbsp;|&nbsp; <b>Requires:</b> <code>SHODAN_API_KEY</code></p>
@@ -196,7 +212,7 @@
 
 <hr>
 
-<h2 id="search_ip2location">SEARCH_IP2LOCATION</h2>
+<h2 id="search_ip2location"><code>search_ip2location</code></h2>
 <div class="indent">
 <p>Queries the <a href="https://www.ip2location.io" target="_blank" rel="noopener">IP2Location.io</a> API (sponsored integration). Returns geolocation to city level, ISP, ASN, domain, and &mdash; on the Security Plan &mdash; VPN, proxy, Tor exit node, and datacenter classification.</p>
 <p><b>MCP parameter:</b> <code>ip</code> (string &mdash; IPv4 or IPv6) &nbsp;|&nbsp; <b>Requires:</b> <code>IP2LOCATION_API_KEY</code></p>
@@ -212,7 +228,7 @@
 
 <hr>
 
-<h2 id="search_abuseipdb">SEARCH_ABUSEIPDB</h2>
+<h2 id="search_abuseipdb"><code>search_abuseipdb</code></h2>
 <div class="indent">
 <p>Checks an IP against the <a href="https://www.abuseipdb.com" target="_blank" rel="noopener">AbuseIPDB</a> v2 API for crowd-sourced abuse reports. Returns confidence score (0&ndash;100%), report count, country, ISP, and last reported timestamp.</p>
 <p><b>MCP parameter:</b> <code>ip</code> (string &mdash; IPv4 or IPv6) &nbsp;|&nbsp; <b>Requires:</b> <code>ABUSEIPDB_API_KEY</code></p>
@@ -226,7 +242,7 @@
 
 <hr>
 
-<h2 id="search_github">SEARCH_GITHUB</h2>
+<h2 id="search_github"><code>search_github</code></h2>
 <div class="indent">
 <p>Queries the <a href="https://docs.github.com/en/rest" target="_blank" rel="noopener">GitHub REST API</a>. Username &rarr; profile, repos, commit-discovered emails. Keyword &rarr; user/repo search.</p>
 <p><b>MCP parameter:</b> <code>query</code> (string) &nbsp;|&nbsp; <b>Optional:</b> <code>GITHUB_TOKEN</code> (raises rate limit from 60 to 5000 req/h)</p>
@@ -237,7 +253,7 @@
 
 <hr>
 
-<h2 id="search_rdap">SEARCH_RDAP</h2>
+<h2 id="search_rdap"><code>search_rdap</code></h2>
 <div class="indent">
 <p>Looks up a domain&rsquo;s registrar, registration and expiry dates, name servers and status codes over RDAP, the machine-readable successor to WHOIS. Registrant contact details are redacted by registry policy and never returned.</p>
 <p><b>MCP parameter:</b> <code>domain</code> (string) &nbsp;|&nbsp; <b>No API key required</b></p>
@@ -245,7 +261,7 @@
 
 <hr>
 
-<h2 id="search_dns">SEARCH_DNS</h2>
+<h2 id="search_dns"><code>search_dns</code></h2>
 <div class="indent">
 <p>Queries A/AAAA/MX/NS/TXT/CNAME/SOA records and analyzes SPF, DMARC, and DKIM configuration using <a href="https://www.dnspython.org" target="_blank" rel="noopener">dnspython</a> (no external API).</p>
 <p><b>MCP parameter:</b> <code>domain</code> (string) &nbsp;|&nbsp; <b>No API key required</b></p>
@@ -257,7 +273,7 @@
 
 <hr>
 
-<h2 id="search_gdelt_geo">SEARCH_GDELT_GEO</h2>
+<h2 id="search_gdelt_geo"><code>search_gdelt_geo</code></h2>
 <div class="indent">
 <p>Recent, geolocated worldwide news from <a href="https://www.gdeltproject.org/" target="_blank" rel="noopener">The GDELT Project</a>'s 15-minute article feed (the GEO 2.0 API it replaces was retired). Queries are matched against headlines and URLs (quoted phrases, <code>OR</code>, or <code>*</code> for everything); results are grouped by place. The last 6 hours are kept in memory (<code>OPENOSINT_GDELT_WINDOW_HOURS</code>), loaded only when the tool is first used; the first search may cover just the last 15 minutes while older articles load, and the result says so. No API key. Optionally scoped to a bounding box. News data: GDELT Project, <a href="https://www.gdeltproject.org/" target="_blank" rel="noopener">gdeltproject.org</a>.</p>
 <p><b>MCP parameters:</b> <code>query</code> (string, required), <code>timespan</code> (minutes, 15&ndash;1440, capped at the loaded window), <code>maxpoints</code> (1&ndash;500), <code>bbox</code> (array) &nbsp;|&nbsp; <b>No API key required</b></p>
@@ -267,7 +283,7 @@
 
 <hr>
 
-<h2 id="search_dorks_live">SEARCH_DORKS_LIVE</h2>
+<h2 id="search_dorks_live"><code>search_dorks_live</code></h2>
 <div class="indent">
 <p>Executes live Google dork queries through the <a href="https://get.brightdata.com/984ni58s2oad?utm_source=site&amp;utm_medium=tools" target="_blank" rel="noopener">Bright Data SERP API</a>, returning structured results (title, URL, snippet). Defaults to 5 dorks per run; each is a separate billable API call.</p>
 <p><b>MCP parameter:</b> <code>target</code> (string) &nbsp;|&nbsp; <b>Requires:</b> <code>BRIGHTDATA_API_KEY</code> + <code>BRIGHTDATA_SERP_ZONE</code></p>
@@ -279,7 +295,7 @@
 
 <hr>
 
-<h2 id="scrape_url">SCRAPE_URL</h2>
+<h2 id="scrape_url"><code>scrape_url</code></h2>
 <div class="indent">
 <p>Fetches any public URL through the <a href="https://get.brightdata.com/984ni58s2oad?utm_source=site&amp;utm_medium=tools" target="_blank" rel="noopener">Bright Data Web Unlocker</a> API, bypassing Cloudflare/CAPTCHA. Returns clean Markdown.</p>
 <p><b>MCP parameter:</b> <code>url</code> (string) &nbsp;|&nbsp; <b>Requires:</b> <code>BRIGHTDATA_API_KEY</code> + <code>BRIGHTDATA_UNLOCKER_ZONE</code></p>
@@ -291,23 +307,47 @@ This domain is for use in illustrative examples in documents.</pre>
 
 <hr>
 
-<h2 id="search_footprint">SEARCH_FOOTPRINT</h2>
+<h2 id="search_footprint"><code>search_footprint</code></h2>
 <div class="indent">
 <p>Collects a target's public search-engine footprint via the <a href="https://get.brightdata.com/984ni58s2oad?utm_source=site&amp;utm_medium=tools" target="_blank" rel="noopener">Bright Data SERP API</a>. Detects entity type (email, username, domain, phone, or full name) and runs entity-type-aware Google queries, returning structured results plus Entity Correlation Graph nodes/edges.</p>
 <p><b>MCP parameter:</b> <code>target</code> (string) &nbsp;|&nbsp; <b>Requires:</b> <code>BRIGHTDATA_API_KEY</code> + <code>BRIGHTDATA_SERP_ZONE</code></p>
 <pre>$ openosint footprint johndoe99</pre>
 </div>
 
-<hr>
-
-
-<div style="margin-top:24px; padding-top:12px; border-top:1px solid #ccc; font-family:monospace; font-size:12px; text-align:center;">
-<a href="/">Home</a> &middot;
-<a href="/blog/">Blog</a> &middot;
-<a href="/tools/">Tools</a> &middot;
-<a href="https://github.com/OpenOSINT/OpenOSINT" target="_blank" rel="noopener">GitHub</a>
+  </article>
 </div>
 
-</div>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap">
+    <ul class="footer-links">
+      <li><a href="/blog/">Blog</a></li>
+      <li><a href="/tools/">Tools</a></li>
+      <li><a href="/commercial/">Commercial</a></li>
+      <li><a href="/sponsors.html">Sponsors</a></li>
+      <li><a href="/terms/">Terms</a></li>
+      <li><a href="/privacy/">Privacy</a></li>
+      <li><a href="/acceptable-use/">Acceptable Use</a></li>
+      <li><a href="/subprocessors/">Subprocessors</a></li>
+      <li><a href="mailto:commercial@openosint.tech">Contact</a></li>
+    </ul>
+    <span>&copy; 2026 Tommaso Bertocchi, Trieste, Italy</span>
+  </div>
+</footer>
+<script>
+document.querySelectorAll("pre").forEach(function (pre) {
+  if (!navigator.clipboard) return;
+  var b = document.createElement("button");
+  b.type = "button"; b.className = "copy"; b.textContent = "Copy"; b.setAttribute("aria-label", "Copy code");
+  b.addEventListener("click", function () {
+    var code = pre.querySelector("code") || pre;
+    navigator.clipboard.writeText(code.innerText).then(function () {
+      b.textContent = "Copied"; setTimeout(function () { b.textContent = "Copy"; }, 1500);
+    });
+  });
+  pre.appendChild(b);
+});
+</script>
 </body>
 </html>

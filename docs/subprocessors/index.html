@@ -1,53 +1,59 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Sub-processors — OpenOSINT</title>
-<meta name="description" content="OpenOSINT sub-processor list for OpenOSINT Cloud and the public demo — who receives query content, result content, or credentials, and whether the key is operator-held or your own.">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sub-processors | OpenOSINT</title>
+<meta name="description" content="Every external party that receives query content or credentials from OpenOSINT Cloud and the public demo, and whether the key is operator-held.">
 <link rel="canonical" href="https://openosint.tech/subprocessors/">
-<meta property="og:title" content="Sub-processors — OpenOSINT">
-<meta property="og:url" content="https://openosint.tech/subprocessors/">
-<meta property="og:type" content="website">
+<meta name="theme-color" content="#16181b">
+<link rel="icon" href="/logo.svg" type="image/svg+xml">
+<link rel="preload" href="/assets/fonts/HankenGrotesk.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/style.css">
 <meta property="og:site_name" content="OpenOSINT">
-<link rel="icon" type="image/svg+xml" href="../logo.svg">
-<link rel="stylesheet" href="../style.css">
-<script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@type": "WebPage",
-  "name": "Sub-processors — OpenOSINT",
-  "url": "https://openosint.tech/subprocessors/",
-  "isPartOf": { "@type": "WebSite", "url": "https://openosint.tech" }
-}
-</script>
+<meta property="og:type" content="website">
+<meta property="og:title" content="Sub-processors | OpenOSINT">
+<meta property="og:description" content="Every external party that receives query content or credentials from OpenOSINT Cloud and the public demo, and whether the key is operator-held.">
+<meta property="og:url" content="https://openosint.tech/subprocessors/">
+<meta property="og:image" content="https://openosint.tech/assets/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="OpenOSINT: open-source engine for passive checks of public information">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Sub-processors | OpenOSINT">
+<meta name="twitter:description" content="Every external party that receives query content or credentials from OpenOSINT Cloud and the public demo, and whether the key is operator-held.">
+<meta name="twitter:image" content="https://openosint.tech/assets/og.png">
 </head>
 <body>
+<a class="skip-link" href="#main">Skip to content</a>
+<header class="site-header">
+  <div class="wrap bar">
+    <a class="logo" href="/"><svg width="22" height="22" viewBox="0 0 22 22" aria-hidden="true"><rect x="2" y="2" width="18" height="18" fill="none" stroke="currentColor" stroke-width="3"/><path d="M11 6v10M6 11h10" stroke="currentColor" stroke-width="1.5"/></svg>OpenOSINT</a>
+    <nav class="nav" aria-label="Main">
+      <a href="/docs/">Docs</a>
+      <a href="/tools/">Tools</a>
+      <a href="/blog/">Blog</a>
+      <a href="https://github.com/OpenOSINT/OpenOSINT" aria-current="page" rel="noopener">GitHub</a>
+    </nav>
+    <div class="bar-right">
+      <a class="btn btn-small" href="https://app.openosint.tech/?utm_source=openosint.tech&amp;utm_medium=referral&amp;utm_campaign=nav">Hosted tools</a>
+      <details class="menu">
+        <summary>Menu</summary>
+        <div class="menu-panel">
+          <a href="/docs/">Docs</a>
+          <a href="/tools/">Tools</a>
+          <a href="/blog/">Blog</a>
+          <a href="https://github.com/OpenOSINT/OpenOSINT" rel="noopener">GitHub</a>
+        </div>
+      </details>
+    </div>
+  </div>
+</header>
 
-<div id="nav">
-<a href="/" style="color:#3fb950;font-weight:bold;">HOME</a>
-<a href="/blog/" style="color:#58a6ff;">BLOG</a>
-<a href="/tools/" style="color:#58a6ff;">TOOLS</a>
-<a href="/commercial/" style="color:#f0a732;font-weight:bold;">FOR TEAMS</a>
-<a href="https://github.com/OpenOSINT/OpenOSINT" target="_blank" rel="noopener">GITHUB</a>
-<span class="nav-sep">|</span><a href="/sponsors.html" class="nav-cta">&#10084; Sponsor</a>
-</div>
-
-<div id="content">
-
-<div id="masthead">
-<table width="100%" cellpadding="0" cellspacing="0" border="0">
-<tr>
-<td class="mhead-l">OPENOSINT</td>
-<td class="mhead-c">Sub-processors</td>
-<td class="mhead-r">2026-08-30</td>
-</tr>
-</table>
-</div>
-
-<hr>
-
-<h2 id="intro">SUB-PROCESSORS</h2>
+<main id="main">
+<div class="wrap page">
+  <article class="prose">
+    <h1 id="intro">SUB-PROCESSORS</h1>
 <div class="indent">
 <p>This page covers the two surfaces the operator directly hosts and controls: <b>OpenOSINT Cloud</b> (the paid API) and the <b>public demo</b> at this site. It lists every external party that receives query content, result content, credentials, or personal data when you use either surface, built directly from the deployed code and infrastructure configuration rather than from a general description of the product. This list is referenced in our <a href="/privacy/">Privacy Policy</a> (&sect;5). Last updated: 2026-08-30.</p>
 <p>If you self-host OpenOSINT (the open-source CLI, MCP server, or local web UI) with your own API keys, this page does not apply to that use — you are the controller for that processing, and your relationship with whichever providers you configure is your own. See our <a href="/privacy/">Privacy Policy</a> (&sect;3).</p>
@@ -56,7 +62,7 @@
 <h2 id="operator-keyed">OPERATOR-ENGAGED SUB-PROCESSORS</h2>
 <div class="indent">
 <p>These parties act on the operator's own account or key, to provide OpenOSINT Cloud and/or the public demo as a service. They are true sub-processors of the operator.</p>
-<table>
+<div class="table-wrap" tabindex="0" role="region" aria-label="Table"><table>
 <tr>
   <th>Sub-processor</th>
   <th>Surface</th>
@@ -106,13 +112,13 @@
   <td>USA</td>
   <td>Standard Contractual Clauses (SCCs)</td>
 </tr>
-</table>
+</table></div>
 </div>
 
 <h2 id="not-used">NOT USED TO PROCESS YOUR QUERY OR PERSONAL DATA</h2>
 <div class="indent">
 <p>These providers do not receive data from OpenOSINT Cloud or the public demo, even though the underlying open-source project supports them for self-hosted use. Each surface is verified and stated independently below — a fact about one is not assumed to hold for the other.</p>
-<table>
+<div class="table-wrap" tabindex="0" role="region" aria-label="Table"><table>
 <tr>
   <th>Provider</th>
   <th>OpenOSINT Cloud</th>
@@ -133,7 +139,7 @@
   <td>Not used. <code>search_breach</code> is deliberately excluded from both the Cloud API's tool list and its MCP gateway's tool registrations — it is not wired in, not a missing key.</td>
   <td>Not used. <code>search_breach</code> is blocked unconditionally in demo mode — not just a missing key — because the operator does not want to be the entity making a breach lookup available to an anonymous visitor on a non-consenting third party, regardless of whose API key would be used.</td>
 </tr>
-</table>
+</table></div>
 <p>If you self-host OpenOSINT (CLI, MCP server, or local web UI) with your own key for any of these, that processing is between you and the provider — see the scope note at the top of this page.</p>
 </div>
 
@@ -173,15 +179,40 @@
 </table>
 </div>
 
-<div style="margin-top:24px; padding-top:12px; border-top:1px solid #ccc; font-family:monospace; font-size:12px; text-align:center;">
-<a href="/">Home</a> &middot;
-<a href="/terms/">Terms of Service</a> &middot;
-<a href="/privacy/">Privacy Policy</a> &middot;
-<a href="/acceptable-use/">Acceptable Use</a> &middot;
-<a href="/blog/">Blog</a> &middot;
-<a href="https://github.com/OpenOSINT/OpenOSINT" target="_blank" rel="noopener">GitHub</a>
+  </article>
 </div>
 
-</div>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap">
+    <ul class="footer-links">
+      <li><a href="/blog/">Blog</a></li>
+      <li><a href="/tools/">Tools</a></li>
+      <li><a href="/commercial/">Commercial</a></li>
+      <li><a href="/sponsors.html">Sponsors</a></li>
+      <li><a href="/terms/">Terms</a></li>
+      <li><a href="/privacy/">Privacy</a></li>
+      <li><a href="/acceptable-use/">Acceptable Use</a></li>
+      <li><a href="/subprocessors/">Subprocessors</a></li>
+      <li><a href="mailto:commercial@openosint.tech">Contact</a></li>
+    </ul>
+    <span>&copy; 2026 Tommaso Bertocchi, Trieste, Italy</span>
+  </div>
+</footer>
+<script>
+document.querySelectorAll("pre").forEach(function (pre) {
+  if (!navigator.clipboard) return;
+  var b = document.createElement("button");
+  b.type = "button"; b.className = "copy"; b.textContent = "Copy"; b.setAttribute("aria-label", "Copy code");
+  b.addEventListener("click", function () {
+    var code = pre.querySelector("code") || pre;
+    navigator.clipboard.writeText(code.innerText).then(function () {
+      b.textContent = "Copied"; setTimeout(function () { b.textContent = "Copy"; }, 1500);
+    });
+  });
+  pre.appendChild(b);
+});
+</script>
 </body>
 </html>

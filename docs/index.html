@@ -3,27 +3,26 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>OpenOSINT: open-source engine, hosted checks</title>
-<meta name="description" content="OpenOSINT is an open-source engine for passive checks of public information. Monitor watches your domain's security, Diligence compares company records with their digital footprint.">
+<title>OpenOSINT: open-source engine for passive OSINT checks</title>
+<meta name="description" content="Open-source engine for passive checks of public information: 21 tools in a CLI, an MCP server and a web UI. MIT licensed. Hosted Monitor and Diligence.">
 <link rel="canonical" href="https://openosint.tech/">
 <meta name="theme-color" content="#16181b">
 <link rel="icon" href="/logo.svg" type="image/svg+xml">
-
+<link rel="preload" href="/assets/fonts/HankenGrotesk.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/style.css">
 <meta property="og:site_name" content="OpenOSINT">
 <meta property="og:type" content="website">
-<meta property="og:title" content="OpenOSINT: open-source engine, hosted checks">
-<meta property="og:description" content="OpenOSINT is an open-source engine for passive checks of public information. Monitor watches your domain's security, Diligence compares company records with their digital footprint.">
+<meta property="og:title" content="OpenOSINT: open-source engine for passive OSINT checks">
+<meta property="og:description" content="Open-source engine for passive checks of public information: 21 tools in a CLI, an MCP server and a web UI. MIT licensed. Hosted Monitor and Diligence.">
 <meta property="og:url" content="https://openosint.tech/">
-<meta property="og:image" content="https://app.openosint.tech/static/og-image.png?v=3c660b6667">
+<meta property="og:image" content="https://openosint.tech/assets/og.png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
-<meta property="og:image:alt" content="OpenOSINT: open-source checks of public information about domains and companies">
+<meta property="og:image:alt" content="OpenOSINT: open-source engine for passive checks of public information">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="OpenOSINT: open-source engine, hosted checks">
-<meta name="twitter:description" content="OpenOSINT is an open-source engine for passive checks of public information. Monitor watches your domain's security, Diligence compares company records with their digital footprint.">
-<meta name="twitter:image" content="https://app.openosint.tech/static/og-image.png?v=3c660b6667">
-<meta name="twitter:image:alt" content="OpenOSINT: open-source checks of public information about domains and companies">
-
+<meta name="twitter:title" content="OpenOSINT: open-source engine for passive OSINT checks">
+<meta name="twitter:description" content="Open-source engine for passive checks of public information: 21 tools in a CLI, an MCP server and a web UI. MIT licensed. Hosted Monitor and Diligence.">
+<meta name="twitter:image" content="https://openosint.tech/assets/og.png">
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -33,85 +32,48 @@
   "logo": "https://openosint.tech/logo.svg",
   "description": "Open-source engine for passive checks of public information, with hosted products Monitor and Diligence.",
   "email": "commercial@openosint.tech",
-  "sameAs": ["https://github.com/OpenOSINT/OpenOSINT", "https://app.openosint.tech/"]
+  "sameAs": [
+    "https://github.com/OpenOSINT/OpenOSINT",
+    "https://app.openosint.tech/"
+  ]
 }
 </script>
-
-<style>
-/* Visual language of app.openosint.tech: editorial, light, square corners, Hanken Grotesk + IBM Plex Mono. */
-@font-face { font-family: "Hanken Grotesk"; font-style: normal; font-weight: 400 700; font-display: swap; src: url("/assets/fonts/HankenGrotesk.woff2") format("woff2"); }
-@font-face { font-family: "IBM Plex Mono"; font-style: normal; font-weight: 400; font-display: swap; src: url("/assets/fonts/IBMPlexMono-Regular.woff2") format("woff2"); }
-:root {
-  color-scheme: light;
-  --ink: #16181b; --body: #3f454b; --muted: #5b6168; --line: #dadde0;
-  --white: #fff; --band-light: #f1f2f3; --band-dark: #1e2124; --on-dark: #fff; --on-dark-muted: #b9bec3;
-  --gutter: clamp(16px, 4vw, 48px); --max: 1280px;
-  --font: "Hanken Grotesk", system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
-  --mono: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareSourceCode",
+  "name": "OpenOSINT",
+  "description": "Open-source engine for passive checks of public information: CLI, MCP server and web UI.",
+  "codeRepository": "https://github.com/OpenOSINT/OpenOSINT",
+  "programmingLanguage": "Python",
+  "license": "https://opensource.org/licenses/MIT",
+  "url": "https://openosint.tech/"
 }
-*, *::before, *::after { box-sizing: border-box; border-radius: 0; }
-html { -webkit-text-size-adjust: 100%; }
-body { margin: 0; min-height: 100vh; display: flex; flex-direction: column; background: var(--white); color: var(--ink); font-family: var(--font); font-size: 1rem; line-height: 1.55; }
-a { color: var(--ink); text-underline-offset: 3px; }
-a:hover { color: #000; }
-:focus-visible { outline: 3px solid var(--ink); outline-offset: 2px; }
-.wrap { width: 100%; max-width: var(--max); margin: 0 auto; padding: 0 var(--gutter); }
-.skip-link { position: absolute; left: -999px; top: 0; background: var(--white); padding: .5rem 1rem; z-index: 10; }
-.skip-link:focus { left: 0; }
-
-.site-header { border-bottom: 1px solid var(--line); }
-.site-header .wrap { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 16px; min-height: 72px; }
-.logo { font-size: 18px; font-weight: 700; letter-spacing: -0.01em; text-decoration: none; }
-.nav { display: flex; flex-wrap: wrap; gap: 4px 28px; font-size: 15px; font-weight: 500; }
-.nav a { text-decoration: none; }
-@media (max-width: 480px) { .nav { gap: 4px 16px; font-size: 14px; } }
-
-main { flex: 1; }
-.intro { padding: clamp(56px, 9vw, 120px) 0 clamp(32px, 5vw, 56px); }
-h1 { margin: 0 0 24px; font-size: clamp(44px, 7vw, 92px); font-weight: 600; line-height: .98; letter-spacing: -0.035em; }
-.lead { max-width: 40rem; margin: 0 0 32px; font-size: 19px; line-height: 1.5; color: var(--body); }
-.btn { display: inline-flex; align-items: center; justify-content: center; min-height: 44px; padding: 12px 20px; border: 1px solid var(--ink); background: var(--ink); color: var(--white); font-size: 15px; font-weight: 600; line-height: 1.2; text-decoration: none; text-align: center; }
-.btn:hover { background: #000; color: var(--white); }
-.btn-secondary { background: var(--white); color: var(--ink); }
-.btn-secondary:hover { background: var(--band-light); color: var(--ink); }
-
-.products { padding-bottom: clamp(40px, 6vw, 72px); }
-.plans { display: flex; flex-wrap: wrap; border-top: 2px solid var(--ink); }
-.plan { flex: 1 1 300px; min-width: 0; padding: 32px; display: flex; flex-direction: column; gap: 24px; }
-.plan:first-child { padding-left: 0; }
-.plan:last-child { padding-right: 0; }
-@media (max-width: 640px) { .plan { padding-left: 0; padding-right: 0; } }
-.plan h2 { margin: 0 0 12px; font-size: clamp(26px, 3vw, 32px); font-weight: 600; line-height: 1.1; letter-spacing: -0.02em; }
-.plan p { margin: 0; color: var(--body); }
-.plan .btn { align-self: flex-start; }
-.plan-body { flex-grow: 1; }
-
-.band-light { background: var(--band-light); padding: clamp(40px, 6vw, 72px) 0; }
-.band-light h2 { margin: 0 0 16px; font-size: 22px; font-weight: 600; letter-spacing: -0.01em; }
-.band-light p { max-width: 46rem; margin: 0 0 12px; color: var(--body); }
-.band-light p:last-child { margin-bottom: 0; }
-.sponsor { margin: 24px 0; padding: 24px 0 0; border-top: 1px solid var(--line-strong, #c9cdd1); }
-.sponsor h3 { margin: 16px 0 8px; font-size: 18px; font-weight: 600; }
-.sponsor img { display: block; max-width: 100%; height: auto; margin-bottom: 12px; }
-.sponsor code { font-family: var(--mono); }
-
-.site-footer { background: var(--band-dark); color: var(--on-dark-muted); font-size: 14px; }
-.site-footer .wrap { padding-top: 32px; padding-bottom: 32px; display: flex; flex-direction: column; gap: 16px; }
-.site-footer a { color: var(--on-dark); }
-.footer-links { list-style: none; padding: 0; margin: 0; display: flex; flex-wrap: wrap; gap: 8px 20px; }
-</style>
+</script>
 </head>
 <body>
 <a class="skip-link" href="#main">Skip to content</a>
 <header class="site-header">
-  <div class="wrap">
-    <a class="logo" href="/">OpenOSINT</a>
+  <div class="wrap bar">
+    <a class="logo" href="/"><svg width="22" height="22" viewBox="0 0 22 22" aria-hidden="true"><rect x="2" y="2" width="18" height="18" fill="none" stroke="currentColor" stroke-width="3"/><path d="M11 6v10M6 11h10" stroke="currentColor" stroke-width="1.5"/></svg>OpenOSINT</a>
     <nav class="nav" aria-label="Main">
-      <a href="https://app.openosint.tech/monitor?utm_source=openosint.tech&amp;utm_medium=referral&amp;utm_campaign=nav">Monitor</a>
-      <a href="https://app.openosint.tech/diligence?utm_source=openosint.tech&amp;utm_medium=referral&amp;utm_campaign=nav">Diligence</a>
+      <a href="/docs/">Docs</a>
+      <a href="/tools/">Tools</a>
       <a href="/blog/">Blog</a>
-      <a href="https://github.com/OpenOSINT/OpenOSINT" rel="noopener">GitHub</a>
+      <a href="https://github.com/OpenOSINT/OpenOSINT" aria-current="page" rel="noopener">GitHub</a>
     </nav>
+    <div class="bar-right">
+      <a class="btn btn-small" href="https://app.openosint.tech/?utm_source=openosint.tech&amp;utm_medium=referral&amp;utm_campaign=nav">Hosted tools</a>
+      <details class="menu">
+        <summary>Menu</summary>
+        <div class="menu-panel">
+          <a href="/docs/">Docs</a>
+          <a href="/tools/">Tools</a>
+          <a href="/blog/">Blog</a>
+          <a href="https://github.com/OpenOSINT/OpenOSINT" rel="noopener">GitHub</a>
+        </div>
+      </details>
+    </div>
   </div>
 </header>
 
@@ -119,29 +81,59 @@ h1 { margin: 0 0 24px; font-size: clamp(44px, 7vw, 92px); font-weight: 600; line
   <section class="intro" aria-label="Introduction">
     <div class="wrap">
       <h1>OpenOSINT</h1>
-      <p class="lead">OpenOSINT is an open-source engine for passive checks of public information: DNS, certificates and official registers.</p>
-      <a class="btn btn-secondary" href="https://github.com/OpenOSINT/OpenOSINT" rel="noopener">View the engine on GitHub</a>
+      <p class="lead">An open-source engine for passive checks of public information: DNS, certificates and official registers.</p>
+      <div class="install">
+        <pre><code>pip install openosint</code></pre>
+        <p class="muted">Python 3.10 or newer. <a href="/docs/install/">Other ways to install</a></p>
+      </div>
     </div>
   </section>
 
-  <section class="products" aria-label="Products">
+  <section class="section" aria-labelledby="ways">
     <div class="wrap">
+      <h2 id="ways">Use it three ways</h2>
+      <div class="ways">
+        <a href="/docs/quickstart/">
+          <h3>CLI</h3>
+          <p>Direct subcommands and an interactive REPL that picks and chains the tools for you.</p>
+        </a>
+        <a href="/docs/mcp/">
+          <h3>MCP server</h3>
+          <p>The same tools inside Claude Desktop, Claude Code, Cursor or any MCP client.</p>
+        </a>
+        <a href="/docs/web-ui/">
+          <h3>Web UI</h3>
+          <p>Chat, globe and graph in your browser, running on your own machine.</p>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" aria-labelledby="hosted">
+    <div class="wrap">
+      <h2 id="hosted">Hosted products built on the engine</h2>
       <div class="plans">
         <div class="plan">
-          <div class="plan-body">
-            <h2>Monitor</h2>
+          <div>
+            <h3>Monitor</h3>
             <p>Know when your domain&rsquo;s security gets worse. External checks of email authentication, TLS, security headers and lookalike domains, and one email when something changes.</p>
           </div>
           <a class="btn" href="https://app.openosint.tech/monitor?utm_source=openosint.tech&amp;utm_medium=referral&amp;utm_campaign=home">Open Monitor</a>
         </div>
         <div class="plan">
-          <div class="plan-body">
-            <h2>Diligence</h2>
+          <div>
+            <h3>Diligence</h3>
             <p>For analysts, investors and banks. Official company records compared with the company&rsquo;s public footprint, each signal with its source and retrieval time.</p>
           </div>
           <a class="btn" href="https://app.openosint.tech/diligence?utm_source=openosint.tech&amp;utm_medium=referral&amp;utm_campaign=home">Open Diligence</a>
         </div>
       </div>
+    </div>
+  </section>
+
+  <section class="section" aria-label="Source code">
+    <div class="wrap">
+      <p><a class="btn btn-secondary" href="https://github.com/OpenOSINT/OpenOSINT" rel="noopener">View on GitHub &middot; 1,700+ stars</a></p>
     </div>
   </section>
 
@@ -164,6 +156,7 @@ h1 { margin: 0 0 24px; font-size: clamp(44px, 7vw, 92px); font-weight: 600; line
       <p>&rarr; <a href="/sponsors.html"><b>Full media kit and pricing</b></a> &mdash; <a href="https://opencollective.com/openosint_oss" target="_blank" rel="noopener">Open Collective</a> &mdash; <a href="mailto:commercial@openosint.tech?subject=OpenOSINT%20Sponsorship%20Inquiry">commercial@openosint.tech</a></p>
     </div>
   </section>
+
 </main>
 
 <footer class="site-footer">
@@ -182,5 +175,19 @@ h1 { margin: 0 0 24px; font-size: clamp(44px, 7vw, 92px); font-weight: 600; line
     <span>&copy; 2026 Tommaso Bertocchi, Trieste, Italy</span>
   </div>
 </footer>
+<script>
+document.querySelectorAll("pre").forEach(function (pre) {
+  if (!navigator.clipboard) return;
+  var b = document.createElement("button");
+  b.type = "button"; b.className = "copy"; b.textContent = "Copy"; b.setAttribute("aria-label", "Copy code");
+  b.addEventListener("click", function () {
+    var code = pre.querySelector("code") || pre;
+    navigator.clipboard.writeText(code.innerText).then(function () {
+      b.textContent = "Copied"; setTimeout(function () { b.textContent = "Copy"; }, 1500);
+    });
+  });
+  pre.appendChild(b);
+});
+</script>
 </body>
 </html>
