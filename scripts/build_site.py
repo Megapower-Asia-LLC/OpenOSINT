@@ -161,7 +161,7 @@ def tools_table_html() -> str:
         rows.append(
             f'<tr><td><a href="#{name}"><code>{name}</code></a></td><td>{html.escape(info["method"])}</td>'
             f'<td>{html.escape(info["finds"])}</td><td>{policy.noise.value}</td>'
-            f'<td>{"; ".join(needs) or "&mdash;"}</td></tr>'
+            f'<td class="needs">{"; ".join(needs) or "&mdash;"}</td></tr>'
         )
     head = "<tr><th>Tool</th><th>Source</th><th>What it finds</th><th>Noise</th><th>Needs</th></tr>"
     return "<table>\n" + head + "\n" + "\n".join(rows) + "\n</table>"
@@ -363,10 +363,14 @@ def special_pages(posts: list[dict]) -> list[dict]:
     tools_meta, tools_intro = split_front_matter(SITE / "content" / "tools.html")
     tools_meta, tools_intro = expand_meta(tools_meta), expand_tokens(tools_intro)
     detail = (SITE / "content" / "partials" / "tools-detail.html").read_text(encoding="utf-8")
+    tools_crumbs = [
+        {"name": "Home", "url": "/"}, {"name": "Docs", "url": "/docs/"}, {"name": "Tools reference", "url": "/tools/"}
+    ]
     tools = make_page(
-        "/tools/", "page.html", tools_meta,
+        "/tools/", "doc.html", tools_meta,
         wrap_tables(tools_intro + "\n" + tools_table_html() + "\n<hr>\n" + detail),
-        section="tools", source="site/content/tools.html",
+        section="tools", source="site/content/tools.html", jsonld=[ld(breadcrumb_ld(tools_crumbs))],
+        breadcrumbs=tools_crumbs, edit_url=f"{REPO_URL}/edit/main/site/content/tools.html", prev=None, next=None,
     )
     blog_meta = load_yaml("blog.yaml")
     blog = make_page(
@@ -414,6 +418,7 @@ def build() -> dict[str, str]:
     site = {
         "version": project_version(),
         "stars_display": stars_display(cfg["stars"]),
+        "tool_count": len(tool_names()),
         "docs_groups": groups,
         "nav": NAV,
         "footer": FOOTER,
