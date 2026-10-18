@@ -21,9 +21,9 @@ mcp-name: io.github.OpenOSINT/openosint
 
 </div>
 
-> **Hosted version — [OpenOSINT Monitor](https://app.openosint.tech/?utm_source=github&utm_medium=readme&utm_campaign=monitor).**
-> Weekly external checks of your domain's email authentication (SPF/DKIM/DMARC), TLS, security headers and lookalike domains. Ownership-verified; free for one domain.
-> Prefer to run it yourself? Everything below is free and MIT-licensed.
+**Hosted:** [Monitor](https://app.openosint.tech/monitor?utm_source=github&utm_medium=readme&utm_campaign=monitor) · [Diligence](https://app.openosint.tech/diligence?utm_source=github&utm_medium=readme&utm_campaign=diligence)
+
+OpenOSINT is an open-source engine for passive checks of public information; the hosted products are built on it, and everything below is free and MIT-licensed.
 
 ## Self-host (free, MIT)
 
@@ -184,8 +184,6 @@ A publicly reachable or demo instance can never enable active tools, whatever th
 | `search_virustotal (URL submission)` | touches target | **off** | VirusTotal fetches the submitted URL, and the URL becomes visible to the VirusTotal community, which can reveal your investigation. |
 | `search_whois` | passive | on | Queries the registry/registrar WHOIS server, not the target. |
 <!-- NOISE-TABLE:END -->
-
-The Apify Actors in `actors/` are separate products with their own documented behavior (they are not governed by passive mode); see each Actor's README.
 
 This table says what each tool does according to its code. It is not a guarantee about what a remote service, or a third-party binary such as holehe, sherlock, sublist3r or phoneinfoga, does with a request.
 
@@ -579,7 +577,7 @@ openosint web
 > as public regardless. **Setting `OPENOSINT_TRUSTED_PROXY=true` means you
 > are choosing to serve credentialed lookups to whoever your reverse proxy
 > relays to this instance — you are the controller for their queries, the
-> same way OpenOSINT Cloud is for its customers. Put real authentication in
+> same way any operator of a hosted service is for its users. Put real authentication in
 > front of it if "whoever the proxy relays" is broader than you intend.**
 
 ### Interactive REPL
@@ -862,7 +860,6 @@ On a fresh install with no keys at all, these still work: `generate_dorks`,
 | `openosint history [--all] [open N] [clear]` | View/manage REPL session history |
 | `openosint proxy-test` | Verify the configured upstream proxy |
 | `openosint sponsors` | List current sponsors and featured integrations |
-| `openosint prompts` | Show info about the AI OSINT Prompt Pack |
 | `openosint shell` | Explicit alias for the default REPL |
 | `--allow-active` | Enable active tools (noisy or touch the target). Off by default; same as `OPENOSINT_ALLOW_ACTIVE=1` |
 | `-v, --verbose` | Enable debug logging to stderr |
@@ -950,12 +947,8 @@ The port is published on `127.0.0.1` only, and the `Host` check is on (`OPENOSIN
 
 OpenOSINT is free and MIT-licensed. These are optional ways to support it or buy a hosted or contracted version.
 
-- **Hosted monitoring:** [OpenOSINT Monitor](https://app.openosint.tech/?utm_source=github&utm_medium=readme&utm_campaign=monitor), free for one domain.
-- **Pay-per-use, no install (Apify Actors, also usable as MCP tools in Claude, Cursor and Windsurf):** [Email Recon](https://apify.com/complete_analogy/openosint-email-recon?utm_source=github&utm_medium=readme&utm_campaign=cloud-table) (from $0.015/run) · [Username Recon](https://apify.com/complete_analogy/openosint-username-recon?utm_source=github&utm_medium=readme&utm_campaign=cloud-table) ($0.04/username) · [Domain Recon](https://apify.com/complete_analogy/openosint-domain-recon?utm_source=github&utm_medium=readme&utm_campaign=cloud-table) ($0.02/domain). MCP endpoint: `https://mcp.apify.com?tools=complete_analogy/openosint-email-recon,complete_analogy/openosint-username-recon,complete_analogy/openosint-domain-recon`. Cloud usage funds the self-hosted project.
-- **Newsletter:** [Agents & OSINT](https://agentsosint.substack.com), one AI-OSINT workflow plus a roundup, weekly.
-- **Guides:** [free 5-prompt starter set](https://tommasodev.gumroad.com/l/free-osint-prompts?utm_source=github&utm_medium=readme&utm_campaign=free-osint-prompts&utm_content=resources) · [AI OSINT Complete Kit, $55](https://tommasodev.gumroad.com/l/ai-osint-complete-kit?utm_source=github&utm_medium=readme&utm_campaign=ai-osint-complete-kit&utm_content=resources). Purchases fund development.
+- **Hosted:** [OpenOSINT Monitor](https://app.openosint.tech/monitor?utm_source=github&utm_medium=readme&utm_campaign=monitor), free for one domain · [OpenOSINT Diligence](https://app.openosint.tech/diligence?utm_source=github&utm_medium=readme&utm_campaign=diligence).
 - **Sponsor:** [Open Collective](https://opencollective.com/openosint_oss) · tiers and media kit in [SPONSORSHIP.md](SPONSORSHIP.md) · [commercial@openosint.tech](mailto:commercial@openosint.tech?subject=OpenOSINT%20Sponsorship%20Inquiry). Current sponsors are listed below.
-- **Affiliate program:** 30-45% commission on the guides above. [Details & terms](https://openosint.tech/affiliates/).
 - **Commercial license & support:** vendor contract, warranty, indemnification, SLA or priority support for procurement, from €300/year. The software itself needs no purchase. See [COMMERCIAL.md](./COMMERCIAL.md) or [commercial@openosint.tech](mailto:commercial@openosint.tech?subject=OpenOSINT%20Commercial%20Plan%20Inquiry).
 
 <!-- SPONSORS:START -->
