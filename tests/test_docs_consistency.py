@@ -131,6 +131,29 @@ def test_no_retired_product_promotion():
     assert not hits, "retired product promotion found:\n" + "\n".join(hits)
 
 
+# IP2Location and TestMu AI are paid, active sponsors: their placements on the
+# home page and in the README must survive any future cleanup.
+_SPONSOR_MARKERS = {
+    "IP2Location": ["IP2Location", "https://www.ip2location.io/?utm_source=openosint", "ip2location-logo.png"],
+    "TestMu AI": ["TestMu AI", "https://www.testmuai.com/?utm_source=openosint", "testmu-ai.svg"],
+}
+
+
+def test_home_and_readme_keep_sponsor_placements():
+    pages = {
+        "README.md": (ROOT / "README.md").read_text(encoding="utf-8"),
+        "docs/index.html": (ROOT / "docs" / "index.html").read_text(encoding="utf-8").replace("&amp;", "&"),
+    }
+    missing = [
+        f"{name}: {marker!r} missing from {rel}"
+        for rel, text in pages.items()
+        for name, markers in _SPONSOR_MARKERS.items()
+        for marker in markers
+        if marker not in text
+    ]
+    assert not missing, "sponsor placement(s) removed:\n" + "\n".join(missing)
+
+
 # ---------------------------------------------------------------------------
 # legal/*.md <-> docs/*/index.html mirror pairs must stay word-for-word
 # identical in substance. Formatting differs by necessity (Markdown syntax vs
