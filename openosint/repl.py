@@ -261,19 +261,12 @@ def _print_config(
 # ---------------------------------------------------------------------------
 
 
-_REPORT_FOOTER = (
-    "\n\n---\n"
-    "*Free 5-prompt OSINT starter set: "
-    "https://openosint.tech/free-prompts?utm_source=cli&utm_medium=report-footer&utm_campaign=free_prompts*\n"
-)
-
-
 def _save_report(content: str) -> Path:
     reports_dir = Path("reports")
     reports_dir.mkdir(exist_ok=True)
     timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
     path = reports_dir / f"{timestamp}_report.md"
-    path.write_text(content + _REPORT_FOOTER, encoding="utf-8")
+    path.write_text(content, encoding="utf-8")
     return path
 
 

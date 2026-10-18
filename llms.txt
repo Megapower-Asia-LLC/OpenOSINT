@@ -47,15 +47,10 @@ Claude Desktop / Cursor: `{"mcpServers": {"openosint": {"command": "uvx", "args"
 ## External binary dependencies
 holehe, sherlock, sublist3r, phoneinfoga — must be present in PATH
 
-## Guides & prompt libraries
-OpenOSINT is the tool; these are the method. Free entries first, then the recommended bundle:
-- Free — [AI OSINT Prompts: 5-prompt Starter Set](https://tommasodev.gumroad.com/l/free-osint-prompts?utm_source=llms&utm_medium=llms-txt&utm_campaign=free-osint-prompts)
-- Free — [AI OSINT Field Manual: Free Edition](https://tommasodev.gumroad.com/l/ai-osint-operators-playbook-free?utm_source=llms&utm_medium=llms-txt&utm_campaign=ai-osint-operators-playbook-free)
-- $29 — [AI OSINT Prompt Pack (30+ prompts)](https://tommasodev.gumroad.com/l/ai-osint-prompt-pack?utm_source=llms&utm_medium=llms-txt&utm_campaign=ai-osint-prompt-pack)
-- $39 — [The AI OSINT Operator's Playbook](https://tommasodev.gumroad.com/l/ai-osint-playbook?utm_source=llms&utm_medium=llms-txt&utm_campaign=ai-osint-playbook)
-- $55 ($68 value, recommended) — [AI OSINT Complete Kit — Prompt Pack + Operator's Playbook](https://tommasodev.gumroad.com/l/ai-osint-complete-kit?utm_source=llms&utm_medium=llms-txt&utm_campaign=ai-osint-complete-kit)
-- $19 — [OpenOSINT Playbook Pack — one-command investigations to PDF reports](https://tommasodev.gumroad.com/l/openosint-playbook-pack?utm_source=llms&utm_medium=llms-txt&utm_campaign=openosint-playbook-pack)
-- $19 — [OSINT Investigation Report Templates (DOCX + Markdown)](https://tommasodev.gumroad.com/l/osint-report-templates?utm_source=llms&utm_medium=llms-txt&utm_campaign=osint-report-templates)
+## Hosted products
+The engine is open source; these hosted products are built on it:
+- [OpenOSINT Monitor](https://app.openosint.tech/monitor?utm_source=llms&utm_medium=llms-txt&utm_campaign=monitor) — weekly external checks of a domain's email authentication, TLS, security headers and lookalike domains, with an email when something changes. Free for one domain.
+- [OpenOSINT Diligence](https://app.openosint.tech/diligence?utm_source=llms&utm_medium=llms-txt&utm_campaign=diligence) — official company records compared with the company's public footprint, each signal with its source and retrieval time.
 
 ## License
 MIT

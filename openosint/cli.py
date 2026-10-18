@@ -124,9 +124,6 @@ def _build_parser() -> argparse.ArgumentParser:
             "  openosint --provider ollama --ollama-model mistral\n"
             "  openosint --proxy socks5://user:pass@host:1080 email target@example.com\n"
             "  openosint proxy-test                        # verify the configured proxy\n"
-            "\n"
-            "Learn the method: AI OSINT Operator's Playbook (paid guide, $39)\n"
-            "  https://tommasodev.gumroad.com/l/ai-osint-playbook?utm_source=cli&utm_medium=help&utm_campaign=operator_playbook\n"
         ),
     )
     parser.add_argument(
@@ -604,12 +601,6 @@ def _build_parser() -> argparse.ArgumentParser:
     subparsers.add_parser(
         "proxy-test",
         help="Verify the configured upstream proxy by fetching your exit IP.",
-    )
-
-    # prompts
-    subparsers.add_parser(
-        "prompts",
-        help="Show information about the AI OSINT Prompt Pack.",
     )
 
     # history
@@ -1286,15 +1277,6 @@ async def _async_main() -> None:
         _handle_sponsors()
     elif args.command == "proxy-test":
         _handle_proxy_test()
-    elif args.command == "prompts":
-        print(
-            "AI OSINT Prompt Pack — 30+ structured prompts for AI-assisted OSINT.\n"
-            "Covers email, username, domain, IP, phone, company due diligence,\n"
-            "image clues, verification, and reporting.\n"
-            "Follows a real process: scope → collect → pivot → verify → document.\n"
-            "\n"
-            "  https://tommasodev.gumroad.com/l/ai-osint-prompt-pack?ref=cli"
-        )
     else:
         parser.print_help()
         sys.exit(1)
