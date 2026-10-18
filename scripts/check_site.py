@@ -25,6 +25,13 @@ from urllib.request import Request, urlopen
 ROOT = Path(__file__).resolve().parent.parent
 DOCS = ROOT / "docs"
 SITE_HOST = "openosint.tech"
+BEACON_PLACEHOLDER = "REPLACE_WITH_CLOUDFLARE_TOKEN"
+REQUIRED_ICON_LINKS = {
+    ("icon", "/favicon.ico"),
+    ("icon", "/favicon.svg"),
+    ("apple-touch-icon", "/apple-touch-icon.png"),
+    ("manifest", "/site.webmanifest"),
+}
 BEACON_HOST = "static.cloudflareinsights.com"  # Cloudflare Web Analytics beacon, the one allowed third-party script
 MAX_TITLE = 60
 MAX_DESCRIPTION = 155
@@ -50,6 +57,8 @@ class PageInfo(HTMLParser):
         self.resources: list[str] = []  # everything the browser loads
         self.json_ld: list[str] = []
         self.beacons = 0
+        self.beacon_tokens: list[str] = []
+        self.icon_links: set[tuple[str, str]] = set()
         self.meta_names: set[str] = set()
         self._ld_buffer: list[str] | None = None
 
@@ -75,6 +84,7 @@ class PageInfo(HTMLParser):
             self._ld_buffer = []
         if tag == "script" and BEACON_HOST in a.get("src", "") and a.get("data-cf-beacon"):
             self.beacons += 1
+            self.beacon_tokens.append(a["data-cf-beacon"])
         if tag in RESOURCE_TAGS and a.get("src"):
             self.resources.append(a["src"])
         if a.get("srcset"):
@@ -91,6 +101,7 @@ class PageInfo(HTMLParser):
             self.resources.append(a.get("content", ""))
 
     def handle_link(self, a: dict[str, str]) -> None:
+        self.icon_links.add((a.get("rel", ""), a.get("href", "")))
         if a.get("rel") == "canonical":
             self.canonical = a.get("href", "")
         elif a.get("href"):
@@ -184,6 +195,11 @@ def check_pages(pages: dict[Path, PageInfo]) -> list[str]:
             ]
         if info.beacons != 1:
             problems.append(f"{name}: {info.beacons} Cloudflare Analytics beacons (need exactly 1)")
+        if any(BEACON_PLACEHOLDER in token or "<TOKEN>" in token for token in info.beacon_tokens):
+            problems.append(f"{name}: Cloudflare Analytics token is still the placeholder")
+        problems += [
+            f"{name}: missing <link rel={rel!r} href={href!r}>" for rel, href in sorted(REQUIRED_ICON_LINKS - info.icon_links)
+        ]
         for block in info.json_ld:
             try:
                 json.loads(block)
@@ -229,6 +245,17 @@ def link_problems(name: str, href: str, path: Path, pages: dict[Path, PageInfo])
         if fragment not in info.ids:
             return [f"{name}: broken anchor {href}"]
     return []
+
+
+def check_manifest() -> list[str]:
+    manifest = DOCS / "site.webmanifest"
+    if not manifest.is_file():
+        return ["site.webmanifest: missing"]
+    try:
+        icons = json.loads(manifest.read_text(encoding="utf-8")).get("icons", [])
+    except ValueError as exc:
+        return [f"site.webmanifest: invalid JSON ({exc})"]
+    return [f"site.webmanifest: missing icon {i.get('src')}" for i in icons if not (DOCS / i.get("src", "").lstrip("/")).is_file()]
 
 
 def check_sitemap(pages: dict[Path, PageInfo]) -> list[str]:
@@ -278,7 +305,7 @@ def load_pages() -> dict[Path, PageInfo]:
 
 def run_checks() -> list[str]:
     pages = load_pages()
-    return check_pages(pages) + check_links(pages) + check_sitemap(pages) + check_generated()
+    return check_pages(pages) + check_links(pages) + check_manifest() + check_sitemap(pages) + check_generated()
 
 
 def fetch_status(url: str) -> str:

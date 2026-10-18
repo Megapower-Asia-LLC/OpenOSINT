@@ -65,6 +65,12 @@ def test_every_setting_in_the_catalog_is_documented():
     assert [s.key for s in SETTINGS if s.key not in page] == []
 
 
+def _icons(root: Path) -> None:
+    for name in ("favicon.ico", "favicon.svg", "apple-touch-icon.png"):
+        _write(root, name, "x")
+    _write(root, "site.webmanifest", '{"icons": [{"src": "/icon-192.png"}]}')
+
+
 def _write(root: Path, rel: str, text: str) -> None:
     path = root / rel
     path.parent.mkdir(parents=True, exist_ok=True)
@@ -72,12 +78,14 @@ def _write(root: Path, rel: str, text: str) -> None:
 
 
 BEACON = (
-    '<script defer src="https://static.cloudflareinsights.com/beacon.min.js" '
+    '<script type="module" src="https://static.cloudflareinsights.com/beacon.min.js" '
     'data-cf-beacon=\'{"token": "t"}\'></script>'
 )
 GOOD_HEAD = (
     '<!DOCTYPE html><html lang="en"><head><title>Page</title><meta name="description" content="A page.">'
     '<link rel="canonical" href="https://openosint.tech/">'
+    '<link rel="icon" href="/favicon.ico"><link rel="icon" href="/favicon.svg">'
+    '<link rel="apple-touch-icon" href="/apple-touch-icon.png"><link rel="manifest" href="/site.webmanifest">'
     '<meta property="og:title" content="t"><meta property="og:description" content="d">'
     '<meta property="og:image" content="https://openosint.tech/img.png"><meta name="twitter:card" content="c">'
 )
@@ -120,10 +128,13 @@ def test_checker_reports_each_kind_of_breakage(tmp_path, monkeypatch):
 def test_checker_accepts_a_clean_page(tmp_path, monkeypatch):
     monkeypatch.setattr(check_site, "DOCS", tmp_path)
     _write(tmp_path, "img.png", "x")
+    _icons(tmp_path)
+    _write(tmp_path, "icon-192.png", "x")
     _write(tmp_path, "index.html", GOOD_HEAD + '</head><body><h1 id="top">A</h1><a href="#top">up</a>' + BEACON + '</body></html>')
     _write(tmp_path, "sitemap.xml", "<urlset><url><loc>https://openosint.tech/</loc></url></urlset>")
     pages = check_site.load_pages()
-    assert check_site.check_pages(pages) + check_site.check_links(pages) + check_site.check_sitemap(pages) == []
+    problems = check_site.check_pages(pages) + check_site.check_links(pages) + check_site.check_manifest()
+    assert problems + check_site.check_sitemap(pages) == []
 
 
 def test_no_unexpanded_tokens_in_output():
@@ -142,3 +153,14 @@ def test_checker_requires_exactly_one_analytics_beacon(tmp_path, monkeypatch):
     assert "none/index.html: 0 Cloudflare Analytics beacons" in text
     assert "two/index.html: 2 Cloudflare Analytics beacons" in text
     assert "one/index.html: 1 Cloudflare" not in text
+
+
+def test_checker_rejects_placeholder_token_and_missing_icons(tmp_path, monkeypatch):
+    monkeypatch.setattr(check_site, "DOCS", tmp_path)
+    placeholder = BEACON.replace('"t"', '"REPLACE_WITH_CLOUDFLARE_TOKEN"')
+    head = GOOD_HEAD.replace('<link rel="manifest" href="/site.webmanifest">', "")
+    _write(tmp_path, "index.html", head + "</head><body><h1>A</h1>" + placeholder + "</body></html>")
+    text = "\n".join(check_site.check_pages(check_site.load_pages()) + check_site.check_manifest())
+    assert "still the placeholder" in text
+    assert "rel='manifest'" in text
+    assert "site.webmanifest: missing" in text

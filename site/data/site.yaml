@@ -3,5 +3,4 @@
 stars: 1773
 docs_groups: [Get started, Use, Reference]
 # Cloudflare Web Analytics site token. Public by design (it ships in every page).
-# REPLACE the placeholder with the token from the Cloudflare dashboard, then rebuild.
-cf_analytics_token: "REPLACE_WITH_CLOUDFLARE_TOKEN"
+cf_analytics_token: "8c1e6e8590b649a5803fbbd3356aa7d2"
