@@ -10,7 +10,8 @@ Markers (created automatically if absent):
     <!-- SPONSORS:START -->
     <!-- SPONSORS:END -->
 
-Pass --docs-html to also sync the sponsor cards on docs/sponsors.html from the
+Pass --docs-html to also sync the sponsor cards on the media-kit page source
+(site/content/pages/sponsors.html; docs/sponsors.html is built from it) from the
 same sponsors.json (markers: <!-- SPONSORS-HTML:START/END -->). Opt-in and off
 by default so this script's default behavior — and the existing test suite —
 is unchanged.
@@ -19,7 +20,7 @@ Running this script is idempotent: re-running it produces the same output.
 Wire it to CI or pre-commit to keep README in sync:
 
     pre-commit: python scripts/render_sponsors.py --check
-    CI step:    python scripts/render_sponsors.py --docs-html docs/sponsors.html && git diff --exit-code README.md docs/sponsors.html
+    CI step:    python scripts/render_sponsors.py --docs-html site/content/pages/sponsors.html && git diff --exit-code README.md site/content/pages/sponsors.html
 """
 
 from __future__ import annotations

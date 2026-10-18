@@ -189,7 +189,7 @@ def _normalize_markdown_body(text: str) -> list[str]:
 def _normalize_html_body(html_text: str) -> list[str]:
     import html as _html
 
-    start = html_text.index('<h2 id="intro"')
+    start = re.search(r'<h[12] id="intro"', html_text).start()
     end = html_text.index('<hr>\n<div id="footer">')
     body = _html.unescape(html_text[start:end])
     body = re.sub(r"<[^>]+>", " ", body)

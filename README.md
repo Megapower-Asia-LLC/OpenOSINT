@@ -23,6 +23,8 @@ mcp-name: io.github.OpenOSINT/openosint
 
 **Hosted:** [Monitor](https://app.openosint.tech/monitor?utm_source=github&utm_medium=readme&utm_campaign=monitor) · [Diligence](https://app.openosint.tech/diligence?utm_source=github&utm_medium=readme&utm_campaign=diligence)
 
+**Docs:** https://openosint.tech/docs/
+
 OpenOSINT is an open-source engine for passive checks of public information; the hosted products are built on it, and everything below is free and MIT-licensed.
 
 ## Self-host (free, MIT)

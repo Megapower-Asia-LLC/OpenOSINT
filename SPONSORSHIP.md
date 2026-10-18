@@ -101,8 +101,11 @@ All sponsor data lives in [`openosint/sponsors.json`](openosint/sponsors.json) â
 Then regenerate README and the media kit from that single file:
 
 ```bash
-python scripts/render_sponsors.py --docs-html docs/sponsors.html
+python scripts/render_sponsors.py --docs-html site/content/pages/sponsors.html
+python scripts/build_site.py
 ```
+
+`docs/sponsors.html` is generated from `site/content/pages/sponsors.html`; never edit it by hand.
 
 CLI banner, Web UI, and `openosint sponsors` update automatically at runtime from the same file â€” nothing else to touch.
 
