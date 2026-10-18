@@ -71,6 +71,10 @@ def _write(root: Path, rel: str, text: str) -> None:
     path.write_text(text, encoding="utf-8")
 
 
+BEACON = (
+    '<script defer src="https://static.cloudflareinsights.com/beacon.min.js" '
+    'data-cf-beacon=\'{"token": "t"}\'></script>'
+)
 GOOD_HEAD = (
     '<!DOCTYPE html><html lang="en"><head><title>Page</title><meta name="description" content="A page.">'
     '<link rel="canonical" href="https://openosint.tech/">'
@@ -116,7 +120,7 @@ def test_checker_reports_each_kind_of_breakage(tmp_path, monkeypatch):
 def test_checker_accepts_a_clean_page(tmp_path, monkeypatch):
     monkeypatch.setattr(check_site, "DOCS", tmp_path)
     _write(tmp_path, "img.png", "x")
-    _write(tmp_path, "index.html", GOOD_HEAD + '</head><body><h1 id="top">A</h1><a href="#top">up</a></body></html>')
+    _write(tmp_path, "index.html", GOOD_HEAD + '</head><body><h1 id="top">A</h1><a href="#top">up</a>' + BEACON + '</body></html>')
     _write(tmp_path, "sitemap.xml", "<urlset><url><loc>https://openosint.tech/</loc></url></urlset>")
     pages = check_site.load_pages()
     assert check_site.check_pages(pages) + check_site.check_links(pages) + check_site.check_sitemap(pages) == []
@@ -129,7 +133,7 @@ def test_no_unexpanded_tokens_in_output():
 
 def test_checker_requires_exactly_one_analytics_beacon(tmp_path, monkeypatch):
     monkeypatch.setattr(check_site, "DOCS", tmp_path)
-    beacon = '<script defer src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon=\'{"token": "t"}\'></script>'
+    beacon = BEACON
     _write(tmp_path, "img.png", "x")
     _write(tmp_path, "none/index.html", GOOD_HEAD + "</head><body><h1>A</h1></body></html>")
     _write(tmp_path, "two/index.html", GOOD_HEAD + "</head><body><h1>B</h1>" + beacon * 2 + "</body></html>")
