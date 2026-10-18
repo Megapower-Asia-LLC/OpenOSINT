@@ -16,11 +16,9 @@ Security researchers, analysts and developers who want repeatable lookups on dom
 
 ## Three ways to use it
 
-| Interface | What it is | Start here |
-|---|---|---|
-| CLI and REPL | Direct subcommands such as `openosint dns example.com`, plus an interactive session where the agent chooses the tools. | [Quickstart](/docs/quickstart/) |
-| MCP server | The same tools inside Claude Desktop, Claude Code, Cursor or any MCP client. | [MCP server](/docs/mcp/) |
-| Web UI | A local browser app with chat, a news globe and a graph view. | [Web UI](/docs/web-ui/) |
+- **[CLI and REPL](/docs/quickstart/)**: direct subcommands such as `openosint dns example.com`, plus an interactive session where the agent chooses the tools.
+- **[MCP server](/docs/mcp/)**: the same tools inside Claude Desktop, Claude Code, Cursor or any MCP client.
+- **[Web UI](/docs/web-ui/)**: a local browser app with chat, a news globe and a graph view.
 
 ## How it behaves
 

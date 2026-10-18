@@ -88,7 +88,7 @@ td:first-child { min-width: 9rem; }
 .crumbs ol { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 4px 8px; }
 .crumbs li + li::before { content: "/"; margin-right: 8px; }
 .crumbs a { color: var(--muted); }
-.page { padding: clamp(32px, 5vw, 64px) 0 clamp(48px, 7vw, 96px); }
+.page { padding-top: clamp(32px, 5vw, 64px); padding-bottom: clamp(48px, 7vw, 96px); }
 
 /* ---- docs layout: sidebar left on desktop, <details> menu on mobile ---- */
 .docs { display: block; }
@@ -112,7 +112,8 @@ td:first-child { min-width: 9rem; }
 .pager a:hover { border-color: var(--ink); }
 .pager small { display: block; color: var(--muted); font-size: 13px; }
 .pager .next { text-align: right; }
-.edit { margin: 1.5rem 0 0; font-size: 14px; }
+.edit { margin: 1rem 0 0; font-size: 14px; }
+.edit a { display: inline-block; padding: 8px 0; }
 
 /* ---- home ---- */
 .intro { padding: clamp(48px, 8vw, 104px) 0 clamp(24px, 4vw, 48px); }
