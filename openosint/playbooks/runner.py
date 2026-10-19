@@ -12,6 +12,7 @@ from enum import Enum
 from pathlib import Path
 from typing import Awaitable, Callable
 
+from openosint.brightdata import BRIGHTDATA_LINK_CLI
 from openosint.tools.generate_dorks import run_dork_osint
 from openosint.tools.search_breach import run_breach_osint
 from openosint.tool_policy import TOOL_POLICY, is_tool_enabled
@@ -65,7 +66,7 @@ TOOL_REQUIREMENTS: dict[str, _Req] = {
     "search_footprint": (
         ["BRIGHTDATA_API_KEY", "BRIGHTDATA_SERP_ZONE"],
         [],
-        "Sign up at brightdata.com to obtain your API key and SERP zone.",
+        f"Sign up at Bright Data to obtain your API key and SERP zone: {BRIGHTDATA_LINK_CLI}",
     ),
     "search_email": ([], ["holehe"], None),
     "search_breach": (["HIBP_API_KEY"], [], None),

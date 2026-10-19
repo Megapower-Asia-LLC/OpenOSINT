@@ -122,9 +122,9 @@ openosint > investigate target@example.com
 | `search_dns` | dnspython (built-in) | A/AAAA/MX/NS/TXT/CNAME/SOA records; SPF, DMARC, DKIM analysis |
 | `search_rdap` | RDAP (IANA bootstrap, keyless) | Registrar, registration/expiry dates, name servers, status; registrant contacts redacted by policy |
 | `search_gdelt_geo` | GDELT 15-minute GKG feed (keyless) | Recent worldwide news placed on a map: headline, link, place; GeoJSON output |
-| `search_dorks_live` | Bright Data SERP API | Live Google search results for dork queries (title, URL, snippet) |
-| `scrape_url` | Bright Data Web Unlocker | Fetch any URL bypassing Cloudflare/CAPTCHA — returns clean Markdown *(touches the target, off by default)* |
-| `search_footprint` | Bright Data SERP API | Entity-type-aware public search-engine footprint: detects email/username/domain/phone/name and returns structured results + Entity Correlation Graph nodes/edges |
+| `search_dorks_live` | [Bright Data](https://get.brightdata.com/984ni58s2oad?utm_source=github&utm_medium=readme)¹ SERP API | Live Google search results for dork queries (title, URL, snippet) |
+| `scrape_url` | [Bright Data](https://get.brightdata.com/984ni58s2oad?utm_source=github&utm_medium=readme) Web Unlocker | Fetch any URL bypassing Cloudflare/CAPTCHA — returns clean Markdown *(touches the target, off by default)* |
+| `search_footprint` | [Bright Data](https://get.brightdata.com/984ni58s2oad?utm_source=github&utm_medium=readme) SERP API | Entity-type-aware public search-engine footprint: detects email/username/domain/phone/name and returns structured results + Entity Correlation Graph nodes/edges |
 
 Full per-tool documentation, CLI flags, and output formats: [openosint.tech](https://openosint.tech/).
 
@@ -853,9 +853,9 @@ On a fresh install with no keys at all, these still work: `generate_dorks`,
 | `openosint abuseipdb IP [-t N]` | AbuseIPDB reputation check |
 | `openosint github QUERY [-t N]` | GitHub profile/repo/email discovery |
 | `openosint dns DOMAIN [-t N]` | DNS records + email security analysis |
-| `openosint search-dorks-live TARGET [--max-dorks N] [-t N]` | Live Google dork results via Bright Data |
-| `openosint scrape URL [-t N]` | Fetch a URL via Bright Data Web Unlocker |
-| `openosint footprint TARGET [--max-queries N] [-t N]` | SERP footprint via Bright Data |
+| `openosint search-dorks-live TARGET [--max-dorks N] [-t N]` | Live Google dork results via [Bright Data](https://get.brightdata.com/984ni58s2oad?utm_source=github&utm_medium=readme)¹ |
+| `openosint scrape URL [-t N]` | Fetch a URL via [Bright Data](https://get.brightdata.com/984ni58s2oad?utm_source=github&utm_medium=readme) Web Unlocker |
+| `openosint footprint TARGET [--max-queries N] [-t N]` | SERP footprint via [Bright Data](https://get.brightdata.com/984ni58s2oad?utm_source=github&utm_medium=readme) |
 | `openosint multi TARGETS` | Parallel multi-target investigation (max 10) |
 | `openosint exposure DOMAIN [--lookalikes] [--report FILE.html] [--lang it\|en] [--resolver IP]` | External exposure report graded A-F (beta) |
 | `openosint playbook RECIPE TARGET` | Run a deterministic investigation playbook (no AI) |
@@ -929,7 +929,7 @@ The port is published on `127.0.0.1` only, and the `Host` check is on (`OPENOSIN
 - **Most tools depend on third-party services you don't control.** Nine of
   the 21 tools hard-require an API key and are subject to that provider's
   uptime, rate limits, and pricing (Shodan, VirusTotal, Censys, AbuseIPDB,
-  IP2Location, HaveIBeenPwned, and the three Bright Data–backed tools). Free
+  IP2Location, HaveIBeenPwned, and the three [Bright Data](https://get.brightdata.com/984ni58s2oad?utm_source=github&utm_medium=readme)¹–backed tools). Free
   tiers are small; heavy use requires a paid plan with the provider, not with
   OpenOSINT.
 - **Local binaries are unsandboxed subprocesses.** `holehe`, `sherlock`,

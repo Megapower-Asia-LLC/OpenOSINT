@@ -130,10 +130,12 @@ def noise_markdown() -> str:
 
 def token_values() -> dict[str, str]:
     from openosint.agent import DEFAULT_ANTHROPIC_MODEL
+    from openosint.brightdata import BRIGHTDATA_LINK_SITE_DOCS
     from openosint.tool_policy import DEFAULT_MAX_CALLS, DEFAULT_MAX_CALLS_MULTI
 
     return {
         "VERSION": project_version(),
+        "BRIGHTDATA_LINK_DOCS": BRIGHTDATA_LINK_SITE_DOCS,
         "MAX_CALLS": str(DEFAULT_MAX_CALLS),
         "MAX_CALLS_MULTI": str(DEFAULT_MAX_CALLS_MULTI),
         "DEFAULT_MODEL": DEFAULT_ANTHROPIC_MODEL,
@@ -143,6 +145,7 @@ def token_values() -> dict[str, str]:
 
 
 def tools_table_html() -> str:
+    from openosint.brightdata import BRIGHTDATA_LINK_SITE_TOOLS
     from openosint.settings_catalog import SETTINGS
     from openosint.tool_policy import TOOL_POLICY
 
@@ -158,8 +161,11 @@ def tools_table_html() -> str:
             needs.insert(0, f"<code>{info['binary']}</code> on PATH")
         if not policy.is_passive:
             needs.append("<code>--allow-active</code>")
+        method = html.escape(info["method"])
+        if info["method"].startswith("Bright Data"):
+            method = f'<a href="{html.escape(BRIGHTDATA_LINK_SITE_TOOLS)}" target="_blank" rel="noopener">{method}</a>'
         rows.append(
-            f'<tr><td><a href="#{name}"><code>{name}</code></a></td><td>{html.escape(info["method"])}</td>'
+            f'<tr><td><a href="#{name}"><code>{name}</code></a></td><td>{method}</td>'
             f'<td>{html.escape(info["finds"])}</td><td>{policy.noise.value}</td>'
             f'<td class="needs">{"; ".join(needs) or "&mdash;"}</td></tr>'
         )

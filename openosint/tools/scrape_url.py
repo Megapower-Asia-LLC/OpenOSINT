@@ -30,6 +30,7 @@ import re
 
 import requests
 
+from openosint.brightdata import BRIGHTDATA_LINK_CLI
 from openosint.settings_catalog import missing_from, missing_keys_message
 from openosint.tool_policy import requires_active
 from openosint.tools.exceptions import OSINTError, ToolExecutionError
@@ -61,7 +62,9 @@ def _fetch_unlocker(url: str, api_key: str, zone: str, timeout: int) -> str:
         raise OSINTError(f"Network error querying Bright Data Web Unlocker: {exc}") from exc
 
     if response.status_code == 401:
-        raise OSINTError("Bright Data Web Unlocker: invalid API key.")
+        raise OSINTError(
+            f"Bright Data Web Unlocker: invalid API key. Get a key: {BRIGHTDATA_LINK_CLI}"
+        )
     if response.status_code == 403:
         raise OSINTError("Bright Data Web Unlocker: forbidden — check zone permissions.")
     if response.status_code == 429:

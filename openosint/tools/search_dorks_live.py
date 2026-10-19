@@ -29,6 +29,7 @@ from collections import Counter
 
 import requests
 
+from openosint.brightdata import BRIGHTDATA_LINK_CLI
 from openosint.settings_catalog import missing_from, missing_keys_message
 from openosint.tools.exceptions import OSINTError, ToolExecutionError
 from openosint.tools.generate_dorks import _DORK_TEMPLATES
@@ -109,6 +110,8 @@ def _auth_error(response: requests.Response, api_key: str) -> SerpFetchError:
     )
     body_preview = _redact((response.text or "")[:_BODY_PREVIEW_LEN], api_key)
     message = f"Bright Data SERP: {kind}. HTTP {response.status_code}, body={body_preview!r}"
+    if response.status_code == 401:
+        message += f" Get a key: {BRIGHTDATA_LINK_CLI}"
     if "token expired" in (response.text or "").lower():
         message += " — Bright Data API key expired — renew it in the Bright Data dashboard."
     return SerpFetchError(message, status_code=response.status_code, error_code="auth")

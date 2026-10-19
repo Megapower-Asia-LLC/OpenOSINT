@@ -24,6 +24,8 @@ This table is generated from the key catalog in the code, so it matches the vers
 
 <!-- gen:config-keys -->
 
+The Bright Data key and zones are created in the [Bright Data dashboard](%%BRIGHTDATA_LINK_DOCS%%) (a free tier is available). That is a referral link: OpenOSINT earns a commission if you sign up through it, at no extra cost to you.
+
 These tools need no key: <!-- gen:keyless -->. Tools that are noisy or touch the target also need `--allow-active`; see the [tools reference](/tools/).
 
 ## Behaviour settings
