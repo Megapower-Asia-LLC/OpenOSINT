@@ -9,6 +9,12 @@ OpenOSINT adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [2.36.1] — 2026-10-19
+
+### Changed
+
+- The Bright Data referral link now appears where Bright Data is named without a link: the README tool and CLI tables, the site tools table, the configuration page (with a one-line referral disclosure) and `llms.txt`. The "invalid API key" errors of `scrape_url`, `search_footprint` and `search_dorks_live` end with `Get a key: <link>`. Links carry UTM parameters; tool behaviour, arguments and return values are unchanged.
+
 ## [2.36.0] — 2026-10-15
 
 ### Added
